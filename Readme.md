@@ -37,6 +37,15 @@
 
 3. Git init, commit, push
 
-### 2. Create ping endpoint
+### 2. Add ping endpoint
 
+### 3. Create Nginx Config Template for Spring Boot Backend
+
+- Create file /etc/nginx/sites-available/gamesj
+
+- Activate it
+
+      sudo ln -s /etc/nginx/sites-available/gamesj /etc/nginx/sites-enabled/
+      sudo nginx -t
+      sudo systemctl reload nginx
 
