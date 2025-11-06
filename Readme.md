@@ -2,11 +2,11 @@
 
 ## Complete vertical
 
-### Table of Content
-
-  [1. Create Project skeleton](#1-create-project-skeleton)    
-  [2. Add ping endpoint](#2-add-ping-endpoint) 
-
+1. [Create Project skeleton](#1-create-project-skeleton)
+2. [Add ping endpoint](#2-add-ping-endpoint)
+3. [Create Nginx Config Template for Spring Boot Backend](#3-create-nginx-config-template-for-spring-boot-backend)
+4. [Issue SSL Certificate with Certbot for gamesj. subdomain](#4-issue-ssl-certificate-with-certbot-for-gamesj-subdomain)
+5. [Build backend, Deploy, install Java Runtime and Test](#5-build-backend-deploy-install-java-runtime-and-test)
 
 
 ### 1. Create Project skeleton
@@ -64,6 +64,40 @@
 
       sudo systemctl reload nginx
 
+
+### 5. Build backend, Deploy, install Java Runtime and Test
+
+- Create target/gamesj-0.0.1-SNAPSHOT.jar
+
+      mvn clean package
+
+- Copy jar file to server 
+
+      scp target/gamesj-0.0.1-SNAPSHOT.jar barry75@barryonweb.com:/var/www/games/gamesj/
+
+- Install Java runtime and verify
+
+      wget https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9+10/OpenJDK21U-jdk_x64_linux_hotspot_21.0.9_10.tar.gz
+      sudo mkdir -p /usr/lib/jvm
+      sudo tar -xzf OpenJDK21U-jdk_x64_linux_hotspot_21.0.9_10.tar.gz -C /usr/lib/jvm
+      sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-21.0.9+10/bin/java 1
+      sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk-21.0.9+10/bin/javac 1
+      sudo update-alternatives --config java
+      sudo update-alternatives --config javac
+      java --version
+      javac --version
+
+- Run backend manually
+
+      java -jar /var/www/games/gamesj/gamesj-0.0.1-SNAPSHOT.jar
+
+- Test in Browser 
+
+      https://gamesj.barryonweb.com/ping
+
+- Test in Terminal
+
+      curl https://gamesj.barryonweb.com/ping
 
 
 
