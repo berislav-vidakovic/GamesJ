@@ -1,6 +1,15 @@
-## Games backend project in Java
+# Games backend project in Java
 
-### Create Project skeleton
+## Complete vertical
+
+### Table of Content
+
+  [1. Create Project skeleton](#1-create-project-skeleton)    
+  [2. Add ping endpoint](#2-add-ping-endpoint) 
+
+
+
+### 1. Create Project skeleton
 
 1. Generate Spring Boot Project on  https://start.spring.io
 
@@ -24,5 +33,10 @@
 
 2. Download, Extract and run
 
-    mvn spring-boot:run
+        mvn spring-boot:run
+
+3. Git init, commit, push
+
+### 2. Create ping endpoint
+
 
