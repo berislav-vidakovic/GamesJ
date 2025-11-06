@@ -49,3 +49,21 @@
       sudo nginx -t
       sudo systemctl reload nginx
 
+### 4. Issue SSL Certificate with Certbot for gamesj. subdomain
+
+- Run Certbot with Nginx plugin
+
+      sudo certbot --nginx -d gamesj.barryonweb.com
+
+- After success, certificates are stored in:
+
+      /etc/letsencrypt/live/gamesj.barryonweb.com/fullchain.pem
+      /etc/letsencrypt/live/gamesj.barryonweb.com/privkey.pem
+
+- Reload Nginx:
+
+      sudo systemctl reload nginx
+
+
+
+

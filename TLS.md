@@ -57,7 +57,7 @@ It reports any issues (permissions, missing plugins, wrong credentials, DNS prop
 - Run certbot
 
   ```bash
-  sudo certbot --nginx -d gamesj
+  sudo certbot --nginx -d gamesj.barryonweb.com
   ```
 
 - Add HSTS header to the end of listen 443 ssl block in Nginx conf
