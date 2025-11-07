@@ -7,6 +7,7 @@
 3. [Create Nginx Config Template for Spring Boot Backend](#3-create-nginx-config-template-for-spring-boot-backend)
 4. [Issue SSL Certificate with Certbot for gamesj. subdomain](#4-issue-ssl-certificate-with-certbot-for-gamesj-subdomain)
 5. [Build backend, Deploy, install Java Runtime and Test](#5-build-backend-deploy-install-java-runtime-and-test)
+6. [Register backend as service](#6-register-backend-as-service)
 
 
 ### 1. Create Project skeleton
@@ -26,9 +27,7 @@
     - Add Dependencies (click Add Dependencies):
 
       - Spring Web (for REST API)
-
       - Spring WebSocket (for WebSocket support)
-
       - Spring Boot DevTools
 
 2. Download, Extract and run
@@ -41,11 +40,36 @@
 
 ### 3. Create Nginx Config Template for Spring Boot Backend
 
-- Create file /etc/nginx/sites-available/gamesj
+- Create basic file /etc/nginx/sites-available/gamesj
 
-- Activate it
+    ```bash
+    server {
+      listen 80;
+      server_name gamesj.barryonweb.com;
+
+      location / {
+          proxy_pass http://127.0.0.1:8080/;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Health check endpoint
+      location /ping {
+          proxy_pass http://127.0.0.1:8080/api/ping;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+    }
+    ```
+
+- Activate, verify, reload
 
       sudo ln -s /etc/nginx/sites-available/gamesj /etc/nginx/sites-enabled/
+      ls -l /etc/nginx/sites-enabled/
       sudo nginx -t
       sudo systemctl reload nginx
 
@@ -59,6 +83,25 @@
 
       /etc/letsencrypt/live/gamesj.barryonweb.com/fullchain.pem
       /etc/letsencrypt/live/gamesj.barryonweb.com/privkey.pem
+
+- Update last section in gamesj Nginx config file
+
+  - Add HSTS line in SSL section - Force browsers to use HTTPS, even if the user tries HTTP
+
+    ```bash
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    ```
+
+  - Update last section 
+
+    ```bash
+    # Redirect all HTTP requests to HTTPS
+    server {
+        listen 80;
+        server_name gamesj.barryonweb.com;
+        return 301 https://$host$request_uri;
+    }
+    ```
 
 - Reload Nginx:
 
@@ -91,13 +134,49 @@
 
       java -jar /var/www/games/gamesj/gamesj-0.0.1-SNAPSHOT.jar
 
-- Test in Browser 
-
-      https://gamesj.barryonweb.com/ping
 
 - Test in Terminal
 
       curl https://gamesj.barryonweb.com/ping
 
+- Test in Browser 
+
+      https://gamesj.barryonweb.com/ping
 
 
+### 6. Register backend as service
+
+  - Create service file in  /etc/systemd/system/gamesj.service
+
+  - Reload systemd to register the service
+
+        sudo systemctl daemon-reload
+
+  - Start/stop the service 
+
+        sudo systemctl start gamesj
+        sudo systemctl stop gamesj
+
+  - Check the status 
+
+        sudo systemctl status gamesj
+
+  - Enable automatic start on boot
+
+        sudo systemctl enable gamesj
+
+  - Enable no password to restart service
+
+        sudo visudo 
+        barry75 ALL=(ALL) NOPASSWD: /bin/systemctl restart gamesj
+        barry75 ALL=(ALL) NOPASSWD: /bin/systemctl reload nginx
+        barry75 ALL=(ALL) NOPASSWD: /bin/cp, /bin/ln, /usr/sbin/nginx
+
+  - Check no password commands for the user
+
+        sudo -l -U barry75
+
+
+  - Follow logs in realtime
+
+        sudo journalctl -u gamesj -f
