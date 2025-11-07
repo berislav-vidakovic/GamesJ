@@ -180,3 +180,33 @@
   - Follow logs in realtime
 
         sudo journalctl -u gamesj -f
+
+
+### 7. Create CI/CD pipeline
+
+- Create .github/workflows/deploy.yml
+
+- Create and update key pair 
+
+      ssh-keygen -t ed25519 -C "github-ci" -f github_ci
+  
+  - copy keys to ~/.ssh/
+
+- Add the Public key to Linux server
+
+  - append github_ci.pub content to ~/.ssh/authorized_keys on Linux
+
+- Test local to Linux connection: 
+
+      ssh -i ~/.ssh/github_ci barry75@barryonweb.com
+
+- Add the Private Key to GitHub Secrets
+
+  - GitHub: Settings → Secrets and variables → Actions → New repository secret
+    - Paste full conetnt of private key github_ci
+  - (Optional TODO) Add Known Hosts Fingerprint
+
+- Test connection
+
+  - Create .github/workflows/test-ssh.yml
+  - GitHub Actions - Run workflow
