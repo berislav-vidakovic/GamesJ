@@ -8,6 +8,8 @@
 4. [Issue SSL Certificate with Certbot for gamesj. subdomain](#4-issue-ssl-certificate-with-certbot-for-gamesj-subdomain)
 5. [Build backend, Deploy, install Java Runtime and Test](#5-build-backend-deploy-install-java-runtime-and-test)
 6. [Register backend as service](#6-register-backend-as-service)
+7. [Create CI/CD pipeline](#7-create-cicd-pipeline)
+8. [Connect backend to DB](#8-connect-backend-to-db)
 
 
 ### 1. Create Project skeleton
@@ -186,27 +188,46 @@
 
 - Create .github/workflows/deploy.yml
 
-- Create and update key pair 
+- Win: Create and update key pair 
 
       ssh-keygen -t ed25519 -C "github-ci" -f github_ci
   
   - copy keys to ~/.ssh/
 
-- Add the Public key to Linux server
+- VPS: Add the Public key 
 
   - append github_ci.pub content to ~/.ssh/authorized_keys on Linux
 
-- Test local to Linux connection: 
+- Test Dev to VPS connection: 
 
       ssh -i ~/.ssh/github_ci barry75@barryonweb.com
 
-- Add the Private Key to GitHub Secrets
+- GitHub: Add the Private Key to GitHub Secrets
 
-  - GitHub: Settings → Secrets and variables → Actions → New repository secret
-    - Paste full conetnt of private key github_ci
+  - Repo: Settings → Secrets and variables → Actions → New repository secret
+    - Paste full content of private key github_ci
   - (Optional TODO) Add Known Hosts Fingerprint
 
 - Test connection
 
   - Create .github/workflows/test-ssh.yml
   - GitHub Actions - Run workflow
+
+
+### 8. Connect backend to DB
+
+- Add dependencies JPA and MySQL to pom.xml
+
+- Configure datasource in src/main/resources/application.yaml
+
+- Create Controller, Model, Repository
+
+- Create resources/db/init.sql
+
+- Add sql copy into yaml
+
+
+
+
+
+

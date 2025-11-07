@@ -1,3 +1,14 @@
 spring:
   application:
     name: gamesj
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_games?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: barry75
+    password: abc123
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect

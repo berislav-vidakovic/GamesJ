@@ -1,5 +1,5 @@
 // PingController.java
-package com.gamesj.controllers;
+package com.gamesj.Controllers;
 
 
 import org.springframework.web.bind.annotation.GetMapping;

@@ -43,8 +43,15 @@ jobs:
       # Copy published files to server
       - name: Deploy backend files 
         run: |
+          ssh barry75@barryonweb.com "mkdir -p /var/www/games/gamesj"
           scp target/gamesj-0.0.1-SNAPSHOT.jar barry75@barryonweb.com:/var/www/games/gamesj/
-      
+
+      # Copy DB scripts to server
+      - name: Copy SQL scripts 
+        run: |
+          ssh barry75@barryonweb.com "mkdir -p /var/www/games/gamesj/db"
+          scp src/main/resources/db/*.sql barry75@barryonweb.com:/var/www/games/gamesj/db/
+
       # Deploy Nginx config and reload
       - name: Update Nginx config
         run: |
