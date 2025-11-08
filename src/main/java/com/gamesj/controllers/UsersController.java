@@ -11,6 +11,7 @@ import com.gamesj.Repositories.UserRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/users")
@@ -24,17 +25,26 @@ public class UsersController {
 
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getUsers() {
-        List<User> users = userRepository.findAll();
-        //List<User> users = new ArrayList<>();
-        UUID id = UUID.randomUUID();
+      List<User> users = userRepository.findAll();
+      UUID id = UUID.randomUUID();
 
-        Map<String, Object> response = Map.of(
-            "id", id.toString(),
-            "users", users 
-        );
+      // build base URL from request
+      String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(); 
 
-        HttpStatus status = users.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK;
+      List<String> techstack = List.of(
+          baseUrl + "/images/java.png",
+          baseUrl + "/images/spring.png",
+          baseUrl + "/images/mysql.png"
+      );
 
-        return new ResponseEntity<>(response, status);
+      Map<String, Object> response = Map.of(
+          "id", id.toString(),
+          "users", users,
+          "techstack", techstack
+      );
+
+      return users.isEmpty()
+          ? ResponseEntity.noContent().build()
+          : ResponseEntity.ok(response);
     }
 }

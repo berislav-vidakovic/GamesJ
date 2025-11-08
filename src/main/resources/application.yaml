@@ -12,3 +12,5 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+  app:
+    public-url: https://gamesj.barryonweb.com
