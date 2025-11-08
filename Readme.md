@@ -41,6 +41,8 @@
 
 ### 2. Add ping endpoint
 
+- Create Controllers/PingController.java
+
 ### 3. Create Nginx Config Template for Spring Boot Backend
 
 - Create basic file /etc/nginx/sites-available/gamesj
@@ -189,29 +191,48 @@
 
 - Create .github/workflows/deploy.yml
 
-- Win: Create and update key pair 
+- Dev (Win): Create and update key pair 
 
       ssh-keygen -t ed25519 -C "github-ci" -f github_ci
   
   - copy keys to ~/.ssh/
 
-- VPS: Add the Public key 
+- VPS (Linux): Add the Public key 
 
-  - append github_ci.pub content to ~/.ssh/authorized_keys on Linux
+  - append github_ci.pub content to ~/.ssh/authorized_keys 
 
-- Test Dev to VPS connection: 
+- Test connection Dev-VPS: 
 
       ssh -i ~/.ssh/github_ci barry75@barryonweb.com
 
 - GitHub: Add the Private Key to GitHub Secrets
 
-  - Repo: Settings → Secrets and variables → Actions → New repository secret
+  - Repo: Settings - Secrets and variables - Actions - New repository secret
     - Paste full content of private key github_ci
   - (Optional TODO) Add Known Hosts Fingerprint
 
-- Test connection
+- Test connection GitHub-VPS
 
   - Create .github/workflows/test-ssh.yml
+
+      ```yml
+      name: Test SSH Connection
+      on:
+        workflow_dispatch:  # Allows trigger manually in GitHub
+      jobs:
+        test-ssh:
+          runs-on: ubuntu-latest
+          steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            - name: Start SSH agent and load key
+              uses: webfactory/ssh-agent@v0.9.0
+              with:
+                ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+            - name: Test SSH connection
+              run: ssh -o StrictHostKeyChecking=no barry75@barryonweb.com "echo Connected successfully from GitHub!"
+      ```
+
   - GitHub Actions - Run workflow
 
 

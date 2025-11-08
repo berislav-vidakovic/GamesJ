@@ -1,6 +1,14 @@
 server {
     server_name gamesj.barryonweb.com;
 
+     # Serve images directly
+    location /images/ {
+        alias /var/www/games/gamesj/images/; 
+        access_log off;
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
     # Main site redirect
     location = / {
         return 302 /panel/;

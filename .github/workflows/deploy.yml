@@ -46,6 +46,12 @@ jobs:
           ssh barry75@barryonweb.com "mkdir -p /var/www/games/gamesj"
           scp target/gamesj-0.0.1-SNAPSHOT.jar barry75@barryonweb.com:/var/www/games/gamesj/
 
+      # Copy images to server
+      - name: Deploy images 
+        run: |
+          ssh barry75@barryonweb.com "mkdir -p /var/www/games/gamesj/images"
+          scp src/main/resources/images/*.png barry75@barryonweb.com:/var/www/games/gamesj/images/    
+
       # Deploy Nginx config and reload
       - name: Update Nginx config
         run: |
