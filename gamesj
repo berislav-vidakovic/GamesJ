@@ -72,6 +72,9 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection keep-alive;
         proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;   
+        proxy_set_header X-Forwarded-Port $server_port; 
+        proxy_set_header X-Forwarded-Host $host;       
         proxy_cache_bypass $http_upgrade;
     }
 
@@ -91,6 +94,9 @@ server {
       proxy_set_header Upgrade $http_upgrade;
       proxy_set_header Connection "Upgrade";
       proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-Proto $scheme;   
+      proxy_set_header X-Forwarded-Port $server_port; 
+      proxy_set_header X-Forwarded-Host $host;       
 
     # Optional: increase timeout for long-lived connections
       proxy_read_timeout 3600s;
