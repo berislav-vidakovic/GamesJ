@@ -10,6 +10,7 @@
 6. [Register backend as service](#6-register-backend-as-service)
 7. [Create CI/CD pipeline](#7-create-cicd-pipeline)
 8. [Connect backend to DB](#8-connect-backend-to-db)
+9. [Web socket and CORS policy to connect Frontend with backend](#9-web-socket-and-cors-policy-to-connect-frontend-with-backend)
 
 
 ### 1. Create Project skeleton
@@ -222,12 +223,18 @@
 
 - Create Controller, Model, Repository
 
-- Create resources/db/init.sql
 
-- Add sql copy into yaml
+### 9. Web socket and CORS policy to connect Frontend with backend
 
+- Add frontend dev and production URL to Config/CorsConfig.java
 
+- Create Config/WebSocketConfig.java
 
+- Create WebSockets/WebSocketHandler.java
+
+- Add copy frontends to gamesj dir to frontend deploy yaml file 
+
+- Add Websocket and Frontend sections to Nging config file gamesj 
 
 
 

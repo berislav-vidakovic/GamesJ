@@ -1,12 +1,78 @@
 server {
     server_name gamesj.barryonweb.com;
 
+    # Main site redirect
+    location = / {
+        return 302 /panel/;
+    }
+
+    root /var/www/games/gamesj;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # Redirect /panel → /panel/
+    location = /panel {
+        return 301 /panel/;
+    }
+
+    location /panel/ {
+        root /var/www/games/gamesj/frontend;
+        index index.html;
+        try_files $uri /panel/index.html;
+    }
+
+    # Redirect /sudoku → /sudoku/
+    location = /sudoku {
+        return 301 /sudoku/;
+    }
+
+    location /sudoku/ {
+        root /var/www/games/gamesj/frontend;
+        index index.html;
+        try_files $uri /sudoku/index.html;
+    }
+
+    # Redirect /connect4 → /connect4/
+    location = /connect4 {
+        return 301 /connect4/;
+    }
+
+    location /connect4/ {
+        root /var/www/games/gamesj/frontend;
+        index index.html;
+        try_files $uri /connect4/index.html;
+    }
+
+    # Redirect /battleships → /battleships/
+    location = /battleships {
+        return 301 /battleships/;
+    }
+
+    location /battleships/ {
+        root /var/www/games/gamesj/frontend;
+        index index.html;
+        try_files $uri /battleships/index.html;
+    }
+
     location / {
       proxy_pass http://127.0.0.1:8080/;
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Backend API proxy
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection keep-alive;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
     }
 
     # Health check endpoint
@@ -16,6 +82,19 @@ server {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # WebSocket proxy
+    location /websocket {
+      proxy_pass http://127.0.0.1:8080/websocket;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "Upgrade";
+      proxy_set_header Host $host;
+
+    # Optional: increase timeout for long-lived connections
+      proxy_read_timeout 3600s;
+      proxy_send_timeout 3600s;
     }
 
     listen 443 ssl; # managed by Certbot
