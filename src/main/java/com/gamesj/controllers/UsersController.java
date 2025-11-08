@@ -28,6 +28,9 @@ public class UsersController {
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getUsers() {
       List<User> users = userRepository.findAll();
+      if (users.isEmpty()) 
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204
+
       UUID id = UUID.randomUUID();
 
       // build base URL from request
@@ -45,8 +48,6 @@ public class UsersController {
           "techstack", techstack
       );
 
-      return users.isEmpty()
-          ? ResponseEntity.noContent().build()
-          : ResponseEntity.ok(response);
+      return new ResponseEntity<>(response, HttpStatus.OK); // 200
     }
 }

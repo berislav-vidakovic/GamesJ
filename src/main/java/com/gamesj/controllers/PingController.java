@@ -1,7 +1,8 @@
 // PingController.java
 package com.gamesj.Controllers;
 
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
@@ -10,7 +11,8 @@ import java.util.Map;
 public class PingController {
 
     @GetMapping("/api/ping")
-    public Map<String, String> ping() {
-        return Map.of("response", "pong");
+    public ResponseEntity<Map<String, Object>> ping() {
+      Map<String, Object> response = Map.of( "response", "pong" );
+      return new ResponseEntity<>(response, HttpStatus.OK); // 200
     }
 }

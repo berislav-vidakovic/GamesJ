@@ -10,10 +10,10 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-    @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new WebSocketHandler(), "/websocket")
-                .setAllowedOrigins("http://localhost:5174",
-                  "https://gamesj.barryonweb.com" ); // frontend origin
-    }
+  @Override
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+      registry.addHandler(new WebSocketHandler(), "/websocket")
+              .setAllowedOrigins("http://localhost:5174",
+                "https://gamesj.barryonweb.com" ); // frontend origin
+  }
 }

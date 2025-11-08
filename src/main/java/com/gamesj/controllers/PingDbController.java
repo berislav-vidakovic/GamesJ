@@ -1,5 +1,7 @@
 package com.gamesj.Controllers;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,9 +21,18 @@ public class PingDbController {
     }
 
     @GetMapping("/pingdb")
-    public Map<String, String> pingDb() {
-        Optional<Healthcheck> row = healthcheckRepository.findById(1L);
-        String message = row.map(Healthcheck::getMsg).orElse("No record found");
-        return Map.of("response", message);
+    public ResponseEntity<Map<String, Object>> pingDb() {
+      try {
+        Optional<Healthcheck> row = healthcheckRepository.findTopByOrderByIdAsc();
+        if (!row.isPresent()) 
+          return new ResponseEntity<>(HttpStatus.NO_CONTENT); //  204         
+        Map<String, Object> response = Map.of("response", row.get().getMsg());
+        return new ResponseEntity<>(response, HttpStatus.OK); // 200 
+      } 
+      catch (Exception ex) {
+        ex.printStackTrace();
+        Map<String, Object> errorResponse = Map.of("error", "Database connection failed");
+        return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE); // 503 
+      }
     }
 }

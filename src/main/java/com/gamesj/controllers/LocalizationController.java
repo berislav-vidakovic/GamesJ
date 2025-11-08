@@ -1,6 +1,7 @@
 package com.gamesj.Controllers;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.gamesj.Repositories.LocalizationRepository;
 import com.gamesj.Models.Localization;
@@ -19,8 +20,18 @@ public class LocalizationController {
 
     @GetMapping("/get")
     public ResponseEntity<Map<String, Object>> getLocalization() {
-        List<Localization> locales = localizationRepository.findAll();
+      try {
+        List<Localization> locales = localizationRepository.findAll();        
+        if ( locales.isEmpty() ) 
+          return new ResponseEntity<>(HttpStatus.NO_CONTENT); //  204 
         Map<String, Object> response = Map.of("locales", locales);
-        return ResponseEntity.ok(response);
+        return new ResponseEntity<>(response, HttpStatus.OK); // 200          
+      } 
+      catch (Exception ex) {
+        ex.printStackTrace();
+        Map<String, Object> errorResponse = Map.of("error", "Database connection failed");
+        return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE); // 503 
+      }
+
     }
 }
