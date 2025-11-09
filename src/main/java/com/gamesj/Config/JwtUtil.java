@@ -9,15 +9,19 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final Key SECRET_KEY = Keys.hmacShaKeyFor("KeyForJWTauthenticationInGamesProject".getBytes());
-    private static final long EXPIRATION_TIME_MS = 3600000; // 1 hour
+    private static final long EXPIRATION_TIME_MS = 60*60*1000; // 1 hour
+
+    public static Key getSecretKey() {
+        return SECRET_KEY;
+    }
 
     public static String generateToken(int userId, String username) {
-        return Jwts.builder()
-                .setSubject(username)
-                .claim("userId", userId)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MS))
-                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
-                .compact();
+      return Jwts.builder()
+              .setSubject(username)
+              .claim("userId", userId)
+              .setIssuedAt(new Date())
+              .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MS))
+              .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
+              .compact();
     }
 }

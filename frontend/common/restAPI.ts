@@ -7,6 +7,10 @@ export async function sendGETRequest(endpoint: string, handleResponse: (data: an
     ////console.log("Sending GET: ", getUrl );
     fetch(getUrl, { 
         method: "GET",
+        headers: {
+          "Authorization": "Bearer " + localStorage.getItem("authToken"),
+          "Content-Type": "application/json"
+        },
         credentials: "include" // required for cookies
       } ) 
       .then( async(res) => { // this returns a Promise that resolves with parsed JSON
@@ -32,7 +36,10 @@ export async function sendPOSTRequest(
   //console.log("Sending POST: ", `${postUrl} Body:${msgBody}` );
   fetch( postUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Authorization": "Bearer " + localStorage.getItem("authToken"),
+            "Content-Type": "application/json" 
+          },
           body: msgBody, 
   }) 
     .then(async (res) => { 

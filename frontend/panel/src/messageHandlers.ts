@@ -78,14 +78,17 @@ export function handleUserLogin( jsonResp: any, status: number ){
   if( status == StatusCodes.OK ){
     setCurrentUserIdRef(Number(jsonResp.userId));
     localStorage.setItem("authToken", jsonResp.token);
+    console.log("Login OK", jsonResp.token);
   }
 }
 
 export function handleUserLogout( jsonResp: any, status: number ){
   console.log("Logout POST response received: ", jsonResp); 
   //var response = new { userId, isOnline = false };  
-  if( status == StatusCodes.OK )
+  if( status == StatusCodes.OK ) {
     setCurrentUserIdRef(null);
+    localStorage.removeItem("authToken");
+  }
 }
 
 export function handleInvite( jsonResp: any, status: number ){

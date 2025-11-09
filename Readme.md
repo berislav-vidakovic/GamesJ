@@ -261,9 +261,34 @@
 
 ### 10. Hashing password and JWT authentication
 
-- Added dependendencies into pom.xml
+#### Workflow
 
-- Created class SecurityConfig
+1. Register
+    - Request: send raw password
+    - Backend applies hashing and stores hashed password into DB 
+    - Response: acknowledgement 
+
+2. Login
+    - Request: send raw password
+    - Backend compares matching password and stored hashed value
+    - Response: JWT (JSON Web Token)
+    - Frontend stores JWT into localStorage
+
+3. Any action
+    - Request: send JWT in header Authorization: Bearer 
+    - Backend checks JWT if endpoint not in white list within JwtAuthFilter
+
+4. Logout 
+    - Request: send JWT in header Authorization: Bearer 
+    - Response: acknowledgement 
+    - Frontend clears JWT from localStorage
+
+
+#### Implementation
+
+- Add dependencies into pom.xml
+
+- Create class SecurityConfig 
 
 - Hashing password at user register using BCrypt 
 
@@ -279,14 +304,27 @@
 
 - Created class JwtUtil
 
-- Generate token and send it in API response 
+  - SECRET_KEY, EXPIRATION_TIME_MS and generateToken
+
+- Generate JWT and send it in API response 
 
     ```java
     String token = JwtUtil.generateToken(user.getUserId(), user.getLogin());
     ```
 
-- Frontend stores token from response to localStorage  
+- Frontend handles JWT with localStorage  
 
+    - stores on login
+    - removes on logout
 
+- Include JWT in Request Header
+
+    ```ts
+    "Authorization": "Bearer " + localStorage.getItem("authToken"),
+    ```
+
+- Apply JWT authentication check in backend - create filter class  JwtAuthFilter
+
+  - define edpoints that skip authentication
 
 
