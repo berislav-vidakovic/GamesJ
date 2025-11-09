@@ -49,8 +49,8 @@ jobs:
       # Copy DB scripts to server
       - name: Copy DB scripts 
         run: |
-          ssh barry75@barryonweb.com "mkdir -p /var/www/gamesj/data/mysql"
-          scp -r src/main/resources/*.sql barry75@barryonweb.com:/var/www/gamesj/data/mysql/
+          ssh barry75@barryonweb.com "mkdir -p /var/www/games/gamesj/data/mysql"
+          scp -r src/main/resources/*.sql barry75@barryonweb.com:/var/www/games/gamesj/data/mysql/
 
       # Copy images to server
       - name: Deploy images 
