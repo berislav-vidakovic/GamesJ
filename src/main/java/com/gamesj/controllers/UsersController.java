@@ -56,6 +56,61 @@ public class UsersController {
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     }
 
+    @PostMapping("/new")
+    public ResponseEntity<?> registerUser(@RequestBody Map<String, Object> body) {
+      try {
+        // Expecting: {"register": {"login": "penny", "fullname": "Penny"}}
+        if (!body.containsKey("register")) {
+          Map<String, Object> response = Map.of(
+                    "acknowledged", false,
+                    "error", "Missing 'register' field"
+          );
+          return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> credentials = (Map<String, Object>) body.get("register");
+        String login = (String) credentials.get("login");
+        String fullName = (String) credentials.get("fullname");
+        if (login == null || login.isBlank() || fullName == null || fullName.isBlank()) {
+          Map<String, Object> response = Map.of(
+                    "acknowledged", false,
+                    "error", "Missing login or fullname"
+            );
+          return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
+        }
+        System.out.printf("Register request: login=%s, fullname=%s%n", login, fullName);
+
+        boolean exists = userRepository.existsByLoginOrFullName(login, fullName);
+        if (exists) {
+          Map<String, Object> response = Map.of(
+                  "acknowledged", false,
+                  "error", "User  already exists"
+          );
+          return new ResponseEntity<>(response, HttpStatus.CONFLICT); // 409
+        }
+        // Create and persist user
+        User newUser = new User();
+        newUser.setLogin(login);
+        newUser.setFullName(fullName);
+        userRepository.save(newUser);
+        System.out.printf("New user inserted: %s%n", login);
+
+        Map<String, Object> response = Map.of(
+                "acknowledged", true,
+                "user", newUser
+        );
+        return new ResponseEntity<>(response, HttpStatus.CREATED); // 201
+      } 
+      catch (Exception e) {
+          e.printStackTrace();
+          Map<String, Object> errorResponse = Map.of( 
+            "acknowledged", false, "error", e.getMessage());
+          return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500   
+      }
+    }
+
+
      @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam("id") String clientId, @RequestBody Map<String, Object> body) {
         return handleUserStatusChange(clientId, body, true, true);
@@ -74,29 +129,32 @@ public class UsersController {
         try {
           parsedClientId = UUID.fromString(clientId);
         } catch (IllegalArgumentException e) {
-          return ResponseEntity.badRequest().body(Map.of(
-                  "acknowledged", false,
+          Map<String, Object> response = Map.of(
+                    "acknowledged", false,
                   "error", "Missing or invalid ID"
-          ));
+            );
+          return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
         }
         System.out.println("Received POST /api/users/logout with valid ID: " + parsedClientId.toString());
 
         // Validate userId
         if (!body.containsKey("userId")) {
-          return ResponseEntity.badRequest().body(Map.of(
-                  "acknowledged", false,
-                  "error", "Missing 'userId' field"
-          ));
+          Map<String, Object> response = Map.of(
+              "acknowledged", false,
+              "error", "Missing 'userId' field"
+            );
+          return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
         }
         int userId = (Integer) body.get("userId");
 
         // Find user
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-          return ResponseEntity.status(204).body(Map.of(
-                  "acknowledged", false,
-                  "error", "UserID Not found"
-          ));
+          Map<String, Object> response = Map.of(
+                "acknowledged", false,
+                "error", "UserID Not found"
+          );
+          return new ResponseEntity<>(response, HttpStatus.NO_CONTENT); // 204
         }
         User user = optionalUser.get();
         user.setIsOnline(isOnline);
@@ -107,16 +165,13 @@ public class UsersController {
                 "isOnline", isOnline
         );
 
-        return ResponseEntity.ok(response);
+        return new ResponseEntity<>(response, HttpStatus.OK); // 200
       } 
       catch (Exception e) {
         e.printStackTrace();
-        return ResponseEntity.internalServerError().body(Map.of(
-                "acknowledged", false,
-                "error", e.getMessage()
-        ));
+        Map<String, Object> errorResponse = Map.of( 
+          "acknowledged", false, "error", e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500   
       }
     }
-
-
   }
