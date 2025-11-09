@@ -72,11 +72,13 @@ export const handleResponseSignUp = ( jsonResp: any, status: number ) => {
 }
 
 export function handleUserLogin( jsonResp: any, status: number ){
-  //var response = new { userId, isOnline = true };
+  //var response = new { userId, isOnline = true, token };
   console.log("******** ****** POST response handleUserLogin received: ", 
       jsonResp, "Status: ", status); 
-  if( status == StatusCodes.OK )
+  if( status == StatusCodes.OK ){
     setCurrentUserIdRef(Number(jsonResp.userId));
+    localStorage.setItem("authToken", jsonResp.token);
+  }
 }
 
 export function handleUserLogout( jsonResp: any, status: number ){

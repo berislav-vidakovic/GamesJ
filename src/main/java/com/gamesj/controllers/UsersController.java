@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.gamesj.Config.JwtUtil;
 import com.gamesj.Models.User;
 import com.gamesj.Repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -170,8 +172,8 @@ public class UsersController {
       User user = optionalUser.get();
 
       // Password validation 
-      boolean passwordMatches = passwordEncoder.matches(password, user.getPwd());
-      if( !passwordMatches ) {
+      boolean passwordsMatch = passwordEncoder.matches(password, user.getPwd());
+      if( !passwordsMatch ) {
         Map<String, Object> response = Map.of(
               "acknowledged", false,
               "error", "Invalid password"
@@ -182,9 +184,12 @@ public class UsersController {
       user.setIsOnline(true);
       userRepository.save(user);
 
+      String token = JwtUtil.generateToken(user.getUserId(), user.getLogin());
+
       Map<String, Object> response = Map.of(
               "userId", userId,
-              "isOnline", true
+              "isOnline", true,
+              "token", token
       );
 
       return new ResponseEntity<>(response, HttpStatus.OK); // 200

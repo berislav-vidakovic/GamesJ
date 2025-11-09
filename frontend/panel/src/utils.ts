@@ -34,7 +34,7 @@ export async function loginUser(userId: number, password: string) {
   const body = JSON.stringify({ userId, password } );
   
   sendPOSTRequest(POSTuserLoginEndpoint, body, handleUserLogin);
-  //console.log("POST sending: ", body );
+  console.log("POST sending: ", body );
 }
 
 export async function logoutUser(userId: number) {

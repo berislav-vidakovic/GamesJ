@@ -11,7 +11,7 @@
 7. [Create CI/CD pipeline](#7-create-cicd-pipeline)
 8. [Connect backend to DB](#8-connect-backend-to-db)
 9. [Web socket and CORS policy to connect Frontend with backend](#9-web-socket-and-cors-policy-to-connect-frontend-with-backend)
-
+10. [Hashing password and JWT authentication](#10-hashing-password-and-jwt-authentication)
 
 ### 1. Create Project skeleton
 
@@ -256,6 +256,37 @@
 - Add copy frontends to gamesj dir to frontend deploy yaml file 
 
 - Add Websocket and Frontend sections to Nging config file gamesj 
+
+
+
+### 10. Hashing password and JWT authentication
+
+- Added dependendencies into pom.xml
+
+- Created class SecurityConfig
+
+- Hashing password at user register using BCrypt 
+
+    ```java
+    String hashedPwd = passwordEncoder.encode(password);
+    ```
+
+- Validating password at user login
+
+    ```java
+    boolean passwordsMatch = passwordEncoder.matches(password, user.getPwd());
+    ```
+
+- Created class JwtUtil
+
+- Generate token and send it in API response 
+
+    ```java
+    String token = JwtUtil.generateToken(user.getUserId(), user.getLogin());
+    ```
+
+- Frontend stores token from response to localStorage  
+
 
 
 

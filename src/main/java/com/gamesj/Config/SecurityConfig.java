@@ -1,4 +1,3 @@
-
 package com.gamesj.Config;
 
 import org.springframework.context.annotation.Bean;
