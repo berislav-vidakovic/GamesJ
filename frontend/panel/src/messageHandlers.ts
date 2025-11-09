@@ -63,10 +63,10 @@ export  const handleResponseGetAllUsers = ( jsonResp: any ) => {
 export const handleResponseSignUp = ( jsonResp: any, status: number ) => {    
   console.log("*** HANDLE User registered: ", jsonResp, "Status: ", status);
   if( jsonResp.acknowledged ) {     
-    //console.log("User registered: ", jsonResp.user);
+    console.log("User registered: ", jsonResp.user);
   }
   else {
-    //console.log("User NOT registered: ", jsonResp.error);
+    console.log("User NOT registered: ", jsonResp.error);
     alert("NOT registered: User already exists");
   }
 }

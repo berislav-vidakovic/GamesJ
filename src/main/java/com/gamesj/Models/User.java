@@ -22,6 +22,9 @@ public class User {
     @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     @Column(name = "isonline")
     private Boolean isOnline = false;
 
@@ -43,6 +46,15 @@ public class User {
 
     public String getFullName() {
         return fullName;
+    }
+
+    
+    public void setPwd(String pwd) {
+        this.passwordHash = pwd;
+    }
+
+    public String getPwd() {
+        return passwordHash;
     }
 
     public void setFullName(String fullName) {
