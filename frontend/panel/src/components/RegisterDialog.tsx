@@ -15,9 +15,10 @@ function RegisterDialog({
     (document.querySelector("#inputLogin") as HTMLElement | null)?.focus();
   }, []);
 
+
   // Refs to access DOM input values
-  const loginRef = useRef<HTMLInputElement>(null);
   const fullnameRef = useRef<HTMLInputElement>(null);
+  const loginRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
   const handleConfirmClick = () => {
@@ -25,9 +26,9 @@ function RegisterDialog({
       alert("You are disconnected.");
       setShowRegisterDialog(false);    
       return;
-    }  
-    const login: string = loginRef.current?.value.trim() ?? "";
+    }
     const fullname: string = fullnameRef.current?.value.trim() ?? "";
+    const login: string = loginRef.current?.value.trim() ?? "";
     const password: string = passwordRef.current?.value.trim() ?? "";
     
     //console.log("Entered values:", { login, fullname });      

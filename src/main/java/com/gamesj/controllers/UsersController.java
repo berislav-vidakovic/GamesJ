@@ -122,65 +122,139 @@ public class UsersController {
 
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestParam("id") String clientId, @RequestBody Map<String, Object> body) {
-      return handleUserStatusChange(clientId, body, true, true);
+    try {
+      // Validate clientId
+      UUID parsedClientId;
+      try {
+        parsedClientId = UUID.fromString(clientId);
+      } 
+      catch (IllegalArgumentException e) {
+        Map<String, Object> response = Map.of(
+                  "acknowledged", false,
+                "error", "Missing or invalid ID"
+          );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
+      }
+      System.out.println("Received POST /api/users/logout with valid ID: " + parsedClientId.toString());
+
+      // Validate userId
+      if (!body.containsKey("userId")) {
+        Map<String, Object> response = Map.of(
+            "acknowledged", false,
+            "error", "Missing 'userId' field"
+          );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
+      }
+      int userId = (Integer) body.get("userId");
+
+      // Extract password field
+      if (!body.containsKey("password")) {
+        Map<String, Object> response = Map.of(
+            "acknowledged", false,
+            "error", "Missing 'password' field"
+          );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
+      }
+      String password = body.get("password").toString();
+      System.out.println("Password received for login: " + password);
+
+      // Find user
+      Optional<User> optionalUser = userRepository.findById(userId);
+      if (optionalUser.isEmpty()) {
+        Map<String, Object> response = Map.of(
+              "acknowledged", false,
+              "error", "UserID Not found"
+        );
+        return new ResponseEntity<>(response, HttpStatus.NO_CONTENT); // 204
+      }
+      User user = optionalUser.get();
+
+      // Password validation 
+      boolean passwordMatches = passwordEncoder.matches(password, user.getPwd());
+      if( !passwordMatches ) {
+        Map<String, Object> response = Map.of(
+              "acknowledged", false,
+              "error", "Invalid password"
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED); // 401
+      }
+
+      user.setIsOnline(true);
+      userRepository.save(user);
+
+      Map<String, Object> response = Map.of(
+              "userId", userId,
+              "isOnline", true
+      );
+
+      return new ResponseEntity<>(response, HttpStatus.OK); // 200
+    } 
+    catch (Exception e) {
+      e.printStackTrace();
+      Map<String, Object> errorResponse = Map.of( 
+        "acknowledged", false, "error", e.getMessage());
+      return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500   
+    }
   }
 
   @PostMapping("/logout")
   public ResponseEntity<?> logout(@RequestParam("id") String clientId, @RequestBody Map<String, Object> body) {
-      return handleUserStatusChange(clientId, body, false, false);
+    return handleUserStatusChange(clientId, body, false, false);
   }
 
-    // Common  handler for login/logout 
+  // Common  handler for login/logout 
   private ResponseEntity<?> handleUserStatusChange(String clientId, Map<String, Object> body, boolean isOnline, boolean isLogin) {
+    try {
+      // Validate clientId
+      UUID parsedClientId;
       try {
-        // Validate clientId
-        UUID parsedClientId;
-        try {
-          parsedClientId = UUID.fromString(clientId);
-        } catch (IllegalArgumentException e) {
-          Map<String, Object> response = Map.of(
-                    "acknowledged", false,
-                  "error", "Missing or invalid ID"
-            );
-          return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
-        }
-        System.out.println("Received POST /api/users/logout with valid ID: " + parsedClientId.toString());
-
-        // Validate userId
-        if (!body.containsKey("userId")) {
-          Map<String, Object> response = Map.of(
-              "acknowledged", false,
-              "error", "Missing 'userId' field"
-            );
-          return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
-        }
-        int userId = (Integer) body.get("userId");
-
-        // Find user
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isEmpty()) {
-          Map<String, Object> response = Map.of(
-                "acknowledged", false,
-                "error", "UserID Not found"
-          );
-          return new ResponseEntity<>(response, HttpStatus.NO_CONTENT); // 204
-        }
-        User user = optionalUser.get();
-        user.setIsOnline(isOnline);
-        userRepository.save(user);
-
+        parsedClientId = UUID.fromString(clientId);
+      } catch (IllegalArgumentException e) {
         Map<String, Object> response = Map.of(
-                "userId", userId,
-                "isOnline", isOnline
-        );
-
-        return new ResponseEntity<>(response, HttpStatus.OK); // 200
-      } 
-      catch (Exception e) {
-        e.printStackTrace();
-        Map<String, Object> errorResponse = Map.of( 
-          "acknowledged", false, "error", e.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500   
+                  "acknowledged", false,
+                "error", "Missing or invalid ID"
+          );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
       }
+      System.out.println("Received POST /api/users/logout with valid ID: " + parsedClientId.toString());
+
+      // Validate userId
+      if (!body.containsKey("userId")) {
+        Map<String, Object> response = Map.of(
+            "acknowledged", false,
+            "error", "Missing 'userId' field"
+          );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
+      }
+      int userId = (Integer) body.get("userId");
+
+      // Find user
+      Optional<User> optionalUser = userRepository.findById(userId);
+      if (optionalUser.isEmpty()) {
+        Map<String, Object> response = Map.of(
+              "acknowledged", false,
+              "error", "UserID Not found"
+        );
+        return new ResponseEntity<>(response, HttpStatus.NO_CONTENT); // 204
+      }
+      User user = optionalUser.get();
+
+
+      user.setIsOnline(isOnline);
+      userRepository.save(user);
+
+      Map<String, Object> response = Map.of(
+              "userId", userId,
+              "isOnline", isOnline
+      );
+
+      return new ResponseEntity<>(response, HttpStatus.OK); // 200
+    } 
+    catch (Exception e) {
+      e.printStackTrace();
+      Map<String, Object> errorResponse = Map.of( 
+        "acknowledged", false, "error", e.getMessage());
+      return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // 500   
     }
+  }
 }

@@ -30,8 +30,8 @@ export async function registerUser(login: string, fullname: string, password: st
 }
 
 
-export async function loginUser(userId: number) {
-  const body = JSON.stringify({ userId } );
+export async function loginUser(userId: number, password: string) {
+  const body = JSON.stringify({ userId, password } );
   
   sendPOSTRequest(POSTuserLoginEndpoint, body, handleUserLogin);
   //console.log("POST sending: ", body );

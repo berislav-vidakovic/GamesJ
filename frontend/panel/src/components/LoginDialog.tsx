@@ -15,6 +15,8 @@ function LoginDialog({
 ) {
 
   const selectedUserRef = useRef<HTMLSelectElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
 
   const handleConfirmClick = () => {
      if (!isWsConnected) {
@@ -23,9 +25,11 @@ function LoginDialog({
       return;
     }  
     const selectedUserId : number = Number(selectedUserRef.current!.value);
+    const password: string = passwordRef.current?.value.trim() ?? "";
+
     //console.log("Selected user ID:", selectedUserId);
    
-    loginUser(selectedUserId); // async call
+    loginUser(selectedUserId, password); // async call
     setShowLoginDialog(false);    // Close dialog
   };
 
@@ -49,6 +53,13 @@ function LoginDialog({
             ))
           }
           </select>
+        )}
+
+        {( selectedUserRef &&
+          <input 
+            placeholder="Password"
+            ref={passwordRef}
+          ></input>
         )}
 
         <div className="auth-buttons">
