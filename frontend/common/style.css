@@ -1,0 +1,504 @@
+/* style.css */
+
+/* Panel*/
+.user-item {
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  font-size: large;
+  margin: 10px 0;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 16px;
+  border: 1px solid #9e9e9e;
+}
+
+.status-online {
+  background-color: #4caf50;
+}
+
+.status-offline {
+  background-color: #fff;
+}
+
+
+
+.sudoku-board {
+  display: grid;
+  grid-template-columns: repeat(9, 40px);
+  grid-template-rows: repeat(9, 40px);
+  border: 2px solid #000;
+  gap: 0;
+
+  /* Add these */
+  margin: 20px auto;     /* horizontally centered */
+  box-sizing: border-box;
+}
+
+.sudoku-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  border: 1px solid #999;
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
+  color: #22A;
+  background-color: #ffd;
+  transition: background-color 0.2s;
+}
+
+
+.sudoku-cell.focused {
+  border: 2px solid #444;
+  background-color: #ffd;
+}
+
+
+.sudoku-cell.error {
+  color: red;         /* number will appear red if you choose to render it */
+  font-weight: 500;
+  background-color: #eee;
+}
+
+/* Container */
+.sudoku-numpad {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 20px;
+}
+
+/* Buttons */
+.sudoku-numpad-button {
+  width: 39px;
+  height: 39px;
+  font-size: 32px;
+  font-weight: 500;
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  cursor: pointer;
+  border: 1px solid #999;
+  border-radius: 4px;
+  background-color: #ffd;
+  color: #22A;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  user-select: none;
+
+  outline: none;        /* remove old focus */
+  box-shadow: none;     /* remove old focus */
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+/* Remove browser focus rings */
+.sudoku-numpad-button:focus,
+.sudoku-numpad-button:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Hover */
+.sudoku-numpad-button:hover {
+  background-color: #ffe680;
+}
+
+/* Active / clicked */
+.sudoku-numpad-button:active {
+  background-color: #ffdd55;
+  transform: scale(0.95);
+}
+
+.sudokuinfobox {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: 90%;
+  padding: 0 10px;
+  margin-bottom: 10px;
+}
+
+
+
+.border-bottom {
+  border-bottom: 3px solid #000;
+}
+
+.border-right {
+  border-right: 3px solid #000;
+}
+
+/* Highlight row or column */
+.sudoku-cell.highlight {
+  background-color: #d0f0ff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+
+/* App container: two columns */
+.app-container {
+  display: flex;
+  width: 75vw;
+  max-width: 1200px;
+  height: 80vh;
+  margin: 50px auto;
+  background-color: #ccf;
+  border-radius: 8px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Users box (left column) */
+.users-box {
+  flex: 0 0 20%;
+  background-color: #eef;
+  padding: 16px 32px;
+  border-radius: 8px 0 0 8px;
+  overflow-y: auto;
+  text-align: left; /* ensures text and list items align left */
+}
+
+/* Right main content (auth + game buttons) */
+.main-content {
+  flex: 1; /* take remaining space */
+  display: flex;
+  flex-direction: column;
+  padding: 32px 32px;
+  box-sizing: border-box;
+  justify-content: flex-start;
+}
+
+/* Auth buttons on top */
+.auth-buttons {
+  display: flex;
+  margin-bottom: 8px;
+  justify-content: flex-end; 
+  flex-wrap: wrap; 
+}
+
+.tech-stack {
+  display: flex;
+  margin-bottom: 8px;
+  justify-content: flex-start; 
+  flex-wrap: wrap; 
+}
+
+
+
+.info-connect4 {
+  display: flex;
+  align-items: center;      /* vertical alignment */
+  justify-content: space-between;/* horizontal alignment to the right */
+  gap: 12px;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.next-move {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.auth-buttons button,
+.info-connect4 button {
+  padding: 8px 16px;
+  border: none;
+  background-color: #4a69bd;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 120px;
+  margin-left: 16px;
+  margin-top: 16px;
+}
+
+.auth-buttons button:focus {
+  outline: none;
+}
+
+.auth-buttons button:disabled {
+  background-color: #777;      /* Gray background */
+  color: #ddd;                 /* Dimmed text */
+  opacity: 0.8;                /* Slightly faded look */
+  cursor: default;
+}
+
+.auth-buttons button:not(:disabled):hover {
+  background-color: #fc0;
+  color: #000;
+}
+
+/* Game buttons */
+.buttons-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap; /* wrap on small screens */
+  margin-top: 8px;
+}
+
+.buttons-container button {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.buttons-container button:focus {
+  outline: none;
+}
+
+.selected-button img {
+  border: 5px solid #2233BD;
+  border-radius: 10px;
+  padding: 2px;
+}
+
+
+.buttons-container img {
+  width: 80px; 
+  height: 80px;
+  object-fit: contain;
+  border-radius: 10px;
+  transition: transform 0.2s;
+}
+
+.buttons-container img:hover {
+  transform: scale(1.1);
+}
+
+/* Status box */
+.status-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  
+  background-color: #eef;    /* subtle background */
+  color: #222;               /* readable text color */
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  
+  width: 100%;               /* stretch within parent */
+  box-sizing: border-box;
+  text-align: left;          /* ensures text inside <p> is left-aligned */
+  font-size: 18px;
+  line-height: 1.4;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.status-box p {
+  margin: 0px;
+}
+
+
+/* Users list */
+.users-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.users-box li.online {
+  color: green;
+  font-weight: bold;
+}
+
+.users-box li.offline {
+  color: gray;
+}
+
+
+button {
+  background: none;
+  cursor: pointer;
+  padding: 8px;
+  border: solid 4px #999;
+}
+
+/*
+button:hover {
+  border: solid 4px #00C;
+}*/
+
+button img {
+  width: 250px;
+  height: 250px;
+  object-fit: contain;
+  transition: transform 0.2s;
+}
+
+button img:hover {
+  transform: scale(1.1);
+}
+
+/* Connect4 classes  */
+.connect4-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.connect4-board {
+  display: grid;
+  grid-template-columns: repeat(7, 88px);
+  grid-template-rows: repeat(6, 88px);
+  border: 2px solid #000;
+  gap: 0;
+  background-color: #00F;
+  /* Add these */
+  margin: 20px auto;     /* horizontally centered */
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.conn4top {
+  display: grid;
+  grid-template-columns: repeat(7, 88px);
+  width: 100%;
+  height: 80;
+  padding-left: 16px;
+}
+
+.conn4inactivecol {
+  background-color: none;
+}
+
+.conn4cell {
+  background-color: #00F; /* Blue board cell */
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;    /* Centers vertically */
+  justify-content: center; /* Centers horizontally */
+  margin: 4px;
+}
+
+/* Circle (the hole or piece) */
+.conn4cell::before {
+  content: "";
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: white; /* Empty slot */
+  display: block;
+}
+
+/* Chip colors */
+.conn4cell.Yellow::before {
+  background-color: yellow;
+}
+
+.conn4cell.Red::before {
+  background-color: red;
+}
+
+.conn4cellNew {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;    /* Centers vertically */
+  justify-content: center; /* Centers horizontally */
+  margin: 4px;
+}
+
+/* Circle (the hole or piece) */
+.conn4cellNew::before {
+  content: "";
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: white; /* Empty slot */
+  display: block;
+}
+
+/* Chip colors */
+.conn4cellNew.Yellow::before {
+  background-color: yellow;
+}
+
+.conn4cellNew.Red::before {
+  background-color: red;
+}
+
+.conn4cellNew.Win::before {
+  background-color: transparent; /* optional: remove default white */
+  background-image: url('assets/happy.png'); /* replace with your image path */
+  background-size: cover;  /* make the image fill the circle */
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.conn4cellNew.Lose::before {
+  background-color: transparent; /* optional: remove default white */
+  background-image: url('assets/sad.png'); /* replace with your image path */
+  background-size: cover;  /* make the image fill the circle */
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+/* Dialog classes */
+.dialog-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog {
+  background: white;
+  padding: 16px 32px;
+  border-radius: 10px;
+  min-width: 250px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;   /* stack items vertically */
+  align-items: flex-start;  /* ✅ left-align child elements */
+  text-align: left;         /* ✅ left-align text within */
+}
+
+.dialog-buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.dialog select,
+.dialog input {
+  width: 100%;
+  padding: 6px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.flaglocales {
+  height: 25px;
+  margin-left: 8px;
+  cursor: pointer;
+}

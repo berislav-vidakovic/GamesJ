@@ -1,0 +1,49 @@
+{
+    "urlBackend": {
+      "backendCsMySQL" : {
+        "Development": {
+          "HTTP": "http://localhost:5003",
+          "WS": "ws://localhost:5003/websocket"
+        },
+        "Production": {
+          "HTTP": "https://games.barryonweb.com",
+          "WS": "wss://games.barryonweb.com/websocket"
+        }
+      },
+      "backendJavaMySQL" : {
+        "Development": {
+          "HTTP": "http://localhost:8080",
+          "WS": "ws://localhost:8080/websocket"
+        },
+        "Production": {
+          "HTTP": "https://gamesj.barryonweb.com",
+          "WS": "wss://gamesj.barryonweb.com/websocket"
+        }
+      }
+    },
+    "urlFrontend": {
+      "Development": {
+          "panel": "http://localhost:5174/",
+          "sudoku": "http://localhost:5175/",
+          "connect4": "http://localhost:5176/",
+          "battleship": "http://localhost:5177/"
+      },
+      "Production": {
+        "backendCsMySQL": {
+            "panel": "https://games.barryonweb.com/panel/",
+            "sudoku": "https://games.barryonweb.com/sudoku/",
+            "connect4": "https://games.barryonweb.com/connect4/",
+            "battleship": "https://games.barryonweb.com/battleships/"
+        },
+        "backendJavaMySQL": {
+            "panel": "https://gamesj.barryonweb.com/panel/",
+            "sudoku": "https://gamesj.barryonweb.com/sudoku/",
+            "connect4": "https://gamesj.barryonweb.com/connect4/",
+            "battleship": "https://gamesj.barryonweb.com/battleships/"
+        }
+
+      }
+    }
+}
+
+

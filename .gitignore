@@ -45,5 +45,18 @@ Thumbs.db
 *~
 bash.exe.stackdump
 
+# frontend
+frontend/node_modules
 
+frontend/panel/node_modules
+frontend/panel/dist
+
+frontend/sudoku/node_modules
+frontend/sudoku/dist
+
+frontend/connect4/node_modules
+frontend/connect4/dist
+
+frontend/battleships/node_modules
+frontend/battleships/dist
 

@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "workspaces": [
+    "common",
+    "panel",
+    "sudoku",
+    "connect4",
+    "battleships"
+  ],
+  "dependencies": {
+    "http-status-codes": "^2.3.0"
+  }
+}
