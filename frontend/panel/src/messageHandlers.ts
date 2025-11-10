@@ -78,6 +78,7 @@ export function handleUserLogin( jsonResp: any, status: number ){
   if( status == StatusCodes.OK ){
     setCurrentUserIdRef(Number(jsonResp.userId));
     localStorage.setItem("authToken", jsonResp.token);
+    localStorage.setItem("userId", jsonResp.userId.toString());
     console.log("Login OK", jsonResp.token);
   }
 }

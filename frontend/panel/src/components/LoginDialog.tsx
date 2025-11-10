@@ -1,7 +1,7 @@
 // LoginDialog.tsx
 import type { Dispatch, SetStateAction } from "react";
 import type { User } from '@common/interfaces';
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { loginUser } from "../utils.ts";
 
 
@@ -16,6 +16,18 @@ function LoginDialog({
 
   const selectedUserRef = useRef<HTMLSelectElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId && selectedUserRef.current) {
+      const optionExists = Array.from(selectedUserRef.current.options).some(
+        (opt) => opt.value === storedUserId
+      );
+      if (optionExists) {
+        selectedUserRef.current.value = storedUserId;
+      }
+    }
+  }, []);
 
 
   const handleConfirmClick = () => {

@@ -1,4 +1,8 @@
-# Games backend project in Java
+# Games - Full stack project in React, Java and MySql
+
+<a href="https://gamesj.barryonweb.com">Run Project</a>  
+<a href="https://github.com/berislav-vidakovic/GamesJ">View Code</a>
+
 
 ## Complete vertical
 
@@ -306,7 +310,7 @@
 
   - SECRET_KEY, EXPIRATION_TIME_MS and generateToken
 
-- Generate JWT and send it in API response 
+- Generate JWT and send it in API Response 
 
     ```java
     String token = JwtUtil.generateToken(user.getUserId(), user.getLogin());
@@ -317,7 +321,7 @@
     - stores on login
     - removes on logout
 
-- Include JWT in Request Header
+- Include JWT in API Request Header
 
     ```ts
     "Authorization": "Bearer " + localStorage.getItem("authToken"),
@@ -325,6 +329,125 @@
 
 - Apply JWT authentication check in backend - create filter class  JwtAuthFilter
 
-  - define edpoints that skip authentication
+  - define endpoints that skip authentication
 
 
+### 11. Refresh token
+
+/api/users/login  
+/api/users/refresh
+
+Actions From the logout state
+  - First login with password
+  - Next login automatic
+
+Actions From login state
+  - Action that requires authentication
+  - Logout
+
+![JWT Image](JWT.png)
+  
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; width: 100%; text-align: left;">
+  <thead>
+    <tr>
+      <th>Transition</th>
+      <th>From State</th>
+      <th>Trigger (Frontend Request / Action)</th>
+      <th>Backend Action</th>
+      <th>Next State / Response</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>T1</td>
+      <td><b>S1 – Logged Out</b></td>
+      <td>Login</td>
+      <td>Frontend decides to attempt login</td>
+      <td><b>S2 – Logging</b></td>
+    </tr>
+    <tr>
+      <td>T2</td>
+      <td><b>S2 – Logging</b></td>
+      <td>Get Refresh Login</td>
+      <td>Send refresh token to backend</td>
+      <td><b>S3 – Validate Refresh Token</b></td>
+    </tr>
+    <tr>
+      <td>T3</td>
+      <td><b>S3 – Validate Refresh Token</b></td>
+      <td>Valid</td>
+      <td>Issue new access + refresh tokens → store refresh token in DB</td>
+      <td><b>S6 – Logged In</b></td>
+    </tr>
+    <tr>
+      <td>T4</td>
+      <td><b>S3 – Validate Refresh Token</b></td>
+      <td>Invalid</td>
+      <td>Reject → request manual login</td>
+      <td><b>S4 – Manual Login</b></td>
+    </tr>
+    <tr>
+      <td>T5</td>
+      <td><b>S4 – Manual Login</b></td>
+      <td>Enter password</td>
+      <td>Send password to backend for validation</td>
+      <td><b>S5 – Validate Password</b></td>
+    </tr>
+    <tr>
+      <td>T6</td>
+      <td><b>S5 – Validate Password</b></td>
+      <td>Valid</td>
+      <td>Issue access + refresh tokens → store refresh token in DB</td>
+      <td><b>S6 – Logged In</b></td>
+    </tr>
+    <tr>
+      <td>T7</td>
+      <td><b>S5 – Validate Password</b></td>
+      <td>Invalid</td>
+      <td>Reject login → notify frontend</td>
+      <td><b>S4 – Manual Login</b></td>
+    </tr>
+    <tr>
+      <td>T8</td>
+      <td><b>S6 – Logged In</b></td>
+      <td>Get Access Token</td>
+      <td>Send access token to backend for validation</td>
+      <td><b>S7 – Validate Access Token</b></td>
+    </tr>
+    <tr>
+      <td>T9</td>
+      <td><b>S7 – Validate Access Token</b></td>
+      <td>Valid</td>
+      <td>Perform business logic</td>
+      <td><b>S6 – Logged In</b></td>
+    </tr>
+    <tr>
+      <td>T10</td>
+      <td><b>S7 – Validate Access Token</b></td>
+      <td>Invalid</td>
+      <td>Reject request (401) → optionally trigger refresh flow</td>
+      <td><b>S2 – Logging</b></td>
+    </tr>
+    <tr>
+      <td>T11</td>
+      <td><b>S6 – Logged In</b></td>
+      <td>Logout</td>
+      <td>Mark user offline → delete refresh token from DB</td>
+      <td><b>S8 – Logging Out</b></td>
+    </tr>
+    <tr>
+      <td>T12</td>
+      <td><b>S8 – Logging Out</b></td>
+      <td>Automatic</td>
+      <td>No frontend action required</td>
+      <td><b>S1 – Logged Out</b></td>
+    </tr>
+    <tr>
+      <td>T13</td>
+      <td><b>S8 – Logging Out</b></td>
+      <td>Manual</td>
+      <td>Clear tokens on frontend → mark user offline → delete refresh token from DB</td>
+      <td><b>S1 – Logged Out</b></td>
+    </tr>
+  </tbody>
+</table>
