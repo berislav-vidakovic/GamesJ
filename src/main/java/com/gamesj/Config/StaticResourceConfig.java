@@ -10,6 +10,6 @@ public class StaticResourceConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // explicitly expose /favicon.ico and other static files
         registry.addResourceHandler("/favicon.ico")
-                .addResourceLocations("classpath:/static/favicon.ico");
+                .addResourceLocations("classpath:/static/");
     }
 }
