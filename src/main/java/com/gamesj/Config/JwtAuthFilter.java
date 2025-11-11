@@ -40,6 +40,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         path.startsWith("/api/pingdb") ||
         path.startsWith("/api/users/all") ||
         path.startsWith("/api/users/new") ||
+        path.startsWith("/favicon.ico") || 
         path.startsWith("/websocket") ||
         path.startsWith("/images") ||
         path.startsWith("/api/auth/refresh") ||
