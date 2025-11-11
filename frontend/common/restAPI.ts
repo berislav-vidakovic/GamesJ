@@ -8,7 +8,7 @@ export async function sendGETRequest(endpoint: string, handleResponse: (data: an
     fetch(getUrl, { 
         method: "GET",
         headers: {
-          "Authorization": "Bearer " + localStorage.getItem("authToken"),
+          "Authorization": "Bearer " + sessionStorage.getItem("authToken"),
           "Content-Type": "application/json"
         },
         credentials: "include" // required for cookies
@@ -37,7 +37,7 @@ export async function sendPOSTRequest(
   fetch( postUrl, {
           method: "POST",
           headers: { 
-            "Authorization": "Bearer " + localStorage.getItem("authToken"),
+            "Authorization": "Bearer " + sessionStorage.getItem("authToken"),
             "Content-Type": "application/json" 
           },
           body: msgBody, 
@@ -53,9 +53,9 @@ export async function sendPOSTRequest(
         case StatusCodes.RESET_CONTENT: // 205
         case StatusCodes.CONFLICT: // 409
         case StatusCodes.BAD_REQUEST: // 400      
+        case StatusCodes.NOT_FOUND: // 404      
+        case StatusCodes.UNAUTHORIZED: // 401 
           handleResponse( jsonResp, res.status );
-        //case StatusCodes.BAD_REQUEST: // 400
-        //case StatusCodes.CONFLICT: // 409
           break;
         default:
           throw new Error(`HTTP error! status: ${res.status}`);

@@ -72,23 +72,27 @@ export const handleResponseSignUp = ( jsonResp: any, status: number ) => {
 }
 
 export function handleUserLogin( jsonResp: any, status: number ){
-  //var response = new { userId, isOnline = true, token };
+  // Response: { userId, isOnline, accessToken, refreshToken }
   console.log("******** ****** POST response handleUserLogin received: ", 
       jsonResp, "Status: ", status); 
   if( status == StatusCodes.OK ){
     setCurrentUserIdRef(Number(jsonResp.userId));
-    localStorage.setItem("authToken", jsonResp.token);
-    localStorage.setItem("userId", jsonResp.userId.toString());
-    console.log("Login OK", jsonResp.token);
+    sessionStorage.setItem("accessToken", jsonResp.accessToken);
+    sessionStorage.setItem("refreshToken", jsonResp.refreshToken);
+    sessionStorage.setItem("userId", jsonResp.userId.toString());
+    console.log("Login OK", jsonResp);
   }
 }
+
 
 export function handleUserLogout( jsonResp: any, status: number ){
   console.log("Logout POST response received: ", jsonResp); 
   //var response = new { userId, isOnline = false };  
   if( status == StatusCodes.OK ) {
     setCurrentUserIdRef(null);
-    localStorage.removeItem("authToken");
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("userId");
   }
 }
 
@@ -188,7 +192,7 @@ function handleWsInvitation( jsonResp: any ){
 
 
 function handleWsUserRegister( jsonResp: any ){
-  //console.log("*** Ws-HANDLE User registered: ", jsonResp);
+  console.log("*** Ws-HANDLE User registered: ", jsonResp);
   if( jsonResp.acknowledged ) { 
     // Construct the new user object
     const newUser: User = {

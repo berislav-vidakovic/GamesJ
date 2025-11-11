@@ -2,18 +2,21 @@ package com.gamesj.Config;
 
 import com.gamesj.WebSockets.WebSocketHandler;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-  @Override
-  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-      registry.addHandler(new WebSocketHandler(), "/websocket")
-              .setAllowedOrigins("http://localhost:5174",
-                "https://gamesj.barryonweb.com" ); // frontend origin
-  }
+    private final WebSocketHandler webSocketHandler;
+
+    public WebSocketConfig(WebSocketHandler webSocketHandler) {
+        this.webSocketHandler = webSocketHandler;
+    }
+
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(webSocketHandler, "/websocket")
+                .setAllowedOrigins("http://localhost:5174"); // frontend origin
+    }
 }

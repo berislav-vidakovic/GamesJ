@@ -36,10 +36,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     // Allow endpoints without token
     String path = request.getRequestURI();
-    if( path.startsWith("/api/users/all") ||
+    if( path.startsWith("/api/ping") ||
+        path.startsWith("/api/pingdb") ||
+        path.startsWith("/api/users/all") ||
+        path.startsWith("/api/users/new") ||
         path.startsWith("/websocket") ||
         path.startsWith("/images") ||
+        path.startsWith("/api/auth/refresh") ||
         path.startsWith("/api/users/login") ||
+        path.startsWith("/api/users/logout") ||
         path.startsWith("/api/localization/get") ) {
           filterChain.doFilter(request, response);
           return;

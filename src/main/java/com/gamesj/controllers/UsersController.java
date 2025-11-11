@@ -10,11 +10,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gamesj.Config.JwtUtil;
+import com.gamesj.Models.RefreshToken;
 import com.gamesj.Models.User;
 import com.gamesj.Repositories.UserRepository;
+import com.gamesj.WebSockets.WebSocketHandler;
+import com.gamesj.Repositories.RefreshTokenRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,10 +28,17 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/api/users")
 public class UsersController {
-  private final UserRepository userRepository;
-  
+  @Autowired
+  private UserRepository userRepository;
+
   @Autowired
   private PasswordEncoder passwordEncoder;
+
+  @Autowired
+  private RefreshTokenRepository refreshTokenRepository;
+
+  @Autowired
+  private WebSocketHandler webSocketHandler;
 
   public UsersController(UserRepository userRepository) {
       this.userRepository = userRepository;
@@ -112,6 +123,19 @@ public class UsersController {
               "acknowledged", true,
               "user", newUser
       );
+
+      // Build WS message as Map
+      Map<String, Object> wsMessage = Map.of(
+          "type", "userRegister",
+          "status", "WsStatus.OK",
+          "data", response
+      );
+      // Convert Map to JSON string
+      String wsJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(wsMessage);
+
+      // Broadcast via WebSocket
+      webSocketHandler.broadcast(wsJson);
+
       return new ResponseEntity<>(response, HttpStatus.CREATED); // 201
     } 
     catch (Exception e) {
@@ -132,7 +156,7 @@ public class UsersController {
       } 
       catch (IllegalArgumentException e) {
         Map<String, Object> response = Map.of(
-                  "acknowledged", false,
+                "acknowledged", false,
                 "error", "Missing or invalid ID"
           );
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
@@ -170,7 +194,6 @@ public class UsersController {
         return new ResponseEntity<>(response, HttpStatus.NO_CONTENT); // 204
       }
       User user = optionalUser.get();
-
       // Password validation 
       boolean passwordsMatch = passwordEncoder.matches(password, user.getPwd());
       if( !passwordsMatch ) {
@@ -180,17 +203,41 @@ public class UsersController {
         );
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED); // 401
       }
+      
+      // Issue access token
+      String accessToken = JwtUtil.generateToken(user.getUserId(), user.getLogin());
 
+      // Issue and store refresh token 
+      String refreshToken = java.util.UUID.randomUUID().toString();
+      LocalDateTime expiryDate = LocalDateTime.now().plusDays(7); // valid for 7 days
+      refreshTokenRepository.deleteByUserId(user.getUserId());
+      RefreshToken tokenEntity = new RefreshToken();
+      tokenEntity.setUserId(user.getUserId());
+      tokenEntity.setToken(refreshToken);
+      tokenEntity.setExpiresAt(expiryDate);
+      refreshTokenRepository.save(tokenEntity);
+
+      // Set user online
       user.setIsOnline(true);
       userRepository.save(user);
-
-      String token = JwtUtil.generateToken(user.getUserId(), user.getLogin());
 
       Map<String, Object> response = Map.of(
               "userId", userId,
               "isOnline", true,
-              "token", token
+              "accessToken", accessToken,           
+              "refreshToken", refreshToken
       );
+
+      //var response = new { userId, isOnline = true };
+      Map<String, Object> wsMessage = Map.of(
+          "type", "userSessionUpdate",
+          "status", "WsStatus.OK",
+          "data", response
+      );
+      // Convert Map to JSON string
+      String wsJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(wsMessage);
+      // Broadcast via WebSocket
+      webSocketHandler.broadcast(wsJson);
 
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     } 
@@ -204,13 +251,9 @@ public class UsersController {
 
   @PostMapping("/logout")
   public ResponseEntity<?> logout(@RequestParam("id") String clientId, @RequestBody Map<String, Object> body) {
-    return handleUserStatusChange(clientId, body, false, false);
-  }
-
-  // Common  handler for login/logout 
-  private ResponseEntity<?> handleUserStatusChange(String clientId, Map<String, Object> body, boolean isOnline, boolean isLogin) {
     try {
       // Validate clientId
+      System.out.println("Received POST /api/users/logout ");
       UUID parsedClientId;
       try {
         parsedClientId = UUID.fromString(clientId);
@@ -243,15 +286,29 @@ public class UsersController {
         return new ResponseEntity<>(response, HttpStatus.NO_CONTENT); // 204
       }
       User user = optionalUser.get();
-
-
-      user.setIsOnline(isOnline);
+      user.setIsOnline(false);
       userRepository.save(user);
+
+      // Clear refresh token from DB
+      System.out.println("Deleting refresh tokens for userId: " + userId);
+      refreshTokenRepository.deleteByUserId(userId);
+      System.out.println("Deleting done ");
+       
 
       Map<String, Object> response = Map.of(
               "userId", userId,
-              "isOnline", isOnline
+              "isOnline", false
       );
+
+      Map<String, Object> wsMessage = Map.of(
+          "type", "userSessionUpdate",
+          "status", "WsStatus.OK",
+          "data", response
+      );
+      // Convert Map to JSON string
+      String wsJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(wsMessage);
+      // Broadcast via WebSocket
+      webSocketHandler.broadcast(wsJson);
 
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     } 

@@ -19,10 +19,11 @@ import { useState, useEffect } from 'react';
 import { connectWS } from '@common/webSocket';
 import type { User } from '@common/interfaces';
 import { setStateFunctionRefs, handleResponseGetAllUsers, handleWsMessage } from './messageHandlers';
-import { getAllUsers, logoutUser, inviteUser, runGame } from './utils';
+import { getAllUsers, logoutUser, inviteUser, runGame, loginRefresh } from './utils';
 import RegisterDialog from './components/RegisterDialog.tsx' 
 import LoginDialog from './components/LoginDialog.tsx' 
 import InviteDialog from './components/InviteDialog.tsx' 
+import { StatusCodes } from 'http-status-codes';
  
 
 function App() {
@@ -65,7 +66,27 @@ function App() {
    }      
   }, [isConfigLoaded, isInitialized]);
 
-  //const handleSignIn = () => //console.log("Sign In clicked");
+  const handleLoginRefresh = ( jsonResp: any, status: number) => {
+    // Response { accessToken, refreshToken }
+    if( status == StatusCodes.OK ) {
+      sessionStorage.setItem("accessToken", jsonResp.accessToken );
+      sessionStorage.setItem("refreshToken", jsonResp.refreshToken );
+      setCurrentUserId( jsonResp.userId );
+      console.log("Refresh token valid, user logged in:", jsonResp.userId );     
+    }
+    else {
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
+      setCurrentUserId(null);
+      console.log("Refresh token invalid, Status Recived:", status );     
+      setShowLoginDialog(true);
+    }
+  }
+  
+  const handleSignIn = () => {
+    loginRefresh(handleLoginRefresh);
+  }
+
   const handleSignOut = () => { 
     logoutUser( currentUserId as number); 
     clearInvitations();
@@ -221,7 +242,7 @@ function App() {
 
         {isBtnVisibleSignIn() && <button 
           id="btnLogin" 
-          onClick={() => setShowLoginDialog(true)}          
+          onClick={() => handleSignIn()}    
         > 
           { localesLoaded ? getTitle("panel.signin"): "..." } 
         </button>}

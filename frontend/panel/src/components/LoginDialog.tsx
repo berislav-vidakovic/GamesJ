@@ -18,7 +18,7 @@ function LoginDialog({
   const passwordRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
+    const storedUserId = sessionStorage.getItem("userId");
     if (storedUserId && selectedUserRef.current) {
       const optionExists = Array.from(selectedUserRef.current.options).some(
         (opt) => opt.value === storedUserId

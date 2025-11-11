@@ -5,6 +5,7 @@ import { handleResponseSignUp, handleUserLogin, handleUserLogout,
 const GETusersEndpoint = 'api/users/all';
 const POSTuserRegisterEndpoint = 'api/users/new';
 const POSTuserLoginEndpoint = 'api/users/login';
+const POSTloginRefreshEndpoint = 'api/auth/refresh';
 const POSTuserLogoutEndpoint = 'api/users/logout';
 const POSTinviteEndpoint = 'api/invitations/invite';
 const POSTcancelEndpoint = 'api/invitations/cancel';
@@ -29,11 +30,18 @@ export async function registerUser(login: string, fullname: string, password: st
   //console.log("POST sending: ", body );
 }
 
-
 export async function loginUser(userId: number, password: string) {
   const body = JSON.stringify({ userId, password } );
   
   sendPOSTRequest(POSTuserLoginEndpoint, body, handleUserLogin);
+  console.log("POST sending: ", body );
+}
+
+export function loginRefresh(handleLoginRefresh: (data: any, status: number) => void) {
+  const refreshToken = sessionStorage.getItem("refreshToken");
+  const body = JSON.stringify({ refreshToken } );
+  
+  sendPOSTRequest(POSTloginRefreshEndpoint, body, handleLoginRefresh );
   console.log("POST sending: ", body );
 }
 

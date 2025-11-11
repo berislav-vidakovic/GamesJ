@@ -16,6 +16,7 @@
 8. [Connect backend to DB](#8-connect-backend-to-db)
 9. [Web socket and CORS policy to connect Frontend with backend](#9-web-socket-and-cors-policy-to-connect-frontend-with-backend)
 10. [Hashing password and JWT authentication](#10-hashing-password-and-jwt-authentication)
+11. [Refresh token](#11-refresh-token)
 
 ### 1. Create Project skeleton
 
@@ -276,7 +277,7 @@
     - Request: send raw password
     - Backend compares matching password and stored hashed value
     - Response: JWT (JSON Web Token)
-    - Frontend stores JWT into localStorage
+    - Frontend stores JWT into sessionStorage
 
 3. Any action
     - Request: send JWT in header Authorization: Bearer 
@@ -285,7 +286,7 @@
 4. Logout 
     - Request: send JWT in header Authorization: Bearer 
     - Response: acknowledgement 
-    - Frontend clears JWT from localStorage
+    - Frontend clears JWT from sessionStorage
 
 
 #### Implementation
@@ -316,7 +317,7 @@
     String token = JwtUtil.generateToken(user.getUserId(), user.getLogin());
     ```
 
-- Frontend handles JWT with localStorage  
+- Frontend handles JWT with sessionStorage  
 
     - stores on login
     - removes on logout
@@ -324,7 +325,7 @@
 - Include JWT in API Request Header
 
     ```ts
-    "Authorization": "Bearer " + localStorage.getItem("authToken"),
+    "Authorization": "Bearer " + sessionStorage.getItem("authToken"),
     ```
 
 - Apply JWT authentication check in backend - create filter class  JwtAuthFilter
@@ -335,11 +336,26 @@
 ### 11. Refresh token
 
 /api/users/login  
+- Request: { userId, password }
+- Response: { userId, isOnline, accessToken, refreshToken }
+  - frontend set accessToken, refreshToken, userId
+
 /api/users/refresh
+- Request: { refreshToken }
+- Response: { accessToken, refreshToken, userId, isOnline }
+
+/api/users/logout
+- Request: { userId }
+  - backend delete refreshToken from DB
+- Response: { userId, isOnline = false }
+  - frontend clear accessToken, refreshToken, userId
+
 
 Actions From the logout state
   - First login with password
   - Next login automatic
+    - On Login button send POST to /refresh
+    - If response != OK open Login Dialog
 
 Actions From login state
   - Action that requires authentication
@@ -451,3 +467,19 @@ Actions From login state
     </tr>
   </tbody>
 </table>
+
+
+#### Implementation
+
+1. Update /login endpoint to issue both access token and refresh token
+
+  - Backend 
+    - generate refresh token and stores into DB
+      - create DB table refresh_tokens
+      - create Model entity for refresh_tokens
+      - create Repository for refresh_tokens
+    - create new endpoint /refreshcheck to validate and renew tokens
+
+
+
+  - Frontend 
