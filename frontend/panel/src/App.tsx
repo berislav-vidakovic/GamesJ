@@ -15,7 +15,7 @@ import '@common/style-mobile.css';
 
 import { URL_SUDOKU } from '@common/config';
 import { loadCommonConfig, getTitle, getLocalization } from '@common/config';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { connectWS } from '@common/webSocket';
 import type { User } from '@common/interfaces';
 import { setStateFunctionRefs, handleResponseGetAllUsers, handleWsMessage } from './messageHandlers';
@@ -43,6 +43,13 @@ function App() {
   const [selectedGame, setSelectedGame] = useState<"panel.game.sudoku" | "panel.game.connect4" | null>(null);
   const [localesLoaded, setLocalesLoaded] = useState(false);
   const [techStack, setTechStack] = useState<string[]>([]);
+  const [autoLogin, setAutoLogin] = useState<boolean>(false);
+  
+  const autoLoginRef = useRef(autoLogin);
+  
+  useEffect(() => { // React ref is synchronous and always holds the latest value
+    autoLoginRef.current = autoLogin; 
+  }, [autoLogin]);
 
 
   useEffect( () => { 
@@ -66,8 +73,15 @@ function App() {
    }      
   }, [isConfigLoaded, isInitialized]);
 
+  useEffect( () => { if( isWsConnected ){
+    setAutoLogin(true);
+    console.log("Auto Login...");
+    loginRefresh(handleLoginRefresh);
+   }      
+  }, [isWsConnected]);
+
   const handleLoginRefresh = ( jsonResp: any, status: number) => {
-    // Response { accessToken, refreshToken }
+    // Response { accessToken, refreshToken, userId }
     if( status == StatusCodes.OK ) {
       sessionStorage.setItem("accessToken", jsonResp.accessToken );
       sessionStorage.setItem("refreshToken", jsonResp.refreshToken );
@@ -78,12 +92,16 @@ function App() {
       sessionStorage.removeItem("accessToken");
       sessionStorage.removeItem("refreshToken");
       setCurrentUserId(null);
-      console.log("Refresh token invalid, Status Recived:", status );     
-      setShowLoginDialog(true);
+      console.log("Refresh token invalid, Status Recived:", status, " Autologin=", autoLoginRef );     
+      if( !autoLoginRef.current )
+        setShowLoginDialog(true);
+      console.log("...Auto Login");
     }
+    setAutoLogin(false);
   }
   
   const handleSignIn = () => {
+    console.log("Signing In ... Autologin=", autoLoginRef );     
     loginRefresh(handleLoginRefresh);
   }
 

@@ -19,6 +19,7 @@ import com.gamesj.Models.RefreshToken;
 import com.gamesj.Models.User;
 import com.gamesj.Repositories.RefreshTokenRepository;
 import com.gamesj.Repositories.UserRepository;
+import com.gamesj.Services.UserMonitor;
 import com.gamesj.WebSockets.WebSocketHandler;
 
 
@@ -31,6 +32,9 @@ public class AuthController {
 
     @Autowired
     private WebSocketHandler webSocketHandler;
+
+    @Autowired
+    private UserMonitor userMonitor;
 
     public AuthController(RefreshTokenRepository refreshTokenRepository,
                           UserRepository userRepository) {
@@ -79,6 +83,12 @@ public class AuthController {
         tokenEntity.setToken(newRefreshToken);
         tokenEntity.setExpiresAt(newExpiry);
         refreshTokenRepository.save(tokenEntity);
+
+        // Set user online
+        user.setIsOnline(true);
+        userRepository.save(user);
+        userMonitor.updateUserActivity(user.getUserId());
+
 
         // Return new tokens
         Map<String, Object> response = Map.of(

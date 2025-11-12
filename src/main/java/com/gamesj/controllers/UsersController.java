@@ -13,6 +13,7 @@ import com.gamesj.Config.JwtUtil;
 import com.gamesj.Models.RefreshToken;
 import com.gamesj.Models.User;
 import com.gamesj.Repositories.UserRepository;
+import com.gamesj.Services.UserMonitor;
 import com.gamesj.WebSockets.WebSocketHandler;
 import com.gamesj.Repositories.RefreshTokenRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +40,9 @@ public class UsersController {
 
   @Autowired
   private WebSocketHandler webSocketHandler;
+
+  @Autowired
+  private UserMonitor userMonitor;
 
   public UsersController(UserRepository userRepository) {
       this.userRepository = userRepository;
@@ -220,6 +224,7 @@ public class UsersController {
       // Set user online
       user.setIsOnline(true);
       userRepository.save(user);
+      userMonitor.updateUserActivity(user.getUserId());
 
       Map<String, Object> response = Map.of(
               "userId", userId,
@@ -293,7 +298,8 @@ public class UsersController {
       System.out.println("Deleting refresh tokens for userId: " + userId);
       refreshTokenRepository.deleteByUserId(userId);
       System.out.println("Deleting done ");
-       
+
+      userMonitor.removeUser(userId);       
 
       Map<String, Object> response = Map.of(
               "userId", userId,

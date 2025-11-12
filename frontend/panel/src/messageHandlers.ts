@@ -217,7 +217,7 @@ function handleWsUserRegister( jsonResp: any ){
 }
 
 async function handleWsUserSessionUpdate( jsonMsgData: any ) {
-  //var response = new { userId, isOnline = true };
+  //var response = new { userId, isOnline = true, automaticLogout (optional) };
   //var msg = new { type = "userSessionUpdate", status = "WsStatus.OK", data = response };
   const userId = jsonMsgData.userId;
   const isOnline = jsonMsgData.isOnline;    
@@ -227,14 +227,17 @@ async function handleWsUserSessionUpdate( jsonMsgData: any ) {
         ? { ...u, isonline: isOnline } // update online status
         : u
     );
-
     // compute online users count from the updated array
     const onlineCount = updated.filter(u => u.isonline).length;
-    setOnlineUsersRef(onlineCount);
-
+    setOnlineUsersRef(onlineCount);    
     //console.log("Online user(s):", onlineCount);
     return updated;
   });
+  // Auto-logout
+  if( jsonMsgData.automaticLogout && userId == sessionStorage.getItem("userId") ) {
+    console.log( "Automatic logout ........ ");
+    setCurrentUserIdRef(null)
+  }
 }
 
 

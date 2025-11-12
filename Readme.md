@@ -333,153 +333,61 @@
   - define endpoints that skip authentication
 
 
-### 11. Refresh token
+### 11. Refresh token and auto login/logout
 
 /api/users/login  
-- Request: { userId, password }
-- Response: { userId, isOnline, accessToken, refreshToken }
-  - frontend set accessToken, refreshToken, userId
+- API Request: { userId, password }
+- API Response: { userId, isOnline = true, accessToken, refreshToken }
+- WS Broadcast: { type: userSessionUpdate }
 
 /api/users/refresh
-- Request: { refreshToken }
-- Response: { accessToken, refreshToken, userId, isOnline }
+- API Request: { refreshToken }
+- API Response: { userId, isOnline = true, accessToken, refreshToken }
+- WS Broadcast: { type: userSessionUpdate }
 
 /api/users/logout
 - Request: { userId }
-  - backend delete refreshToken from DB
 - Response: { userId, isOnline = false }
-  - frontend clear accessToken, refreshToken, userId
+- WS Broadcast: { type: userSessionUpdate }
+
+/websocket
+- Broadcast auto logout: { type: userSessionUpdate, data: { automaticLogout =true } }
 
 
-Actions From the logout state
-  - First login with password
-  - Next login automatic
-    - On Login button send POST to /refresh
-    - If response != OK open Login Dialog
+### Login / Logout FSM — State Transitions
 
-Actions From login state
-  - Action that requires authentication
-  - Logout
+
 
 ![JWT Image](JWT.png)
   
-<table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; width: 100%; text-align: left;">
+
+ <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; width: 100%; text-align: left;">
   <thead>
     <tr>
+      <th>#</th>
+      <th>Start State</th>
       <th>Transition</th>
-      <th>From State</th>
-      <th>Trigger (Frontend Request / Action)</th>
-      <th>Backend Action</th>
-      <th>Next State / Response</th>
+      <th>Next State</th>
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>T1</td>
-      <td><b>S1 – Logged Out</b></td>
-      <td>Login</td>
-      <td>Frontend decides to attempt login</td>
-      <td><b>S2 – Logging</b></td>
-    </tr>
-    <tr>
-      <td>T2</td>
-      <td><b>S2 – Logging</b></td>
-      <td>Get Refresh Login</td>
-      <td>Send refresh token to backend</td>
-      <td><b>S3 – Validate Refresh Token</b></td>
-    </tr>
-    <tr>
-      <td>T3</td>
-      <td><b>S3 – Validate Refresh Token</b></td>
-      <td>Valid</td>
-      <td>Issue new access + refresh tokens → store refresh token in DB</td>
-      <td><b>S6 – Logged In</b></td>
-    </tr>
-    <tr>
-      <td>T4</td>
-      <td><b>S3 – Validate Refresh Token</b></td>
-      <td>Invalid</td>
-      <td>Reject → request manual login</td>
-      <td><b>S4 – Manual Login</b></td>
-    </tr>
-    <tr>
-      <td>T5</td>
-      <td><b>S4 – Manual Login</b></td>
-      <td>Enter password</td>
-      <td>Send password to backend for validation</td>
-      <td><b>S5 – Validate Password</b></td>
-    </tr>
-    <tr>
-      <td>T6</td>
-      <td><b>S5 – Validate Password</b></td>
-      <td>Valid</td>
-      <td>Issue access + refresh tokens → store refresh token in DB</td>
-      <td><b>S6 – Logged In</b></td>
-    </tr>
-    <tr>
-      <td>T7</td>
-      <td><b>S5 – Validate Password</b></td>
-      <td>Invalid</td>
-      <td>Reject login → notify frontend</td>
-      <td><b>S4 – Manual Login</b></td>
-    </tr>
-    <tr>
-      <td>T8</td>
-      <td><b>S6 – Logged In</b></td>
-      <td>Get Access Token</td>
-      <td>Send access token to backend for validation</td>
-      <td><b>S7 – Validate Access Token</b></td>
-    </tr>
-    <tr>
-      <td>T9</td>
-      <td><b>S7 – Validate Access Token</b></td>
-      <td>Valid</td>
-      <td>Perform business logic</td>
-      <td><b>S6 – Logged In</b></td>
-    </tr>
-    <tr>
-      <td>T10</td>
-      <td><b>S7 – Validate Access Token</b></td>
-      <td>Invalid</td>
-      <td>Reject request (401) → optionally trigger refresh flow</td>
-      <td><b>S2 – Logging</b></td>
-    </tr>
-    <tr>
-      <td>T11</td>
-      <td><b>S6 – Logged In</b></td>
-      <td>Logout</td>
-      <td>Mark user offline → delete refresh token from DB</td>
-      <td><b>S8 – Logging Out</b></td>
-    </tr>
-    <tr>
-      <td>T12</td>
-      <td><b>S8 – Logging Out</b></td>
-      <td>Automatic</td>
-      <td>No frontend action required</td>
-      <td><b>S1 – Logged Out</b></td>
-    </tr>
-    <tr>
-      <td>T13</td>
-      <td><b>S8 – Logging Out</b></td>
-      <td>Manual</td>
-      <td>Clear tokens on frontend → mark user offline → delete refresh token from DB</td>
-      <td><b>S1 – Logged Out</b></td>
-    </tr>
+    <tr><td>1</td><td>S1 – Logged out</td><td>T1 – Browser Refresh</td><td>S2 – Browser Refresh</td></tr>
+    <tr><td>2</td><td>S1 – Logged out</td><td>T2 – Manual Login</td><td>S3 – Auto Login</td></tr>
+    <tr><td>3</td><td>S2 – Browser Refresh</td><td>T3 – Get Refresh Token</td><td>S4 – Refresh Token Validation</td></tr>
+    <tr><td>4</td><td>S3 – Auto Login</td><td>T4 – Get Refresh Token</td><td>S4 – Refresh Token Validation</td></tr>
+    <tr><td>5</td><td>S4 – Refresh Token Validation</td><td>T5 – Invalid</td><td>S5 – invalid Refresh Token</td></tr>
+    <tr><td>6</td><td>S5 – invalid Refresh Token</td><td>T6 – Browser Refresh</td><td>S1 – Logged out</td></tr>
+    <tr><td>7</td><td>S5 – invalid Refresh Token</td><td>T7 – Auto Login</td><td>S6 – UI Dialog Login</td></tr>
+    <tr><td>8</td><td>S6 – UI Dialog Login</td><td>T8 – Enter Password</td><td>S7 – Password Validation</td></tr>
+    <tr><td>9</td><td>S7 – Password Validation</td><td>T9 – Invalid</td><td>S6 – UI Dialog Login</td></tr>
+    <tr><td>10</td><td>S7 – Password Validation</td><td>T10 – Valid</td><td>S8 – Renew Tokens</td></tr>
+    <tr><td>11</td><td>S8 – Renew Tokens</td><td>T11 – Tokens renewed</td><td>S9 – Logged In</td></tr>
+    <tr><td>12</td><td>S4 – Refresh Token Validation</td><td>T12 – Valid</td><td>S8 – Renew Tokens</td></tr>
+    <tr><td>13</td><td>S9 – Logged In</td><td>T13 – Get Access Token</td><td>S10 – Access Token Validation</td></tr>
+    <tr><td>14</td><td>S10 – Access Token Validation</td><td>T14 – Invalid</td><td>S3 – Auto Login</td></tr>
+    <tr><td>15</td><td>S10 – Access Token Validation</td><td>T15 – Valid</td><td>S9 – Logged In</td></tr>
+    <tr><td>16</td><td>S9 – Logged In</td><td>T16 – Manual Logout</td><td>S11 – Clear Tokens</td></tr>
+    <tr><td>17</td><td>S11 – Clear Tokens</td><td>T17 – Tokens cleared</td><td>S1 – Logged out</td></tr>
+    <tr><td>18</td><td>S9 – Logged In</td><td>T18 – Auto Logout</td><td>S1 – Logged out</td></tr>
   </tbody>
 </table>
-
-
-#### Implementation
-
-1. Update /login endpoint to issue both access token and refresh token
-
-  - Backend 
-    - generate refresh token and stores into DB
-      - create DB table refresh_tokens
-      - create Model entity for refresh_tokens
-      - create Repository for refresh_tokens
-    - create new endpoint /refreshcheck to validate and renew tokens
-
-
-
-  - Frontend 
