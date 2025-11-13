@@ -224,7 +224,7 @@ public class UsersController {
       // Set user online
       user.setIsOnline(true);
       userRepository.save(user);
-      userMonitor.updateUserActivity(user.getUserId());
+      userMonitor.updateUserActivity(user.getUserId(), parsedClientId);
 
       Map<String, Object> response = Map.of(
               "userId", userId,

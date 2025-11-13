@@ -16,7 +16,9 @@
 8. [Connect backend to DB](#8-connect-backend-to-db)
 9. [Web socket and CORS policy to connect Frontend with backend](#9-web-socket-and-cors-policy-to-connect-frontend-with-backend)
 10. [Hashing password and JWT authentication](#10-hashing-password-and-jwt-authentication)
-11. [Refresh token](#11-refresh-token)
+11. [Refresh token and auto login/logout](#11-refresh-token-and-auto-loginlogout)
+12. [Websocket monitor and idle cleanup](#12-websocket-monitor-and-idle-cleanup)
+
 
 ### 1. Create Project skeleton
 
@@ -400,5 +402,11 @@
   - Closed on idle timeout or Browser close
   - Close/Reconnected on Browser Refresh
 
+- Websocket Monitor
+  - Collect sessions and users to remove
+  - Remove users - Auto logout
+  - Close sessions and remove from Map
+
+  
 
 

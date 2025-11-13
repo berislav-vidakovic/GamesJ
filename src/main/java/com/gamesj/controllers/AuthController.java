@@ -60,9 +60,20 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
       try {        
-        System.out.println("1-AuthController.refreshToken called with body: ");
+        // Validate clientId
+        UUID parsedClientId;
+        try {
+          parsedClientId = UUID.fromString(clientId);
+        } 
+        catch (IllegalArgumentException e) {
+          Map<String, Object> response = Map.of(
+                  "acknowledged", false,
+                  "error", "Missing or invalid ID"
+            );
+          return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
+        }
+        System.out.println("Received POST /auth/refresh with valid ID: " + parsedClientId.toString());
         String refreshToken = body.get("refreshToken");
-        System.out.println("2-AuthController.refreshToken called with body: " );
 
         // get token entity from refreshTokenRepository and check expiry
         RefreshToken tokenEntity = getTokenEntity(refreshToken); // {id, userId, token, expiresAt }
@@ -87,8 +98,9 @@ public class AuthController {
         // Set user online
         user.setIsOnline(true);
         userRepository.save(user);
-        userMonitor.updateUserActivity(user.getUserId());
+        System.out.println(" -----------updateUserActivity " + user.getUserId() + " clientId=" + parsedClientId);
 
+        userMonitor.updateUserActivity(user.getUserId(), parsedClientId);
 
         // Return new tokens
         Map<String, Object> response = Map.of(
