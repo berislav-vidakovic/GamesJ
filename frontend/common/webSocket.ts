@@ -30,7 +30,7 @@ export async function connectWS(
         };
 
         ws.onclose = (event) => {
-          console.warn("WebSocket closed:", event.reason);
+          console.warn("WebSocket closed by server:", event.reason);
           setWsConnected(false);
         };
 

@@ -59,16 +59,16 @@ public class UserMonitor {
     }
 
     private synchronized  void startTimer(){
-       if (cleanupTask != null && !cleanupTask.isCancelled() && !cleanupTask.isDone()) {
-            return; // already running
-        }
+      if (cleanupTask != null && !cleanupTask.isCancelled() && !cleanupTask.isDone()) {
+        return; // already running
+      }
 
-        cleanupTask = scheduler.scheduleAtFixedRate(
-            this::cleanupIdleUsers,
-            CLEANUP_INTERVAL_SECONDS,
-            CLEANUP_INTERVAL_SECONDS,
-            TimeUnit.SECONDS
-        );
+      cleanupTask = scheduler.scheduleAtFixedRate(
+        this::cleanupIdleUsers,
+        CLEANUP_INTERVAL_SECONDS,
+        CLEANUP_INTERVAL_SECONDS,
+        TimeUnit.SECONDS
+      );
 
       System.out.println(" *** Timer started " );
     }
@@ -80,60 +80,60 @@ public class UserMonitor {
         }
     }
 
-    public LocalDateTime getLastActivity(int userId) {
-        return userActivityMap.get(userId);
+    public void autoLogout(int userId){
+      try{
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+          User user = optionalUser.get();
+          user.setIsOnline(false);
+          userRepository.save(user);
+          System.out.println(" *** Updated in DB");
+
+          Map<String, Object> response = Map.of(
+              "userId", userId,
+              "isOnline", false,
+              "automaticLogout", true
+          );
+          Map<String, Object> wsMessage = Map.of(
+              "type", "userSessionUpdate",
+              "status", "WsStatus.OK",
+              "data", response
+          );
+
+          String wsJson = new ObjectMapper().writeValueAsString(wsMessage);
+          webSocketHandler.broadcast(wsJson);
+          System.out.println(" *** Broadcasted WS logout for user " + userId);
+        }
+      }
+      catch (Exception ex) {
+        System.err.println("Error cleaning idle user " + userId + ": " + ex.getMessage());
+        ex.printStackTrace();
+      }
     }
 
     public void cleanupIdleUsers() {
-        try {
-            LocalDateTime now = LocalDateTime.now();
-            System.out.println(" *** cleanupIdleUsers-START, Count = " + userActivityMap.size());
+      try {
+        LocalDateTime now = LocalDateTime.now();
+        System.out.println(" *** cleanupIdleUsers-START, Count = " + userActivityMap.size());
 
-            userActivityMap.entrySet().removeIf(entry -> {
-                boolean idle = Duration.between(entry.getValue(), now).compareTo(IDLE_TIMEOUT) > 0;
-                System.out.println( " *** cleanup curr Interval= " +  Duration.between(entry.getValue(), now) );
-                if (idle) {
-                    int userId = entry.getKey();
-                    System.out.println(" *** Removing idle user: " + userId);
-
-                    try {
-                        Optional<User> optionalUser = userRepository.findById(userId);
-                        if (optionalUser.isPresent()) {
-                            User user = optionalUser.get();
-                            user.setIsOnline(false);
-                            userRepository.save(user);
-                            System.out.println(" *** Updated in DB");
-
-                            Map<String, Object> response = Map.of(
-                                "userId", userId,
-                                "isOnline", false,
-                                "automaticLogout", true
-                            );
-                            Map<String, Object> wsMessage = Map.of(
-                                "type", "userSessionUpdate",
-                                "status", "WsStatus.OK",
-                                "data", response
-                            );
-
-                            String wsJson = new ObjectMapper().writeValueAsString(wsMessage);
-                            webSocketHandler.broadcast(wsJson);
-                            System.out.println(" *** Broadcasted WS logout for user " + userId);
-                        }
-                    } catch (Exception ex) {
-                        System.err.println("Error cleaning idle user " + userId + ": " + ex.getMessage());
-                        ex.printStackTrace();
-                    }
-                }
-                return idle;
-            });
-            System.out.println(" *** cleanupIdleUsers-END, Count = " + userActivityMap.size());
-            if( userActivityMap.isEmpty() ) // Stop timer if no active users remain
-              stopTimer();
-        } 
-        catch (Exception e) {
-          System.err.println("Fatal error in cleanupIdleUsers: " + e.getMessage());
-          e.printStackTrace();
-        }
+        userActivityMap.entrySet().removeIf(entry -> {
+          boolean idle = Duration.between(entry.getValue(), now).compareTo(IDLE_TIMEOUT) > 0;
+          System.out.println( " *** cleanup curr Interval= " +  Duration.between(entry.getValue(), now) );
+          if (idle) {
+            int userId = entry.getKey();
+            System.out.println(" *** Removing idle user: " + userId);
+            autoLogout(userId);
+          }
+          return idle;
+        });
+        System.out.println(" *** cleanupIdleUsers-END, Count = " + userActivityMap.size());
+        if( userActivityMap.isEmpty() ) // Stop timer if no active users remain
+          stopTimer();
+      } 
+      catch (Exception e) {
+        System.err.println("Fatal error in cleanupIdleUsers: " + e.getMessage());
+        e.printStackTrace();
+      }
     }
 
     // shutdown scheduler (when app stops)

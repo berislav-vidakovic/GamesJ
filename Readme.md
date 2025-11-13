@@ -391,3 +391,14 @@
     <tr><td>18</td><td>S9 – Logged In</td><td>T18 – Auto Logout</td><td>S1 – Logged out</td></tr>
   </tbody>
 </table>
+
+
+### 12. Websocket monitor and idle cleanup
+
+- Websocket connection
+  - Established on mount
+  - Closed on idle timeout or Browser close
+  - Close/Reconnected on Browser Refresh
+
+
+
