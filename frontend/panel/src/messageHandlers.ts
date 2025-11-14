@@ -12,7 +12,7 @@ let setOnlineUsersRef:  Dispatch<SetStateAction<number>>;
 let setCallerUserIdRef:  Dispatch<SetStateAction<number | null>>;
 let setCalleeUserIdRef:  Dispatch<SetStateAction<number | null>>;
 let setInvitationStateRef: Dispatch<SetStateAction<"init" | "sent" | "pending" | "paired">>;
-let setSelectedGameRef: Dispatch<SetStateAction<"panel.game.sudoku" | "panel.game.connect4" | null>>;
+let setSelectedGameRef: Dispatch<SetStateAction<"panel.game.sudoku" | "panel.game.connect4" | "panel.game.memory" | null>>;
 let setTechStackRef: Dispatch<SetStateAction<string[]>>;
 
 
@@ -24,7 +24,7 @@ export function setStateFunctionRefs(
   setCallerUserId:  Dispatch<SetStateAction<number | null>>,
   setCalleeUserId:  Dispatch<SetStateAction<number | null>>,
   setInvitationState: Dispatch<SetStateAction<"init" | "sent" | "pending" | "paired">>,
-  setSelectedGame: Dispatch<SetStateAction<"panel.game.sudoku" | "panel.game.connect4" | null>>,
+  setSelectedGame: Dispatch<SetStateAction<"panel.game.sudoku" | "panel.game.connect4" | "panel.game.memory" | null>>,
   setTechStack: Dispatch<SetStateAction<string[]>>
 ){
     setInitializedRef = setInitialized;

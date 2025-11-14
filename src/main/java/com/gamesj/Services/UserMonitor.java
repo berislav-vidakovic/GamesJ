@@ -31,7 +31,7 @@ public class UserMonitor {
     @Value("${useridle.timeout-mins}")
     private long idleTimeoutMinutes;
 
-    @Value("${useridle.cleanup-interval-sec}")
+    @Value("${useridle.check-interval-sec}")
     private long cleanupIntervalSeconds;
 
 

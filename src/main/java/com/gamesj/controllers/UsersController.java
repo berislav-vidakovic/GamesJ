@@ -109,8 +109,6 @@ public class UsersController {
         );
         return new ResponseEntity<>(response, HttpStatus.CONFLICT); // 409
       }
-
-
       // Hash the password using BCrypt
       String hashedPwd = passwordEncoder.encode(password);
 
@@ -198,14 +196,24 @@ public class UsersController {
         return new ResponseEntity<>(response, HttpStatus.NO_CONTENT); // 204
       }
       User user = optionalUser.get();
+
       // Password validation 
-      boolean passwordsMatch = passwordEncoder.matches(password, user.getPwd());
-      if( !passwordsMatch ) {
-        Map<String, Object> response = Map.of(
-              "acknowledged", false,
-              "error", "Invalid password"
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED); // 401
+      // if no hashed pwd in DB => new user, first time password hashing
+      if( user.getPwd().isEmpty() ){
+        // Hash the password using BCrypt
+        String hashedPwd = passwordEncoder.encode(password);
+        user.setPwd(hashedPwd);
+        userRepository.save(user);
+      }       
+      else {
+        boolean passwordsMatch = passwordEncoder.matches(password, user.getPwd());
+        if( !passwordsMatch ) {
+          Map<String, Object> response = Map.of(
+                "acknowledged", false,
+                "error", "Invalid password"
+          );
+          return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED); // 401
+        }
       }
       
       // Issue access token

@@ -20,7 +20,9 @@ public class AppConfig {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**")
-                    .allowedOrigins("http://localhost:5174", "https://gamesj.barryonweb.com")
+                    .allowedOrigins("http://localhost:5174",
+                      "http://localhost:5175", 
+                      "https://gamesj.barryonweb.com")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowCredentials(true);
         }

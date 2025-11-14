@@ -5,10 +5,10 @@ SET NAMES utf8mb4;
 
 DELETE FROM users;
 INSERT INTO users (user_id, password_hash, login, full_name) VALUES
-  (1,'hashS','shelly','Sheldon'),
-  (2,'hashL','lenny','Leonard'),
-  (3,'hashR','raj','Rajesh'),
-  (4,'hashH','howie','Howard');
+  (1,'','shelly','Sheldon'),
+  (2,'','lenny','Leonard'),
+  (3,'','raj','Rajesh'),
+  (4,'','howie','Howard');
 
 
 DELETE FROM localization;
@@ -25,11 +25,10 @@ VALUES
 
       ("panel.run", "Run", "en"), ("panel.run", "Starten", "de"), ("panel.run", "Pokreni", "hr"),
 
-      
-      ("panel.game.sudoku", "Sudoku", "en"), ("panel.game.sudoku", "Sudoku", "de"), 
-      ("panel.game.sudoku", "Sudoku", "hr"),
+      ("panel.game.sudoku", "Sudoku", "en"),
       ("panel.game.connect4", "Connect Four", "en"), ("panel.game.connect4", "Vier gewinnt", "de"), 
-      ("panel.game.connect4", "Četiri u nizu", "hr"),
+      ("panel.game.connect4", "Četiri u nizu", "hr"),  
+      ("panel.game.memory", "Memory", "en"),
 
 
       ("panel.loginmsg1", "Logged in as: ", "en"), ("panel.loginmsg1", "Angemeldet als: ", "de"), 
@@ -55,9 +54,15 @@ VALUES
 
 INSERT IGNORE INTO sudokuboards (board, solution,name,level) 
 VALUES
-      ( "080003000009150273000904100007649800000070300000030054703206400020000900000010530",
-        "185723649649158273372964185537649821814572396296831754753296418421385967968417532",
-        "Munich", 2 );
+  ( "080003000009150273000904100007649800000070300000030054703206400020000900000010530",
+    "185723649649158273372964185537649821814572396296831754753296418421385967968417532",
+    "Munich", 2 ),
+  ( "008102405310000900754000001000000240020710090000400008000047000007593000905260000",
+    "698172435312654987754389621871935246426718593539426718263847159147593862985261374",
+    "Dublin", 2 ),
+  ( "005100004200098700089600512000309000000050000000000271908760000004000080006845309",
+    "635127894241598763789634512812379456467251938593486271928763145354912687176845329",
+    "Zagreb", 2 );
 
 
 COMMIT;

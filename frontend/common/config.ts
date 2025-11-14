@@ -9,7 +9,7 @@ export let URL_BACKEND_WS = '';
 export let URL_PANEL = '';
 export let URL_SUDOKU = '';
 export let URL_CONNECT4 = '';
-export let URL_BATTLESHIP = '';
+export let URL_MEMORY = '';
 
 
 let locales: Locales[] = [];
@@ -23,10 +23,11 @@ function detectEnv(): 'Development' | 'Production' {
 export const getTitle = (paramKey: string, lang: 'en' | 'de' | 'hr' | null = null): string => {
   //const currentLang = sessionStorage.getItem('currentLang') || 'en';
   const currentLang = lang || sessionStorage.getItem('currentLang') || 'en';
-  const locale = locales.find( l => 
+  let locale = locales.find( l => 
     l.paramKey == paramKey && l.language == currentLang );
-  //if( paramKey == "panel.users")
-    //console.log("Get title", paramKey, "->", locale, currentLang);
+  if( !locale && currentLang != 'en' ) // at least 'en' key has to be defined
+    locale = locales.find( l => 
+      l.paramKey == paramKey && l.language == 'en' );
   return locale ? locale.paramValue : paramKey;
 }
 
@@ -42,19 +43,7 @@ export async function loadCommonConfig(
   console.log("Config loaded:", config);
   console.log(`Loaded environment: ${currentEnv}`);
   
-  let backend = import.meta.env.VITE_BACKEND;
-  //let backend = "backendJavaMySQL";
-  console.log("Initial backend from env:", backend);
-
-  if( currentEnv === 'Production' ) {
-    const hostname = window.location.hostname.toLowerCase();
-    console.log("hostname:", hostname);
-    if (hostname.includes('gamesj')) {
-      backend = 'backendJavaMySQL';
-    } else if (hostname.includes('games')) {
-      backend = 'backendCsMySQL';
-    }
-  }
+  let backend = 'backendJavaMySQL';  
 
   URL_BACKEND_HTTP = config.urlBackend[backend][currentEnv].HTTP;
   URL_BACKEND_WS = config.urlBackend[backend][currentEnv].WS;
@@ -64,12 +53,12 @@ export async function loadCommonConfig(
     URL_PANEL = config.urlFrontend[currentEnv].panel;
     URL_SUDOKU = config.urlFrontend[currentEnv].sudoku;
     URL_CONNECT4 = config.urlFrontend[currentEnv].connect4;
-    URL_BATTLESHIP = config.urlFrontend[currentEnv].battleship;
+    URL_MEMORY = config.urlFrontend[currentEnv].memory;
   } else {
     URL_PANEL = config.urlFrontend[currentEnv][backend].panel;
     URL_SUDOKU = config.urlFrontend[currentEnv][backend].sudoku;
     URL_CONNECT4 = config.urlFrontend[currentEnv][backend].connect4;
-    URL_BATTLESHIP = config.urlFrontend[currentEnv][backend].battleship;
+    URL_MEMORY = config.urlFrontend[currentEnv][backend].memory;
   }
   
 

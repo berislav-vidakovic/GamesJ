@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import "@common/style.css";
 import '@common/style-mobile.css';
 
@@ -7,14 +7,19 @@ const nokSound = new Audio("sounds/NOK.mp3");
 
 interface SudokuBoardProps {
   boardString: string;
+  setBoardString: Dispatch<SetStateAction<string>>;
   solutionString: string;
   name: string;
   level: number;
+  adminMode: boolean;
+  startTimer: boolean;
+  setStartTimer: Dispatch<SetStateAction<boolean>>;
 }
 
 type BoardArray = string[][];
 
-const SudokuBoard: React.FC<SudokuBoardProps> = ({ boardString, solutionString, name, level }) => {
+const SudokuBoard: React.FC<SudokuBoardProps> = ({ 
+  boardString, setBoardString, solutionString, name, level, adminMode, startTimer, setStartTimer }) => {
   
 
   const initialBoard: BoardArray = Array.from({ length: 9 }, (_, row) =>
@@ -33,7 +38,6 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ boardString, solutionString, 
   );
   const [time, setTime] = useState<number>(0); // seconds
   const [mistakes, setMistakes] = useState<number>(0);
-
   const boardRef = useRef<HTMLDivElement>(null);
 
   // Auto-focus
@@ -41,23 +45,72 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ boardString, solutionString, 
     boardRef.current?.focus();
   }, []);
 
-  // Timer
+  // Timer controlled by parent
   useEffect(() => {
+    if (!startTimer) {
+      setTime(0);
+      return;
+    }
+    setFocusFirstEmpty();
     const timer = setInterval(() => setTime(prev => prev + 1), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [startTimer]);   // start only when parent sets it true
 
-  // Focus first empty cell
   useEffect(() => {
+    if (startTimer) {
+      boardRef.current?.focus();  
+    }
+  }, [startTimer]);
+ 
+
+  function setFocusFirstEmpty(){
     for (let r = 0; r < 9; r++) {
       for (let c = 0; c < 9; c++) {
         if (board[r][c] === "0") {
           setFocused([r, c]);
+          console.log("Focus set ", r, c);
           return;
         }
       }
     }
+  }
+  // Focus first empty cell
+  useEffect(() => {
+    if( adminMode )
+      setFocused([
+        Number(sessionStorage.getItem("lastRow")), 
+        Number(sessionStorage.getItem("lastCol")) ]);
+    else
+      setFocusFirstEmpty();
   }, []);
+
+  const boardStrFrom2Darray = (arr2D: string[][]) => {
+    //console.log(arr2D);
+    let s: string = "";
+    for( let i = 0; i < arr2D.length; i++ )
+      s += arr2D[i].join('');
+    return s;
+  } 
+
+  function evaluateGame( goodGuess: boolean, board: string, mistakes: number ){
+    console.log(board);
+    if( !board.includes("0") ) {
+      console.log(time);
+      setMessage("CONGRATULATIONS!!! 😊");
+      setStartTimer(false);
+
+    }
+    else if( mistakes == 5 ){
+      console.log(time);
+
+      setMessage("GAME OVER 😢");
+      setStartTimer(false);
+    }
+    else if ( goodGuess )
+      setMessage("Good guess ✅");
+    else
+      setMessage("Wrong guess ❌");
+  }
 
   const moveFocus = (dr: number, dc: number) => {
     if (!focused) return;
@@ -97,21 +150,31 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ boardString, solutionString, 
         moveFocus(0, 1);
         break;
       default:
-        if (/^[1-9]$/.test(e.key) && (board[r][c] === "0" || errorCells[r][c])) {
+        if( adminMode && (/^[1-9]$/.test(e.key) || e.key == " " ) ){
+          console.log("admin mode");
+          const newBoard = board.map(row => [...row]);
+          newBoard[r][c] = e.key == " " ? "0" : e.key;
+          setBoard(newBoard);
+          setBoardString(boardStrFrom2Darray(newBoard));
+          sessionStorage.setItem("lastRow", String(r));
+          sessionStorage.setItem("lastCol", String(c));
+        }
+        else if ( /^[1-9]$/.test(e.key) && (board[r][c] === "0" || errorCells[r][c]) ) {
+          if (!startTimer) return;
           const newBoard = board.map(row => [...row]);
           const newErrors = errorCells.map(row => [...row]);
 
           if (e.key === solutionBoard[r][c]) {
             newBoard[r][c] = e.key;
             newErrors[r][c] = null;
-            setMessage("Good guess ✅");
+            evaluateGame(true, boardStrFrom2Darray(newBoard), mistakes);
             okSound.currentTime = 0; 
             okSound.play(); 
           } else {
             newBoard[r][c] = "0";
             newErrors[r][c] = e.key;
             setMistakes(prev => prev + 1);
-            setMessage("Wrong guess ❌");
+            evaluateGame(false, boardStrFrom2Darray(newBoard), mistakes+1);           
             nokSound.currentTime = 0; // rewind in case it's still playing
             nokSound.play();
           }
@@ -128,6 +191,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ boardString, solutionString, 
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
   };
+
   const handleNumberClick = (num: string) => {
     if (!focused) return;
     const [r, c] = focused;
@@ -141,14 +205,14 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ boardString, solutionString, 
     if (num === solutionBoard[r][c]) {
       newBoard[r][c] = num;
       newErrors[r][c] = null;
-      setMessage("Good guess ✅");
+      evaluateGame(true, boardStrFrom2Darray(newBoard), mistakes);
       okSound.currentTime = 0;
       okSound.play();
     } else {
       newBoard[r][c] = "0";
       newErrors[r][c] = num;
       setMistakes(prev => prev + 1);
-      setMessage("Wrong guess ❌");
+      evaluateGame(false, boardStrFrom2Darray(newBoard), mistakes+1);
       nokSound.currentTime = 0;
       nokSound.play();
     }
@@ -169,6 +233,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ boardString, solutionString, 
       {/* Timer and Mistakes */}
       <div className={"sudokuinfobox"} style={{fontWeight:"600"}}>
         <div>Timer: {formatTime(time)}</div>
+        <div>{message}</div>
         <div>Mistakes: {mistakes}</div>
       </div>
 
@@ -231,11 +296,6 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({ boardString, solutionString, 
             {num}
           </button>
         ))}
-      </div>
-
-
-      <div style={{ marginTop: "20px", fontSize: "18px", minHeight: "24px" }}>
-        {message}
       </div>
     </>
   );

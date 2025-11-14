@@ -20,7 +20,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
           throws ServletException, IOException {
 
     // Add CORS headers
-    response.setHeader("Access-Control-Allow-Origin", "http://localhost:5174");
+    // Allowed origins
+    String origin = request.getHeader("Origin");
+    String[] allowedOrigins = {
+            "http://localhost:5174",
+            "http://localhost:5175",
+            "https://gamesj.com"
+    };
+    // If Origin is in the allowed list, echo it back
+    for (String allowed : allowedOrigins) {
+        if (allowed.equals(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Vary", "Origin"); // Required for proxies
+            break;
+        }
+    }
+
     response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
     response.setHeader("Access-Control-Allow-Credentials", "true");
@@ -41,6 +56,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         path.startsWith("/api/pingdb") ||
         path.startsWith("/api/users/all") ||
         path.startsWith("/api/users/new") ||
+        path.startsWith("/api/sudoku/board") ||
         path.startsWith("/favicon.ico") || 
         path.startsWith("/websocket") ||
         path.startsWith("/images") ||

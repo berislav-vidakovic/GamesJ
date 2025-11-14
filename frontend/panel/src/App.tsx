@@ -2,9 +2,6 @@
 import sudokuImg from '../assets/sudoku.jpg';
 import connect4Img from '../assets/connect4.png';
 import memoryImg from '../assets/memory.png';
-import tictactoeImg from '../assets/tictactoe.png';
-import blackjackImg from '../assets/blackjack.png';
-import mmImg from '../assets/mm.jpg';
 import enImg from '@common/assets/en.png';
 import deImg from '@common/assets/de.png';
 import hrImg from '@common/assets/hr.png';
@@ -13,7 +10,7 @@ import './App.css';
 import "@common/style.css";
 import '@common/style-mobile.css';
 
-import { URL_SUDOKU } from '@common/config';
+import { URL_MEMORY, URL_SUDOKU } from '@common/config';
 import { loadCommonConfig, getTitle, getLocalization } from '@common/config';
 import { useState, useEffect, useRef } from 'react';
 import { connectWS } from '@common/webSocket';
@@ -40,7 +37,8 @@ function App() {
   const [callerUserId, setCallerUserId] = useState<number | null>(null);
   const [calleeUserId, setCalleeUserId] = useState<number | null>(null);
   const [invitationState, setInvitationState] = useState<"init" | "sent" | "pending" | "paired">("init");
-  const [selectedGame, setSelectedGame] = useState<"panel.game.sudoku" | "panel.game.connect4" | null>(null);
+  const [selectedGame, setSelectedGame] = 
+    useState<"panel.game.sudoku" | "panel.game.connect4" | "panel.game.memory" | null>(null);
   const [localesLoaded, setLocalesLoaded] = useState(false);
   const [techStack, setTechStack] = useState<string[]>([]);
   const [autoLogin, setAutoLogin] = useState<boolean>(false);
@@ -92,7 +90,7 @@ function App() {
       sessionStorage.removeItem("accessToken");
       sessionStorage.removeItem("refreshToken");
       setCurrentUserId(null);
-      console.log("Refresh token invalid, Status Recived:", status, " Autologin=", autoLoginRef );     
+      console.log("Refresh token invalid, Status Recived:", status, " Autologin=", autoLoginRef.current );     
       if( !autoLoginRef.current )
         setShowLoginDialog(true);
       console.log("...Auto Login");
@@ -131,12 +129,21 @@ function App() {
     }
     else if( selectedGame == 'panel.game.sudoku' )
       handleSelectGame( URL_SUDOKU);
+    else if( selectedGame == 'panel.game.memory' )
+      handleSelectGame( URL_MEMORY);
+
     setInvitationState("init");
     setSelectedGame(null);
   }
 
   const handleSelectGame = (url: string) => {
-    window.open(url, '_blank');
+    switch(url){
+      case URL_SUDOKU:
+        window.open(`${URL_SUDOKU}?userId=${currentUserId}`, '_blank');            
+        break;
+      case URL_MEMORY:
+        alert("Game Under Construction ...");
+    }
   };
 
   const handleCancelInvitation = () => {
@@ -166,8 +173,9 @@ function App() {
   }
 
   const isBtnVisibleRun = (): boolean => {
-    return (invitationState == "paired" || selectedGame == "panel.game.sudoku")  
-      && currentUserId != null && isWsConnected;
+    return (invitationState == "paired" || selectedGame == "panel.game.sudoku"
+        || selectedGame == "panel.game.memory" )  
+        && currentUserId != null && isWsConnected;
   }
 
   const isBtnVisibleInvite = (): boolean => {
@@ -264,7 +272,6 @@ function App() {
         > 
           { localesLoaded ? getTitle("panel.signin"): "..." } 
         </button>}
-        
 
         {isBtnVisibleSignOut() && <button 
           onClick={handleSignOut}
@@ -292,7 +299,6 @@ function App() {
         </>)}
       </div>
       
-
       <div className="tech-stack">
          Tech stack: &nbsp;
          {techStack && 
@@ -309,9 +315,6 @@ function App() {
          }
        
       </div>
-
-      
-      
       
     {selectedGame  
      ? <h2>{ localesLoaded ? getTitle( selectedGame) : "..."}</h2>
@@ -354,59 +357,38 @@ function App() {
       <div className="buttons-container">      
         <button 
           onClick={() => {
-              if( !isConfigLoaded || !currentUserId ) {
-                //console.log("Config not loaded (or no user logged in)");
-                return;
-              }
-              if( selectedGame == 'panel.game.sudoku') handleSelectGame(URL_SUDOKU);
-              else setSelectedGame('panel.game.sudoku');
-              
-            }}
-          title={localesLoaded ? getTitle(selectedGame as string) : "..." }
+            if( currentUserId  && selectedGame == 'panel.game.sudoku')
+              handleSelectGame(URL_SUDOKU);
+            else 
+              setSelectedGame('panel.game.sudoku');
+          }}
+          title={localesLoaded ? getTitle('panel.game.sudoku') : "..." }
           className={selectedGame === 'panel.game.sudoku' ? 'selected-button' : ''}
         >
           <img src={sudokuImg} alt="Sudoku" />
         </button>
 
         <button 
-          onClick={() => {
-            if( !isConfigLoaded || !currentUserId ) {
-              //console.log("Config not loaded (or no user logged in)");
-              return;
-            }            
-            else {
-              //console.log('SELECTED Connect Four');
-              setSelectedGame('panel.game.connect4');
-            }
-          }} 
+          onClick = { () => setSelectedGame('panel.game.connect4') }
           title={localesLoaded ? getTitle('panel.game.connect4') : "..."}
           className={selectedGame === 'panel.game.connect4' ? 'selected-button' : ''}
         >
           <img src={connect4Img} alt="Connect 4" />
         </button>
+
         <button 
-          onClick={() => { //console.log("Memory is under construction..."); setSelectedGame(null);
-            }            } 
-          title="Memory">
+          onClick={() => { 
+            if( currentUserId  && selectedGame == 'panel.game.memory')
+              handleSelectGame(URL_MEMORY);
+            else 
+              setSelectedGame('panel.game.memory');
+          }} 
+          title={localesLoaded ? getTitle('panel.game.memory') : "..."}
+          className={selectedGame === 'panel.game.memory' ? 'selected-button' : ''}
+        >
           <img src={memoryImg} alt="Memory" />
-        </button>
-        <button 
-          onClick={() => { //console.log("Master Mind is under construction..."); setSelectedGame(null);
-            }            }
-          title="Master Mind">
-          <img src={mmImg} alt="Master Mind" />
-        </button>
-        <button 
-          onClick={() => { //console.log("Tic Tac Toe is under construction..."); setSelectedGame(null);
-            }}
-          title="Tic Tac Toe">
-          <img src={tictactoeImg} alt="Tic Tac Toe" />
-        </button>
-        <button onClick={() => { //console.log("Black Jack is under construction..."); setSelectedGame(null);
-        }}
-          title="Black Jack">
-          <img src={blackjackImg} alt="Black Jack" />
-        </button>
+        </button>    
+
       </div>
       
     </div>

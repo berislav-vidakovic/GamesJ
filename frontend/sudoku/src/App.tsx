@@ -9,13 +9,19 @@ import { useEffect, useState } from "react";
 function App() {
   const [isConfigLoaded, setConfigLoaded] = useState<boolean>(false);
   const [areBoardsLoaded, setBoardsLoaded] = useState<boolean>(false);
-  const [board, setBoard] = useState<string>("");
+  const [boardString, setBoardString] = useState<string>("");
   const [solution, setSolution] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [level, setLevel] = useState<number>(0);
+  const [adminMode, setAdminMode] = useState<boolean>(false);
+  const [selectedGameIdx, setSelectedGameIdx] = useState<number | null>(null);
+  const [games, setGames] = useState<Game[]>([]);
+  const [startTimer, setStartTimer] = useState(false);  
   
   useEffect( () => { 
     loadCommonConfig(setConfigLoaded);     
+    const params = new URLSearchParams(window.location.search);
+    console.log( "Params: userId=", params.get('userId') );
   }, []);
 
    useEffect( () => { if( isConfigLoaded){
@@ -23,14 +29,56 @@ function App() {
    }      
   }, [isConfigLoaded]);
 
+  interface Game {
+    board: string,
+    solution: string, 
+    name: string, 
+    level: number
+  } 
+
+
   const handleInit = ( jsonResp: any ) => {    
-    //console.log("Response (CI/CD) to GET  : ", jsonResp );
-    setBoard(jsonResp.boards[0].board);
-    setSolution(jsonResp.boards[0].solution);
-    setName(jsonResp.boards[0].name);
-    setLevel(jsonResp.boards[0].level);
+    console.log("Number of boards  : ", jsonResp.boards.length );
+    if( jsonResp.boards.length ){
+      const games : Game[] = [];
+      for( let i = 0; i < jsonResp.boards.length; i++ ){
+        const b = jsonResp.boards[i];
+        games.push({
+          board: b.board,
+          solution: b.solution,
+          name: b.name,
+          level: b.level
+        });
+      }
+      setGames(games);
+      //console.log(games);
+      console.log("GAME count: ",  games.length);
+    }
+
     setBoardsLoaded(true);
   }
+
+  const setCurrentGame = (idx: number) => {
+    setBoardString(games[idx].board);
+    setSolution(games[idx].solution);
+    setName(games[idx].name);
+    setLevel(games[idx].level);
+  }
+
+  useEffect(() => {
+    if (games.length > 0 && selectedGameIdx === null) {
+      setSelectedGameIdx(0);
+      setCurrentGame(0);
+    }
+  }, [games]);
+
+  const createEmptyBoard = () => {
+    setBoardString("0".repeat(81));
+    setSolution("0".repeat(81)); // Or also empty for now
+    setName("New Game");
+    setLevel(1);
+    setBoardsLoaded(true);
+  };
 
   return (
     <div 
@@ -42,15 +90,77 @@ function App() {
         justifyContent: "center",
         backgroundColor: "#f8f9fa",
       }}>
-       
-      <h2>Sudoku</h2>
+      
+      <div className="auth-buttons">
+        <button
+          onClick={()=>{
+            setStartTimer(false); 
+            setAdminMode(true);
+            createEmptyBoard();
+          }}
+        >
+          Add game
+        </button>
+        
+        <button
+          onClick={()=>{ 
+            if( adminMode )
+              console.log(boardString);
+          }}
+        >
+          Save
+        </button>
+
+
+      </div>
+         <h2>Sudoku</h2>
+
+      <div className="auth-buttons">
+        <button
+          onClick={() => {
+            console.log("selGame=", selectedGameIdx);
+            setCurrentGame(selectedGameIdx);
+            setAdminMode(false);
+            setStartTimer(true);
+          }}
+        >
+          Start
+        </button>    
+
+        <button
+          onClick={()=>{
+            if( startTimer || adminMode ) return;
+            let idx:number = (selectedGameIdx as number+1) % games.length;
+            console.log(selectedGameIdx, idx, games.length);
+            setSelectedGameIdx(idx);
+            setCurrentGame(idx);
+          } }
+        >
+          Next
+        </button>     
+
+        <button
+          onClick={()=> {
+            if( !adminMode )
+              setStartTimer(false); 
+            //setRestartTimerFlag(!restartTimerFlag);
+          } }
+        >
+          New game
+        </button>    
+      </div>
      
-      {areBoardsLoaded && board.length === 81 && solution.length === 81 &&
+      {areBoardsLoaded && boardString.length === 81 && solution.length === 81 && 
       <Board 
-        boardString={board} 
+        key={boardString}  // forces component to remount whenever board string changes
+        boardString={boardString} 
+        setBoardString={setBoardString}
         solutionString={solution} 
         name={name}
         level={level}
+        adminMode={adminMode}
+        startTimer={startTimer}
+        setStartTimer={setStartTimer}
       />
       }
     </div>
