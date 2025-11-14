@@ -119,7 +119,7 @@ function App() {
         <button
           onClick={() => {
             console.log("selGame=", selectedGameIdx);
-            setCurrentGame(selectedGameIdx);
+            setCurrentGame(selectedGameIdx as number);
             setAdminMode(false);
             setStartTimer(true);
           }}
