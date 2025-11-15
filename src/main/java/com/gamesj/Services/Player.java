@@ -18,4 +18,8 @@ public class Player {
   public int getUserId(){
     return this.userId;
   }
+
+  public void setClientId(UUID clientId){
+    this.clientId = clientId;
+  }
 }

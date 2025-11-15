@@ -38,7 +38,7 @@ function App() {
       senderID = sessionStorage.getItem("senderId");
       sessionStorage.setItem("reconnecting", "false");
     }
-    //console.log('Game ID:', gameID, "UserID:", senderID);
+    console.log('Game ID:', gameID, "UserID:", senderID);
     setGameId(gameID);
     setUserId(Number(senderID));
     updateUserIds(Number(senderID), null, gameID);    
@@ -49,12 +49,13 @@ function App() {
   useEffect( () => { 
     if( !isConfigLoaded || gameId == null ) return;
     const body = JSON.stringify({gameId, userId});
+    console.log("SENDING POST to /api/games/init:", body);
     sendPOSTRequest( 'api/games/init', body, handleResponseInit);
     setStateFunctionRefs(setMyColor, setGameState);
   }, [isConfigLoaded, gameId]);
   
   async function handleResponseInit( jsonResp: any, status: number ) {
-    //console.log("POST init response:", jsonResp);
+    console.log("POST init response:", jsonResp);
     // Req: {gameId, userId} Resp: {gameId, id, userName, user2Id, user2Name}
     if( status == StatusCodes.OK ){
       setGameState("init");

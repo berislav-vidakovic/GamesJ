@@ -25,6 +25,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     String[] allowedOrigins = {
             "http://localhost:5174",
             "http://localhost:5175",
+            "http://localhost:5176",
             "https://gamesj.com"
     };
     // If Origin is in the allowed list, echo it back
@@ -63,6 +64,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         path.startsWith("/api/auth/refresh") ||
         path.startsWith("/api/users/login") ||
         path.startsWith("/api/users/logout") ||
+        path.startsWith("/api/games/init") ||
         path.startsWith("/api/localization/get") ) {
           filterChain.doFilter(request, response);
           return;

@@ -25,6 +25,14 @@ public class Game {
     return this.gameId;
   }
 
+  public void setPlayerClientId(int userId, UUID clientId){
+    if (player1.userId == userId) {
+      player1.setClientId(clientId);
+    } else if (player2.userId == userId) {
+      player2.setClientId(clientId);
+    }
+  }
+
   public boolean isReady(){
     return player1.userId != UserMonitor.EMPTY_USERID && player2.userId != UserMonitor.EMPTY_USERID
      && player1.session != null && player2.session != null 

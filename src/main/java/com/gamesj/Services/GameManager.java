@@ -63,6 +63,13 @@ public class GameManager {
     return null;
   }
 
+  public UUID getGameId(int callerId, int calleeId) {
+    Game game = getGame(callerId, calleeId);
+    if (game != null) 
+      return game.getGameId();
+    return null;
+  }
+
   public void removeGame( Game game ) {
     if( game != null ){
       games.remove(game.getGameId());
@@ -94,7 +101,40 @@ public class GameManager {
     }
 
     return newGame;
-  }    
+  }
+  
+  public int getPartnerId(UUID gameId, int userId){
+    Game game = games.get(gameId);
+    if (game != null) {
+      if (game.getPlayer1UserId() == userId) {
+        return game.getPlayer2UserId();
+      } else if (game.getPlayer2UserId() == userId) {
+        return game.getPlayer1UserId();
+      }
+    }
+    return UserMonitor.EMPTY_USERID;
+  }
+
+  public void setUserGuid(UUID gameId, int userId, UUID clientId){
+    Game game = games.get(gameId);
+    if (game != null) {
+      if (game.getPlayer1UserId() == userId) {
+        game.player1.setClientId(clientId);
+      } else if (game.getPlayer2UserId() == userId) {
+        game.player2.setClientId(clientId);
+      }
+    }
+  }
+
+
+
+  public boolean isGameStatePaired(UUID gameId) {
+    Game game = games.get(gameId);
+    if (game != null) {
+      return game.getState() == Game.STATE_PAIRED;
+    }
+    return false;
+  }
 
   public void pairPlayers(Game game) {
     if (game != null) {

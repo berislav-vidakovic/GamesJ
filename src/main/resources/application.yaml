@@ -21,3 +21,10 @@ websocket:
 useridle:
   timeout-mins: 2
   check-interval-sec: 60
+logging:
+  level:
+    org.springframework.web.socket: DEBUG
+    org.springframework.web.socket.server: DEBUG
+    org.springframework.web.socket.server.support.WebSocketHandshakeHandler: TRACE
+    org.springframework.web.servlet: DEBUG
+    org.springframework.messaging: DEBUG
