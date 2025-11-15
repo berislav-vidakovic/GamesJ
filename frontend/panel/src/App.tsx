@@ -177,11 +177,11 @@ function App() {
   }
 
   const isBtnVisibleCancel = (): boolean => {
-    return invitationState == "sent" && isWsConnected;
+    return invitationState == "sent" && isWsConnected && currentUserId != null;
   }
 
   const isBtnVisibleResponse = (): boolean => {
-    return invitationState == "pending" && isWsConnected;
+    return invitationState == "pending" && isWsConnected && currentUserId != null;
   }
 
   const isBtnVisibleConnect = (): boolean => {

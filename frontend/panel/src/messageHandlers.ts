@@ -158,7 +158,7 @@ function handleWsInvitation( jsonResp: any ){
   //var response = new { sending = true, callerId, calleeId };
   //var response = new { accept = true, callerId, calleeId };
   //    var msg = new { type = "invitation", status = "WsStatus.OK", data = response };
-  //console.log("Received WS: ", jsonResp);
+  console.log("Received WS invitation: ", jsonResp);
   switch( jsonResp.invitation){
     case "send":
       setCallerUserIdRef( Number(jsonResp.callerId) );
@@ -168,6 +168,8 @@ function handleWsInvitation( jsonResp: any ){
       console.log("WS invitation ", jsonResp );
       break;
     case "cancel":
+    case "reject":
+    case "timeout":
       setCallerUserIdRef( null );
       setCalleeUserIdRef( null );
       setInvitationStateRef("init");
@@ -179,13 +181,6 @@ function handleWsInvitation( jsonResp: any ){
       setCallerUserIdRef( Number(jsonResp.callerId) );
       setCalleeUserIdRef( Number(jsonResp.calleeId) );
       setInvitationStateRef( "paired" );
-      break;
-    case "reject":
-      //console.log("Invitation rejected from  user", jsonResp.calleeId );
-      // var response = new { invitatation = accept, callerId, calleeId };
-      setCallerUserIdRef( null );
-      setCalleeUserIdRef( null );
-      setInvitationStateRef( "init" );
       break;
   }  
 }

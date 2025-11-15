@@ -21,8 +21,6 @@ export async function getAllUsers(
 }
 
 
-
-
 export async function registerUser(login: string, fullname: string, password: string) {
   const body = JSON.stringify({ register: { login, fullname, password } } );
   //{ register: { login, fullname } 

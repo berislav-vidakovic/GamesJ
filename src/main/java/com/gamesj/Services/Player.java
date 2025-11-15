@@ -1,0 +1,21 @@
+package com.gamesj.Services;
+
+import java.util.UUID;
+
+import org.springframework.web.socket.WebSocketSession;
+
+public class Player {
+  int userId;
+  UUID clientId;
+  WebSocketSession session;
+
+  public Player(int userId, UUID clientId, WebSocketSession session){
+    this.userId = userId;
+    this.clientId = clientId;
+    this.session = session;
+  }  
+
+  public int getUserId(){
+    return this.userId;
+  }
+}

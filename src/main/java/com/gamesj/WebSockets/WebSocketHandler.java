@@ -29,6 +29,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Autowired
     private UserMonitor userMonitor;
 
+    public WebSocketSession getSessionByClientId(UUID clientId) {
+      for (Map.Entry<WebSocketSession, Client> entry : sessionActivityMap.entrySet()) {
+        WebSocketSession session = entry.getKey();
+        Client client = entry.getValue();
+        if (client.getClientId().equals(clientId)) 
+          return session;
+      }
+      return null; // not found
+    }
+
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
       UUID clientId = null;
@@ -40,14 +50,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
         clientId = UUID.fromString(idParam);
       } 
       catch (Exception e) {
-        System.err.println("Invalid or missing userId in WebSocket URL: " + session.getUri());
+        System.err.println("Invalid or missing clientId in WebSocket URL: " + session.getUri());
         session.close(CloseStatus.BAD_DATA); // immediately close
         return; // abort further processing
       }
       // valid UUID, proceed
       sessionActivityMap.put(session, new Client( LocalDateTime.now(), clientId) );  
       System.out.println(" *** WS Connected for clientId=" + clientId+ " WS(s): " + sessionActivityMap.size() );
-
     }
 
     @Override
@@ -84,6 +93,23 @@ public class WebSocketHandler extends TextWebSocketHandler {
       }      
     }
 
+    public void sendSafe(WebSocketSession session, TextMessage msg) {
+    try {
+      synchronized (session) {  // required for thread safety
+        if (session != null && session.isOpen()) {
+          session.sendMessage(msg);
+        } else {
+          System.err.println("Cannot send WS message: session is closed or null");
+        }
+      }
+    } 
+    catch (Exception e) {
+      System.err.println("Error in sendSafe:");
+      e.printStackTrace();
+    }
+}
+
+
     @Scheduled(fixedRateString = "${websocket.check-interval-ms}")
     public void checkIdleSessions() {
       LocalDateTime now = LocalDateTime.now();
@@ -100,7 +126,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         if (Duration.between(client.getTimeStamp(), now).compareTo(IDLE_TIMEOUT) > 0) {
           try {
             System.out.println("===== WS CLOSING due to inactivity: clientId=" + client.getClientId() );            
-            int userId = userMonitor.getUserId(id);
+            int userId = userMonitor.getUserIdByClientId(id);
             System.out.println("===== UserId= " + userId );                   
             sessionsToClose.put(session, userId);            
           } 

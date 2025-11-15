@@ -23,6 +23,8 @@ public class Client {
     public UUID getClientId() {
       return this.clientId; 
     }
-
     
+    public void setClientId(UUID clientId) {
+      this.clientId = clientId; 
+    }    
 }

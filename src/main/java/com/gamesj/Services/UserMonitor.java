@@ -51,7 +51,14 @@ public class UserMonitor {
       wsHandler.broadcast(wsJson);
     }
 
-    public int getUserId(UUID clientId){
+    public UUID getClientIdByUserId(int userId){
+      Client client = userActivityMap.get(userId);
+      if( client != null )
+        return client.getClientId();
+      return null;
+    }
+
+    public int getUserIdByClientId(UUID clientId){
       for (Map.Entry<Integer, Client> entry : userActivityMap.entrySet()) {
         int userId  = entry.getKey();
         Client client = entry.getValue();
@@ -63,16 +70,21 @@ public class UserMonitor {
 
     // called from controllers 1) /api/login and 2) /auth/refresh
     public void updateUserActivity(int userId, UUID clientId) {
+      
       // add or update userId in map  
       userActivityMap.compute(userId, (key, existingClient) -> {
         if (existingClient == null) {
           return new Client(LocalDateTime.now(), clientId);
-        } else {
+        } 
+        else {
           existingClient.setTimeStamp();
+          existingClient.setClientId(clientId);
           return existingClient;
         }
       });
-      System.out.println(" *** UserId upd. for clientId=" + clientId + " User(s): " + userActivityMap.size() 
+
+
+      System.out.println(" *** *** UserId upd. for clientId=" + clientId + " User(s): " + userActivityMap.size() 
         + " UserId: " + userId );
       //System.out.println(" *** updateUserActivity " + userId + " @ " + LocalDateTime.now() + " id=" + clientId);
       if (cleanupTask == null || cleanupTask.isCancelled() || cleanupTask.isDone()) 
