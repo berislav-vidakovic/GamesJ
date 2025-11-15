@@ -133,6 +133,20 @@ public class InviteController {
         System.out.println("Sending WS: " + json);
         callerSession.sendMessage(new TextMessage(json));
       }
+      else if (invitation.equals("cancel") && calleeSession != null && calleeSession.isOpen()) {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(msg);
+        System.out.println("Sending WS: " + json);
+        calleeSession.sendMessage(new TextMessage(json));
+      }
+      else if (invitation.equals("reject") && callerSession != null && callerSession.isOpen()) {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(msg);
+        System.out.println("Sending WS: " + json);
+        callerSession.sendMessage(new TextMessage(json));
+      }
+
+
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     } 
     catch (Exception ex) {
