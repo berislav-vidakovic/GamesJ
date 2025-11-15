@@ -2,9 +2,7 @@
 import Board from "./Board";
 import { sendGETRequest } from '@common/restAPI';
 import { loadCommonConfig } from '@common/config';
-
 import { useEffect, useState } from "react";
-
 
 function App() {
   const [isConfigLoaded, setConfigLoaded] = useState<boolean>(false);
@@ -36,9 +34,9 @@ function App() {
     level: number
   } 
 
-
   const handleInit = ( jsonResp: any ) => {    
     console.log("Number of boards  : ", jsonResp.boards.length );
+    sessionStorage.setItem("myID", jsonResp.clientId );
     if( jsonResp.boards.length ){
       const games : Game[] = [];
       for( let i = 0; i < jsonResp.boards.length; i++ ){
@@ -54,7 +52,6 @@ function App() {
       //console.log(games);
       console.log("GAME count: ",  games.length);
     }
-
     setBoardsLoaded(true);
   }
 
@@ -110,11 +107,9 @@ function App() {
         >
           Save
         </button>
-
-
       </div>
-         <h2>Sudoku</h2>
-
+      
+      <h2>Sudoku</h2>
       <div className="auth-buttons">
         <button
           onClick={() => {
@@ -126,7 +121,6 @@ function App() {
         >
           Start
         </button>    
-
         <button
           onClick={()=>{
             if( startTimer || adminMode ) return;
@@ -138,7 +132,6 @@ function App() {
         >
           Next
         </button>     
-
         <button
           onClick={()=> {
             if( !adminMode )
@@ -166,5 +159,4 @@ function App() {
     </div>
   );
 }
-
 export default App;

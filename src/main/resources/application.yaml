@@ -16,8 +16,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
 websocket:
-  idle-timeout-minutes: 15
+  idle-timeout-minutes: 3
   check-interval-ms: 300000
 useridle:
-  timeout-mins: 3
-  check-interval-sec: 120
+  timeout-mins: 2
+  check-interval-sec: 60

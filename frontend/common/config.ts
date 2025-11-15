@@ -11,14 +11,11 @@ export let URL_SUDOKU = '';
 export let URL_CONNECT4 = '';
 export let URL_MEMORY = '';
 
-
 let locales: Locales[] = [];
-
 
 function detectEnv(): 'Development' | 'Production' {
   return import.meta.env.MODE === 'production' ? 'Production' : 'Development';
 }
-
 
 export const getTitle = (paramKey: string, lang: 'en' | 'de' | 'hr' | null = null): string => {
   //const currentLang = sessionStorage.getItem('currentLang') || 'en';
@@ -28,6 +25,7 @@ export const getTitle = (paramKey: string, lang: 'en' | 'de' | 'hr' | null = nul
   if( !locale && currentLang != 'en' ) // at least 'en' key has to be defined
     locale = locales.find( l => 
       l.paramKey == paramKey && l.language == 'en' );
+  // return key if 'en' not found
   return locale ? locale.paramValue : paramKey;
 }
 
@@ -60,7 +58,6 @@ export async function loadCommonConfig(
     URL_CONNECT4 = config.urlFrontend[currentEnv][backend].connect4;
     URL_MEMORY = config.urlFrontend[currentEnv][backend].memory;
   }
-  
 
   setConfigLoaded(true);
 }
@@ -73,7 +70,6 @@ export async function getLocalization(): Promise<void> {
     });
   });
 }
-
 
 export  const handleGetLocalization = ( jsonResp: any ) => {    
   //console.log("Resp GET Locales:", jsonResp)

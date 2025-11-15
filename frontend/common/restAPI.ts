@@ -3,12 +3,14 @@ import  { URL_BACKEND_HTTP }  from './config';
 
 // Generic GET sending
 export async function sendGETRequest(endpoint: string, handleResponse: (data: any) => void ): Promise<any> {
-    const getUrl = `${URL_BACKEND_HTTP}/${endpoint}`;
-    ////console.log("Sending GET: ", getUrl );
+    //const getUrl = `${URL_BACKEND_HTTP}/${endpoint}`;
+    const getUrl = `${URL_BACKEND_HTTP}/${endpoint}` + `?id=${sessionStorage.getItem("myID")}`;
+    console.log("Sending GET: ", getUrl );
+
     fetch(getUrl, { 
         method: "GET",
         headers: {
-          "Authorization": "Bearer " + sessionStorage.getItem("authToken"),
+          "Authorization": "Bearer " + sessionStorage.getItem("accessToken"),
           "Content-Type": "application/json"
         },
         credentials: "include" // required for cookies
@@ -37,7 +39,7 @@ export async function sendPOSTRequest(
   fetch( postUrl, {
           method: "POST",
           headers: { 
-            "Authorization": "Bearer " + sessionStorage.getItem("authToken"),
+            "Authorization": "Bearer " + sessionStorage.getItem("accessToken"),
             "Content-Type": "application/json" 
           },
           body: msgBody, 

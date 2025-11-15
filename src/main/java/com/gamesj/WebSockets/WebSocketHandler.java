@@ -46,8 +46,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
       }
       // valid UUID, proceed
       sessionActivityMap.put(session, new Client( LocalDateTime.now(), clientId) );  
-      System.out.println("WebSocket connected clientId= " + clientId);
-      System.out.println(" *************** WS Connected  WS(s): " + sessionActivityMap.size() );
+      System.out.println(" *** WS Connected for clientId=" + clientId+ " WS(s): " + sessionActivityMap.size() );
 
     }
 

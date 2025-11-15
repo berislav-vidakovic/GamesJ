@@ -63,7 +63,7 @@ public class UserMonitor {
 
     // called from controllers 1) /api/login and 2) /auth/refresh
     public void updateUserActivity(int userId, UUID clientId) {
-      //userActivityMap.put(userId, new Client( LocalDateTime.now(), clientId ) );
+      // add or update userId in map  
       userActivityMap.compute(userId, (key, existingClient) -> {
         if (existingClient == null) {
           return new Client(LocalDateTime.now(), clientId);
@@ -72,7 +72,9 @@ public class UserMonitor {
           return existingClient;
         }
       });
-      System.out.println(" *** updateUserActivity " + userId + " @ " + LocalDateTime.now() + " id=" + clientId);
+      System.out.println(" *** UserId upd. for clientId=" + clientId + " User(s): " + userActivityMap.size() 
+        + " UserId: " + userId );
+      //System.out.println(" *** updateUserActivity " + userId + " @ " + LocalDateTime.now() + " id=" + clientId);
       if (cleanupTask == null || cleanupTask.isCancelled() || cleanupTask.isDone()) 
         startTimer();
     }

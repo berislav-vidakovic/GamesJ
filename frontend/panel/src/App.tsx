@@ -21,7 +21,6 @@ import RegisterDialog from './components/RegisterDialog.tsx'
 import LoginDialog from './components/LoginDialog.tsx' 
 import InviteDialog from './components/InviteDialog.tsx' 
 import { StatusCodes } from 'http-status-codes';
- 
 
 function App() {
   const [currentLang, setCurrentLangState] = useState<'en' | 'de' | 'hr' | null>(null);
@@ -42,13 +41,11 @@ function App() {
   const [localesLoaded, setLocalesLoaded] = useState(false);
   const [techStack, setTechStack] = useState<string[]>([]);
   const [autoLogin, setAutoLogin] = useState<boolean>(false);
-  
   const autoLoginRef = useRef(autoLogin);
   
   useEffect(() => { // React ref is synchronous and always holds the latest value
     autoLoginRef.current = autoLogin; 
   }, [autoLogin]);
-
 
   useEffect( () => { 
     loadCommonConfig(setConfigLoaded);     
@@ -111,7 +108,6 @@ function App() {
 
   const handleInvite = () => { if( currentUserId && onlineUsers > 1) setShowInviteDialog(true); }
   
-  
   const handleRespond = (accept: boolean) => {    
     //console.log("Respond to Invitation clicked: ", accept);
     if( accept )
@@ -119,7 +115,6 @@ function App() {
     else
       inviteUser( callerUserId as number, calleeUserId as number, "reject" );
   }
-
 
   const handleRun = () => {
     //console.log("Run clicked");
@@ -149,8 +144,6 @@ function App() {
   const handleCancelInvitation = () => {
     inviteUser(callerUserId as number, calleeUserId as number, "cancel");
   };
-
-  
 
   const clearInvitations = (): void => {
     setCalleeUserId(null);  
@@ -200,8 +193,6 @@ function App() {
     console.log("Set current language to ", lang);
     setCurrentLangState(lang);
   }
-
-  // TODO: Pass lang to each call of  getTitle("panel.users", currentLang) 
 
   return (
    <div className="app-container">
