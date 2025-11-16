@@ -31,7 +31,7 @@ public class GameManager {
   private final ScheduledExecutorService scheduler =
         Executors.newScheduledThreadPool(1);
 
-  private final long GAME_EXPIRE_SECONDS = 5; 
+  private final long GAME_EXPIRE_SECONDS = 60; 
 
   @Autowired
   private ObjectMapper mapper;
@@ -151,7 +151,23 @@ public class GameManager {
     int state = game.getState(); 
     return state == Game.STATE_READY;
   }
- 
+
+  public void setGameState( Game game, int newState ){
+    //System.out.println("### Setting Game State ...");
+    if (game != null) {
+      //System.out.println("### Setting Game State to " + newState + " for gameId=" + game.getGameId() );
+      game.setState(newState);
+    }
+  }
+
+  public int getGameState( Game game ){
+    //System.out.println("### Getting Game State ...");
+    if (game != null) {
+      //System.out.println("### Getting Game State for gameId=" + game.getGameId() );
+      return game.getState();
+    }
+    return Game.STATE_ERROR;
+  }
 
   public boolean updateStateOnRunAction(UUID gameId){
     Game game = games.get(gameId);
@@ -179,9 +195,6 @@ public class GameManager {
       }
     }
   }
-
-
-
 
   public void pairPlayers(Game game) {
     if (game != null) {
@@ -241,5 +254,4 @@ public class GameManager {
     
     gameTimeoutTasks.put(game.getGameId(), future);
   }
-
 }

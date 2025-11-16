@@ -6,10 +6,14 @@ public class Game {
   public Player player1;
   public Player player2;
 
+  public static final int STATE_ERROR = -1;
   public static final int STATE_INVITE = 0;
   public static final int STATE_PAIRED = 1;
   public static final int STATE_RUN1 = 2;
   public static final int STATE_READY = 3;
+  public static final int STATE_RUNNING = 4;
+  public static final int STATE_EVAL = 5;
+  public static final int STATE_OVER = 6;
 
   private int gameState;
 
@@ -31,6 +35,12 @@ public class Game {
       return player1.getClientId();
     
     return null;
+  }
+
+  public UUID getUserGuid(int userId){
+    return  getPlayer1UserId() == userId 
+          ? player1.getClientId()
+          : player2.getClientId();
   }
 
   public int getPartner(int userId){

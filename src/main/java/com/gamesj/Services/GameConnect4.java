@@ -13,10 +13,10 @@ public class GameConnect4 extends Game {
 
     private String board;
 
-    private static final int STATE_INVALID = -1;
-    private static final int STATE_WIN = 1;
-    private static final int STATE_DRAW = 2;
-    private static final int STATE_IN_PROGRESS =3;
+    public static final int STATE_INVALID = -1;
+    public static final int STATE_WIN = 1;
+    public static final int STATE_DRAW = 2;
+    public static final int STATE_IN_PROGRESS =3;
 
     private static final int ROWS = 6;
     private static final int COLUMNS = 7;
