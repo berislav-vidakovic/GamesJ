@@ -1,7 +1,6 @@
 package com.gamesj.Services;
 import java.util.UUID;
 
-
 public class Game {
   private final java.util.UUID gameId;
   public Player player1;
@@ -23,6 +22,22 @@ public class Game {
   
   public UUID getGameId(){
     return this.gameId;
+  }
+
+  public UUID getPartnerGuid(int userId){
+    if (getPlayer1UserId() == userId) 
+      return player2.getClientId();
+    else if (getPlayer2UserId() == userId) 
+      return player1.getClientId();
+    
+    return null;
+  }
+
+  public int getPartner(int userId){
+    if (getPlayer1UserId() == userId) 
+      return player2.getUserId();
+    else 
+      return player1.getUserId();    
   }
 
   public void setPlayerClientId(int userId, UUID clientId){

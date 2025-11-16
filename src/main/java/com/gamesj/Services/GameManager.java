@@ -137,6 +137,22 @@ public class GameManager {
     return state == Game.STATE_PAIRED || state == Game.STATE_RUN1;
   }
 
+  public void updateUserActivity(Game game) {
+    if (game != null) {
+      userMonitor.updateUserActivity(game.getPlayer1UserId(), game.player1.getClientId());
+      userMonitor.updateUserActivity(game.getPlayer2UserId(), game.player2.getClientId());
+    }
+  }
+  
+  public boolean isGameStateReady(UUID gameId){
+    Game game = games.get(gameId);
+    if (game == null) 
+      return false;
+    int state = game.getState(); 
+    return state == Game.STATE_READY;
+  }
+ 
+
   public boolean updateStateOnRunAction(UUID gameId){
     Game game = games.get(gameId);
     //System.out.println(" ### updateStateOnRunAction for gameId=" + gameId );

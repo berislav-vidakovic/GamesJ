@@ -22,4 +22,8 @@ public class Player {
   public void setClientId(UUID clientId){
     this.clientId = clientId;
   }
+
+  public UUID getClientId(){
+    return this.clientId;
+  }
 }

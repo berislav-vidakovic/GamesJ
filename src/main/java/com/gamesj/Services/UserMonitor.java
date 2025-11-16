@@ -70,7 +70,6 @@ public class UserMonitor {
 
     // called from controllers 1) /api/login and 2) /auth/refresh
     public void updateUserActivity(int userId, UUID clientId) {
-      
       // add or update userId in map  
       userActivityMap.compute(userId, (key, existingClient) -> {
         if (existingClient == null) {
@@ -82,7 +81,6 @@ public class UserMonitor {
           return existingClient;
         }
       });
-
 
       System.out.println(" *** *** UserId upd. for clientId=" + clientId + " User(s): " + userActivityMap.size() 
         + " UserId: " + userId );

@@ -16,6 +16,7 @@ import com.gamesj.Models.RefreshToken;
 import com.gamesj.Models.User;
 import com.gamesj.Repositories.UserRepository;
 import com.gamesj.Services.Game;
+import com.gamesj.Services.GameConnect4;
 import com.gamesj.Services.GameManager;
 import com.gamesj.Services.Player;
 import com.gamesj.Services.UserMonitor;
@@ -159,6 +160,8 @@ public class GamesController {
       int user2Id = gameManager.getPartnerId(UUID.fromString(gameId), userId);
 
       UUID clientId = UUID.randomUUID();
+      userMonitor.updateUserActivity(userId, clientId);
+
       gameManager.setUserGuid(UUID.fromString(gameId), userId, clientId);
       User user1 = userRepository.findById(userId).orElse(null);
       User user2 = userRepository.findById(user2Id).orElse(null);
@@ -187,4 +190,5 @@ public class GamesController {
       ));
     }
   }
+
 }

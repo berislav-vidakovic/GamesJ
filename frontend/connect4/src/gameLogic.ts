@@ -52,7 +52,7 @@ export function reConnect(){
   window.location.reload();
 }
 
-// -------------swapColors - POST request, POST reposne, WS incoming ----------
+// -------------swapColors - POST request, POST response, WS incoming ----------
 export async function swapColors( 
     gameId: string | null ){
   // /api/games/connect4/swapcolors
@@ -63,6 +63,7 @@ export async function swapColors(
   sendPOSTRequest( 'api/games/connect4/swapcolors', body, handleSwapColorsResponse);
 }
 
+// Response { color }
 async function handleSwapColorsResponse( jsonResp: any, status: number ) {
   if( status == StatusCodes.OK ){
     setMyColorRef(jsonResp.color);
@@ -71,7 +72,7 @@ async function handleSwapColorsResponse( jsonResp: any, status: number ) {
     alert(`Error: ${jsonResp.error} STATUS: ${status}`);
 }
 
-// ---------------------restartGame -----------------------------------------
+// ------------------new Game -----------------------------------------
 export async function newGame(gameId: string | null){
   const body = JSON.stringify({gameId, userId: myUserId, user2Id: partnerId });
   console.log("Restart: ", myUserId, partnerId, body );
@@ -83,8 +84,7 @@ async function handleNewGameResponse( jsonResp: any, status: number ) {
   console.log("jsonResp", jsonResp, status);
   //setBoardStringRef(jsonResp.board);
   setGameStateRef("init");
-  stringToMatrix(jsonResp.board, setBoardRowsRef);   
-
+  stringToMatrix(jsonResp.board, setBoardRowsRef);  
 }
 
 function handleWsNewGame( jsonData: any ){

@@ -160,14 +160,14 @@ public class GameConnect4 extends Game {
     }
 
     public String getPartnerColor(int userId) {
-        return (userId == player1.userId) ? color2 : color1;
+      return (userId == player1.userId) ? color2 : color1;
     }
 
     public void swapColors() {
-        synchronized (lock) {
-            String temp = color1;
-            color1 = color2;
-            color2 = temp;
-        }
+      synchronized (lock) {
+        String temp = color1;
+        color1 = color2;
+        color2 = temp;
+      }
     }
 }
