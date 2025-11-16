@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamesj.Config.JwtUtil;
 import com.gamesj.Models.RefreshToken;
 import com.gamesj.Models.User;
@@ -43,6 +44,9 @@ public class UsersController {
 
   @Autowired
   private UserMonitor userMonitor;
+
+  @Autowired
+  private ObjectMapper mapper;
 
   public UsersController(UserRepository userRepository) {
       this.userRepository = userRepository;
@@ -133,7 +137,7 @@ public class UsersController {
           "data", response
       );
       // Convert Map to JSON string
-      String wsJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(wsMessage);
+      String wsJson = mapper.writeValueAsString(wsMessage);
 
       // Broadcast via WebSocket
       webSocketHandler.broadcast(wsJson);
@@ -248,7 +252,7 @@ public class UsersController {
           "data", response
       );
       // Convert Map to JSON string
-      String wsJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(wsMessage);
+      String wsJson = mapper.writeValueAsString(wsMessage);
       // Broadcast via WebSocket
       webSocketHandler.broadcast(wsJson);
 
@@ -320,7 +324,7 @@ public class UsersController {
           "data", response
       );
       // Convert Map to JSON string
-      String wsJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(wsMessage);
+      String wsJson = mapper.writeValueAsString(wsMessage);
       // Broadcast via WebSocket
       webSocketHandler.broadcast(wsJson);
 

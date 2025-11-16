@@ -27,6 +27,9 @@ public class UserMonitor {
     @Autowired
     private ApplicationContext context; // inject context
 
+    @Autowired
+    private ObjectMapper mapper;
+
     // Injected via application.properties
     @Value("${useridle.timeout-mins}")
     private long idleTimeoutMinutes;
@@ -145,7 +148,7 @@ public class UserMonitor {
               "data", response
           );
 
-          String wsJson = new ObjectMapper().writeValueAsString(wsMessage);
+          String wsJson = mapper.writeValueAsString(wsMessage);
           broadcastWsMessage(wsJson);
           System.out.println(" *** Broadcasted WS logout for user " + userId);
         }

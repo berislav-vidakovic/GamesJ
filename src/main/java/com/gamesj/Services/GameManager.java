@@ -1,22 +1,16 @@
 package com.gamesj.Services;
 
-import java.time.LocalDateTime;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.gamesj.Models.User;
-import com.gamesj.Repositories.UserRepository;
 import com.gamesj.WebSockets.WebSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

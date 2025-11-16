@@ -15,8 +15,6 @@ import com.gamesj.Services.GameManager;
 import com.gamesj.Services.Player;
 import com.gamesj.Services.UserMonitor;
 import com.gamesj.WebSockets.WebSocketHandler;
-import com.gamesj.Repositories.RefreshTokenRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
@@ -31,13 +29,10 @@ public class InviteController {
   private GameManager gameManager;
 
   @Autowired
-  private PasswordEncoder passwordEncoder;
-
-  @Autowired
-  private RefreshTokenRepository refreshTokenRepository;
-
-  @Autowired
   private WebSocketHandler webSocketHandler;
+
+  @Autowired
+  private ObjectMapper mapper;
 
   @Autowired
   private UserMonitor userMonitor;
@@ -118,25 +113,21 @@ public class InviteController {
       );
       // send and cancel are sent by caller / accept and reject are sent by callee
       if (invitation.equals("send") && calleeSession != null && calleeSession.isOpen()) {
-        ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(msg);
         System.out.println("Sending WS: " + json);
         calleeSession.sendMessage(new TextMessage(json));
       }
       else if (invitation.equals("accept") && callerSession != null && callerSession.isOpen()) {
-        ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(msg);
         System.out.println("Sending WS: " + json);
         callerSession.sendMessage(new TextMessage(json));
       }
       else if (invitation.equals("cancel") && calleeSession != null && calleeSession.isOpen()) {
-        ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(msg);
         System.out.println("Sending WS: " + json);
         calleeSession.sendMessage(new TextMessage(json));
       }
       else if (invitation.equals("reject") && callerSession != null && callerSession.isOpen()) {
-        ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(msg);
         System.out.println("Sending WS: " + json);
         callerSession.sendMessage(new TextMessage(json));

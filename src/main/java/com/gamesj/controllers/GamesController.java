@@ -2,37 +2,24 @@ package com.gamesj.Controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamesj.Config.JwtUtil;
 import com.gamesj.Models.RefreshToken;
 import com.gamesj.Models.User;
 import com.gamesj.Repositories.UserRepository;
-import com.gamesj.Services.Game;
-import com.gamesj.Services.GameConnect4;
 import com.gamesj.Services.GameManager;
-import com.gamesj.Services.Player;
 import com.gamesj.Services.UserMonitor;
-import com.gamesj.WebSockets.WebSocketHandler;
 import com.gamesj.Repositories.RefreshTokenRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
 @RestController
 @RequestMapping("/api/games")
@@ -41,13 +28,7 @@ public class GamesController {
   private GameManager gameManager;
 
   @Autowired
-  private PasswordEncoder passwordEncoder;
-
-  @Autowired
   private RefreshTokenRepository refreshTokenRepository;
-
-  @Autowired
-  private WebSocketHandler webSocketHandler;
 
   @Autowired
   private UserMonitor userMonitor;
@@ -144,18 +125,18 @@ public class GamesController {
     System.out.println("### POST /api/games/init Request received");
     try {
       if (!body.containsKey("gameId") || !body.containsKey("userId"))
-          return ResponseEntity.badRequest().body(Map.of(
-                  "acknowledged", false,
-                  "error", "Missing keys in POST request"
-          ));
+        return ResponseEntity.badRequest().body(Map.of(
+          "acknowledged", false,
+          "error", "Missing keys in POST request"
+        ));
       String gameId = body.get("gameId").toString();
       Integer userId = (Integer) body.get("userId");
 
       if (!gameManager.isValidStateForRunAction(UUID.fromString(gameId)))
-          return ResponseEntity.badRequest().body(Map.of(
-                  "acknowledged", false,
-                  "error", "Invalid gameId in POST request"
-          ));
+        return ResponseEntity.badRequest().body(Map.of(
+          "acknowledged", false,
+          "error", "Invalid gameId in POST request"
+        ));
 
       int user2Id = gameManager.getPartnerId(UUID.fromString(gameId), userId);
 
@@ -167,10 +148,10 @@ public class GamesController {
       User user2 = userRepository.findById(user2Id).orElse(null);
 
       if (user1 == null || user2 == null)
-          return ResponseEntity.badRequest().body(Map.of(
-                  "acknowledged", false,
-                  "error", "Invalid userIds in POST request"
-          ));
+        return ResponseEntity.badRequest().body(Map.of(
+          "acknowledged", false,
+          "error", "Invalid userIds in POST request"
+        ));
 
       Map<String, Object> response = Map.of(
         "gameId", gameId,
@@ -185,8 +166,8 @@ public class GamesController {
     catch (Exception ex) {
       ex.printStackTrace();
       return ResponseEntity.status(500).body(Map.of(
-              "acknowledged", false,
-              "error", ex.getMessage()
+        "acknowledged", false,
+        "error", ex.getMessage()
       ));
     }
   }

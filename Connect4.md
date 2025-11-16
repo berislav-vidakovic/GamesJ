@@ -1,4 +1,9 @@
-# Workflow
+# Connect Four
+
+## State Transition FSM
+
+![FSM](Connect4.png)
+
 
 ## Panel browser
 
@@ -30,6 +35,19 @@
 ### 5. /games/connect4/swapcolors
 
 - Backend: updateUserActivity
+
+### 6. /games/connect4/start
+
+- Backend: updateUserActivity
+
+
+### 7. /games/connect4/insertdisk
+
+- Backend: updateUserActivity
+
+
+### 8. /games/connect4/newgame
+
 
 
 
