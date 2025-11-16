@@ -307,11 +307,14 @@ public class Connect4Controller {
         // Update game state
         gameManager.setGameState( gameC4, Game.STATE_OVER );
       }
+      else
+        gameManager.setGameState( gameC4, Game.STATE_RUNNING );
+       
       // HTTP response
       Map<String, Object> response = Map.of(
           "userId", userId,
           "board", board,
-          "state", state
+          "state", state // inprogress or gameover
       );
       // WebSocket message
       Map<String, Object> wsMsg = Map.of(
@@ -341,6 +344,81 @@ public class Connect4Controller {
   // Resp: { board }
   @PostMapping("/newgame")
   public ResponseEntity<?> postNewGame(@RequestBody Map<String, Object> body){
-      return ResponseEntity.ok("(not implemented)");
+    try {
+      // Validate required keys ----------------------------------------------------
+      if (!body.containsKey("gameId") || !body.containsKey("userId")) {
+          return ResponseEntity.badRequest().body(Map.of(
+              "acknowledged", false,
+              "error", "Missing keys gameId and/or userId in POST request"
+          ));
+      }
+
+      String gameId = body.get("gameId").toString();
+      int userId = Integer.parseInt(body.get("userId").toString());
+
+      // Validate game exists ------------------------------------------------------
+      GameConnect4 gameC4 = (GameConnect4) gameManager.getGameById(UUID.fromString(gameId));
+      if (gameC4 == null) {
+          return ResponseEntity.badRequest().body(Map.of(
+              "acknowledged", false,
+              "error", "Invalid Game type in POST request"
+          ));
+      }
+      // Validate game state ---------------------------------------------------------
+      System.out.println("### Game State for New Game: " + gameManager.getGameState( gameC4 ) );
+      if ( gameManager.getGameState( gameC4 ) != Game.STATE_OVER ) {
+        return ResponseEntity.badRequest().body(Map.of(
+          "acknowledged", false,
+          "error", "Invalid Game state for New Game action"
+        ));
+      }
+      gameManager.updateUserActivity(gameC4);
+      gameManager.setGameState( gameC4, Game.STATE_READY );
+
+      // Determine partner ---------------------------------------------------------
+      UUID partnerGuid = gameC4.getPartnerGuid(userId);
+      WebSocketSession partnerSession = webSocketHandler.getSessionByClientId(partnerGuid);
+
+      // User with the next move is RED -------------------------------------------
+      if (!gameC4.getUserColor(userId).equals("Red")) {
+          userId = gameC4.getPartner(userId);
+      }
+
+      // Reset board ---------------------------------------------------------------
+      String board = gameC4.resetBoard();
+
+      // HTTP response
+      Map<String, Object> response = Map.of(
+          "userId", userId,
+          "board", board
+      );
+
+      // WS message
+      Map<String, Object> wsMsg = Map.of(
+          "type", "newGame",
+          "status", "WsStatus.OK",
+          "data", response
+      );
+
+      // Send WS to partner --------------------------------------------------------
+      if (partnerSession != null && partnerSession.isOpen()) {
+          ObjectMapper mapper = new ObjectMapper();
+          String json = mapper.writeValueAsString(wsMsg);
+          System.out.println("Sending WS: " + json);
+          partnerSession.sendMessage(new TextMessage(json));
+      }
+
+      return ResponseEntity.ok(response);
+    }
+    catch (Exception ex) {
+        System.out.println("Error in PostNewGame: " + ex.getMessage());
+        return ResponseEntity.status(500).body(Map.of(
+            "acknowledged", false,
+            "error", ex.getMessage()
+        ));
+    }
+
+      
+
   }
 }

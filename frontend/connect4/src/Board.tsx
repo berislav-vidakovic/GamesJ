@@ -72,6 +72,8 @@ const Connect4Board: React.FC<Connect4BoardProps> = ({ boardString,
         return "Win";
       case "theirWin":
         return "Lose";
+      case "draw":
+        return "Draw";
       default:
         return "";
     }
@@ -99,11 +101,10 @@ const Connect4Board: React.FC<Connect4BoardProps> = ({ boardString,
     <>
       <div className="info-connect4">
         <div>
-          {["init", "myWin", "theirWin", "draw"].includes(gameState as string) 
-            && isWsConnected && <button
-            onClick={() => {
-              swapColors(gameId);
-            }}
+          {
+            gameState == "init" && isWsConnected && 
+            <button
+              onClick={() => { swapColors(gameId); }}
           >
             Your color
           </button>}

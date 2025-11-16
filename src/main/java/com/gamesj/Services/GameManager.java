@@ -31,7 +31,7 @@ public class GameManager {
   private final ScheduledExecutorService scheduler =
         Executors.newScheduledThreadPool(1);
 
-  private final long GAME_EXPIRE_SECONDS = 60; 
+  private final long GAME_EXPIRE_SECONDS = 10; 
 
   @Autowired
   private ObjectMapper mapper;

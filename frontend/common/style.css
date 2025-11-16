@@ -440,17 +440,25 @@ button img:hover {
 }
 
 .conn4cellNew.Win::before {
-  background-color: transparent; /* optional: remove default white */
-  background-image: url('assets/happy.png'); /* replace with your image path */
-  background-size: cover;  /* make the image fill the circle */
+  background-color: transparent; 
+  background-image: url('assets/happy.png'); 
+  background-size: cover;  
   background-position: center;
   background-repeat: no-repeat;
 }
 
 .conn4cellNew.Lose::before {
-  background-color: transparent; /* optional: remove default white */
-  background-image: url('assets/sad.png'); /* replace with your image path */
-  background-size: cover;  /* make the image fill the circle */
+  background-color: transparent; 
+  background-image: url('assets/sad.png'); 
+  background-size: cover;  
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.conn4cellNew.Draw::before {
+  background-color: transparent; 
+  background-image: url('assets/draw.png'); 
+  background-size: cover;  
   background-position: center;
   background-repeat: no-repeat;
 }
