@@ -70,6 +70,16 @@ public class GameManager {
     return null;
   }
 
+  public void removeAll() {
+    games.clear();
+    System.out.println(" *** Removed ALL Games. Total Games  : " + games.size() );
+    // Cancel all scheduled tasks
+    for (ScheduledFuture<?> future : gameTimeoutTasks.values()) {
+        future.cancel(false);
+    }
+    gameTimeoutTasks.clear();
+  }
+
   public void removeGame( Game game ) {
     if( game != null ){
       games.remove(game.getGameId());
@@ -88,7 +98,7 @@ public class GameManager {
 
     switch(gameType) {
       case "panel.game.connect4":
-        newGame = new Game(gameId, player1, player2);
+        newGame = new GameConnect4(gameId, player1, player2);
         break;
       default:
         System.out.println("Unsupported game type: " + gameType);
@@ -103,6 +113,10 @@ public class GameManager {
     return newGame;
   }
   
+  public Game getGameById(UUID gameId){
+    return games.get(gameId);
+  }
+
   public int getPartnerId(UUID gameId, int userId){
     Game game = games.get(gameId);
     if (game != null) {
@@ -113,6 +127,30 @@ public class GameManager {
       }
     }
     return UserMonitor.EMPTY_USERID;
+  }
+
+  public boolean isValidStateForRunAction(UUID gameId){
+    Game game = games.get(gameId);
+    if (game == null) 
+      return false;
+    int state = game.getState(); 
+    return state == Game.STATE_PAIRED || state == Game.STATE_RUN1;
+  }
+
+  public boolean updateStateOnRunAction(UUID gameId){
+    Game game = games.get(gameId);
+    //System.out.println(" ### updateStateOnRunAction for gameId=" + gameId );
+    if (game == null) 
+      return false;
+    if( game.getState() == Game.STATE_PAIRED ){
+      game.setState(Game.STATE_RUN1);
+      return true;
+    }
+    if( game.getState() == Game.STATE_RUN1 ) {
+      game.setState(Game.STATE_READY);
+      return true;
+    }
+    return false;
   }
 
   public void setUserGuid(UUID gameId, int userId, UUID clientId){
@@ -128,13 +166,6 @@ public class GameManager {
 
 
 
-  public boolean isGameStatePaired(UUID gameId) {
-    Game game = games.get(gameId);
-    if (game != null) {
-      return game.getState() == Game.STATE_PAIRED;
-    }
-    return false;
-  }
 
   public void pairPlayers(Game game) {
     if (game != null) {

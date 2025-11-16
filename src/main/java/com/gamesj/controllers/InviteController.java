@@ -80,6 +80,11 @@ public class InviteController {
       WebSocketSession calleeSession = webSocketHandler.getSessionByClientId( calleeClientId);
       Player player2 = new Player( calleeId, calleeClientId, calleeSession );
 
+      // Test start
+      if ( invitation.equals("send") ){
+        gameManager.removeAll();
+      }
+      // Test end
       Game game = gameManager.getGame(callerId, calleeId);
       if ( invitation.equals("send") ){
         if( game != null  ) 

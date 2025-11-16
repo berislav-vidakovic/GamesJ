@@ -54,6 +54,22 @@ public class GamesController {
   @Autowired
   private UserRepository userRepository;
 
+  
+  private RefreshToken getTokenEntity(String refreshToken) {
+    if( refreshToken == null || refreshToken.isEmpty() )
+      return null;
+
+    Optional<RefreshToken> tokenEntityOpt = refreshTokenRepository.findByToken(refreshToken);
+    if( tokenEntityOpt.isEmpty() )
+      return null;
+    
+    RefreshToken tokenEntity = tokenEntityOpt.get();
+    if (tokenEntity.getExpiresAt().isBefore(LocalDateTime.now()) )
+      return null;
+
+    return tokenEntity;
+  }
+
   // POST /api/games/run  - Request sent from Panel browser
   // Req: { run: "Connect Four", userId1, userId2, senderId } 
   // Resp: { game: "Connect Four", gameid, senderId }
@@ -78,10 +94,33 @@ public class GamesController {
 
       String gameId = gameManager.getGameId(userId1, userId2).toString();
 
+      String refreshToken = (String) body.get("refreshToken");
+
+      // get token entity from refreshTokenRepository and check expiry
+      RefreshToken tokenEntity = getTokenEntity(refreshToken); // {id, userId, token, expiresAt }
+      if( tokenEntity == null ) 
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "Refresh token missing, invalid or expired"));
+
+      // Load user and issue new tokens
+      User user = userRepository.findById(tokenEntity.getUserId())
+              .orElseThrow(() -> new RuntimeException("User not found"));
+      // Issue new Access Token
+      String newAccessToken = JwtUtil.generateToken(user.getUserId(), user.getLogin());
+      // Issue new Refresh Token and save it in DB
+      String newRefreshToken = UUID.randomUUID().toString();
+      LocalDateTime newExpiry = LocalDateTime.now().plusDays(7);
+      tokenEntity.setToken(newRefreshToken);
+      tokenEntity.setExpiresAt(newExpiry);
+      refreshTokenRepository.save(tokenEntity);
+
       Map<String, Object> response = Map.of(
-              "game", body.get("run"),
-              "gameid", gameId,
-              "senderId", senderId
+        "game", body.get("run"),
+        "gameid", gameId,
+        "senderId", senderId,
+        "refreshToken", newRefreshToken,
+        "accessToken", newAccessToken
       );
 
       return ResponseEntity.ok(response);
@@ -97,7 +136,7 @@ public class GamesController {
   }
 
   // POST /api/games/init - Request sent from Game browser
-  // Req:   { gameId, userId} 
+  // Req:   { gameId, userId} Auth Bearer: accessToken
   // Resp:  { gameId, id, userName, user2Id, user2Name}
   @PostMapping("/init")
   public ResponseEntity<?> postInitGame(@RequestBody Map<String, Object> body) {
@@ -108,40 +147,27 @@ public class GamesController {
                   "acknowledged", false,
                   "error", "Missing keys in POST request"
           ));
-
       String gameId = body.get("gameId").toString();
       Integer userId = (Integer) body.get("userId");
-      
-      System.out.println("### POST /api/games/init Request Processing - 1");
 
-
-      if (!gameManager.isGameStatePaired(UUID.fromString(gameId)))
+      if (!gameManager.isValidStateForRunAction(UUID.fromString(gameId)))
           return ResponseEntity.badRequest().body(Map.of(
                   "acknowledged", false,
                   "error", "Invalid gameId in POST request"
           ));
 
       int user2Id = gameManager.getPartnerId(UUID.fromString(gameId), userId);
-      System.out.println("### POST /api/games/init Request Processing - 2");
-
 
       UUID clientId = UUID.randomUUID();
       gameManager.setUserGuid(UUID.fromString(gameId), userId, clientId);
-
       User user1 = userRepository.findById(userId).orElse(null);
       User user2 = userRepository.findById(user2Id).orElse(null);
-
-      System.out.println("### POST /api/games/init Request Processing - 3");
-
 
       if (user1 == null || user2 == null)
           return ResponseEntity.badRequest().body(Map.of(
                   "acknowledged", false,
                   "error", "Invalid userIds in POST request"
           ));
-
-      System.out.println("### POST /api/games/init Request Processing - 4");
-
 
       Map<String, Object> response = Map.of(
         "gameId", gameId,

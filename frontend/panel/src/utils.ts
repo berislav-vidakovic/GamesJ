@@ -75,10 +75,11 @@ export async function inviteUser(callerId: number, calleeId: number,
 }
 
 
-//Req: { run: "Connect Four", userId1, userId2, senderId } Resp: { game: "Connect Four", gameid, senderId }
+// ->Req: { run: "Connect Four", userId1, userId2, senderId, refreshToken } 
+// Resp: { game: "Connect Four", gameid, senderId, refreshToken, accessToken }
 export async function runGame(userId1: number, 
     userId2: number, run: string | null, senderId: number) {
-  const body = JSON.stringify({ run, userId1, userId2, senderId  } );
+  const body = JSON.stringify({ run, userId1, userId2, senderId,
+    refreshToken: sessionStorage.getItem("refreshToken") } );
   sendPOSTRequest(POSTrunGame, body, handleResponseRunGame);  
-  
 }

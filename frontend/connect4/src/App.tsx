@@ -21,17 +21,26 @@ function App() {
     useState<"init" | "myMove" | "theirMove" | "draw" | "myWin" | "theirWin" | null>(null); 
   
   // Common config
-  useEffect( () => { 
+  useEffect( () => { // After opening new Browser window
     loadCommonConfig(setConfigLoaded);     
     //console.log( "Loading Config ... ", isConfigLoaded);
     let gameID;
     let senderID;
+    let refreshToken: string | null;
+    let accessToken: string | null;
     const bReconnecting = sessionStorage.getItem("reconnecting") === "true";
     const params = new URLSearchParams(window.location.search);
-    console.log( "Params:", params.get('gameId'), params.get('senderId'), "Reconnecting:", bReconnecting );
+    console.log( "Params:", params.get('gameId'), params.get('senderId'), "Reconnecting:", bReconnecting, 
+     "refreshToken:", params.get('refreshToken'), "accessToken:", params.get('accessToken') );
     if( !bReconnecting) {
       gameID = params.get('gameId');
       senderID = params.get('senderId');
+      refreshToken = params.get('refreshToken');
+      accessToken = params.get('accessToken');
+      sessionStorage.setItem("gameId", String(gameID));
+      sessionStorage.setItem("senderId", String(senderID));
+      sessionStorage.setItem("refreshToken", String(refreshToken) );
+      sessionStorage.setItem("accessToken", String(accessToken) );
     }
     else {
       gameID = sessionStorage.getItem("gameId");
@@ -53,10 +62,10 @@ function App() {
     sendPOSTRequest( 'api/games/init', body, handleResponseInit);
     setStateFunctionRefs(setMyColor, setGameState);
   }, [isConfigLoaded, gameId]);
-  
+  // Req:  { gameId, userId } 
+  // Resp: { gameId, id, userName, user2Id, user2Name }  
   async function handleResponseInit( jsonResp: any, status: number ) {
     console.log("POST init response:", jsonResp);
-    // Req: {gameId, userId} Resp: {gameId, id, userName, user2Id, user2Name}
     if( status == StatusCodes.OK ){
       setGameState("init");
       setUserName( jsonResp.userName);
@@ -69,21 +78,17 @@ function App() {
     }
     else 
       alert(`Error: ${jsonResp.error} STATUS: ${status}`);
-
-    //console.log( user2Id, user2Name, userName );
+      //console.log( user2Id, user2Name, userName );
   }
 
   // Game-specific init
   useEffect( () => { 
-    
     if( isGameInitialized && isWsConnected ) {
       //console.log( "--------Ready for Connect4 initilization");
       const body = JSON.stringify({gameId, userId});
       sendPOSTRequest( 'api/games/connect4/init', body, handleResponseConnect4Init);
     }
-    
   }, [isGameInitialized, isWsConnected]);
-
   
   async function handleResponseConnect4Init( jsonResp: any, status: number ) {
     //console.log("POST init response:", jsonResp);
@@ -95,8 +100,6 @@ function App() {
     else 
       alert(`Error: ${jsonResp.error} STATUS: ${status}`);
   }
-
-
 
   return (
     <div className = "connect4-container">

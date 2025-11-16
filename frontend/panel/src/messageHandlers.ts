@@ -135,13 +135,26 @@ export function handleInvite( jsonResp: any, status: number ){
     alert(`Error: ${jsonResp.error} STATUS: ${status}`);
 }
 
-//Req: { run: "Connect Four", userId1, userId2 } Resp: { game: "Connect Four", gameid }
+// Req: { run: "Connect Four", userId1, userId2, senderId, refreshToken } 
+// ->Resp: { game: "Connect Four", gameid, senderId, refreshToken, accessToken }
 export function handleResponseRunGame( jsonResp: any, status: number ){
+  console.log("******** ****** POST response handleResponseRunGame received: ", 
+      jsonResp, "Status: ", status);
+  sessionStorage.setItem("refreshToken", jsonResp.refreshToken);
+  sessionStorage.setItem("accessToken", jsonResp.accessToken);
+  // encodeURIComponent() protects URL from breaking when values contain 
+  // characters that are not allowed inside a URL parameter (like ? and & )
+  const urlNewBrowser =
+    `${URL_CONNECT4}?` +
+    `gameId=${encodeURIComponent(jsonResp.gameid)}&` +
+    `senderId=${encodeURIComponent(jsonResp.senderId)}&` +
+    `accessToken=${encodeURIComponent(jsonResp.accessToken)}&` +
+    `refreshToken=${encodeURIComponent(jsonResp.refreshToken)}`;
+  console.log("Opening new game window URL:", urlNewBrowser );
   if( status == StatusCodes.OK )
     if( jsonResp.game == "panel.game.connect4" )    
-      window.open(`${URL_CONNECT4}?gameId=${jsonResp.gameid}&senderId=${jsonResp.senderId}`, '_blank');    
+      window.open(urlNewBrowser, '_blank');    
 }
-
 
 // ws message handlers -----------------------------------
 export async function handleWsMessage( jsonMsg: any ) {
