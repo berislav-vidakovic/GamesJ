@@ -105,8 +105,7 @@ public class GamesController {
         "accessToken", newAccessToken
       );
 
-      return ResponseEntity.ok(response);
-
+      return new ResponseEntity<>(response, HttpStatus.OK); // 200
     } 
     catch (Exception ex) {
       ex.printStackTrace();
@@ -125,18 +124,17 @@ public class GamesController {
     System.out.println("### POST /api/games/init Request received");
     try {
       if (!body.containsKey("gameId") || !body.containsKey("userId"))
-        return ResponseEntity.badRequest().body(Map.of(
-          "acknowledged", false,
-          "error", "Missing keys in POST request"
-        ));
+        return new ResponseEntity<>(
+          Map.of("acknowledged", false,"error", "Missing keys in POST request"), 
+          HttpStatus.BAD_REQUEST);
       String gameId = body.get("gameId").toString();
       Integer userId = (Integer) body.get("userId");
 
       if (!gameManager.isValidStateForRunAction(UUID.fromString(gameId)))
-        return ResponseEntity.badRequest().body(Map.of(
+        return new ResponseEntity<>(Map.of(
           "acknowledged", false,
           "error", "Invalid gameId in POST request"
-        ));
+        ), HttpStatus.BAD_REQUEST);
 
       int user2Id = gameManager.getPartnerId(UUID.fromString(gameId), userId);
 
@@ -148,10 +146,9 @@ public class GamesController {
       User user2 = userRepository.findById(user2Id).orElse(null);
 
       if (user1 == null || user2 == null)
-        return ResponseEntity.badRequest().body(Map.of(
-          "acknowledged", false,
-          "error", "Invalid userIds in POST request"
-        ));
+        return new ResponseEntity<>(
+          Map.of( "acknowledged", false, "error", "Invalid userIds in POST request"), 
+          HttpStatus.BAD_REQUEST);
 
       Map<String, Object> response = Map.of(
         "gameId", gameId,
@@ -161,14 +158,14 @@ public class GamesController {
         "user2Name", user2.getFullName()
       );
 
-      return ResponseEntity.ok(response);
+      return new ResponseEntity<>(response, HttpStatus.OK); // 200
+
     } 
     catch (Exception ex) {
       ex.printStackTrace();
-      return ResponseEntity.status(500).body(Map.of(
-        "acknowledged", false,
-        "error", ex.getMessage()
-      ));
+      return new ResponseEntity<>(
+        Map.of( "acknowledged", false, "error", ex.getMessage()), 
+        HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

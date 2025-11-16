@@ -63,11 +63,11 @@ public class Connect4Controller {
       gameManager.updateUserActivity(gameC4);
       int userId = Integer.parseInt(body.get("userId").toString());
       String color = gameC4.getUserColor(userId);
-      return ResponseEntity.ok(Map.of("color", color));
+      return ResponseEntity.status(HttpStatus.OK).body(Map.of("color", color)); // 200  
     }
     catch (Exception ex) {
       System.out.println("Error in Post Init Received: " + ex.getMessage());
-      return ResponseEntity.status(500).body(Map.of(
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
         "acknowledged", false,
         "error", ex.getMessage()
       ));
@@ -126,11 +126,11 @@ public class Connect4Controller {
         webSocketHandler.sendWsMessage(partnerSession, new TextMessage(json));
       }
 
-      return ResponseEntity.ok(Map.of("color", color1));
+      return new ResponseEntity<>(Map.of("color", color1), HttpStatus.OK); // 200
     }
     catch (Exception ex) {
       System.out.println("Error in PostSwapColors: " + ex.getMessage());
-      return ResponseEntity.status(500).body(Map.of(
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
         "acknowledged", false,
         "error", ex.getMessage()
       ));
@@ -193,7 +193,7 @@ public class Connect4Controller {
       else 
          return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
 
-      return ResponseEntity.ok(response);
+      return new ResponseEntity<>(response, HttpStatus.OK); // 200
     } 
     catch (Exception ex) {
       System.out.println("Error in PostStartGame: " + ex.getMessage());
@@ -285,7 +285,8 @@ public class Connect4Controller {
       if ( partnerSession != null && partnerSession.isOpen()) 
         webSocketHandler.sendWsMessage( partnerSession, new TextMessage(json));
 
-      return ResponseEntity.ok(response);
+      return new ResponseEntity<>(response, HttpStatus.OK); // 200
+
     } 
     catch (Exception ex) {
       System.out.println("Error in PostInsertDisk: " + ex.getMessage());
@@ -351,7 +352,7 @@ public class Connect4Controller {
         webSocketHandler.sendWsMessage( partnerSession, new TextMessage(json));
       }
 
-      return ResponseEntity.ok(response);
+      return new ResponseEntity<>(response, HttpStatus.OK); // 200
     }
     catch (Exception ex) {
       System.out.println("Error in PostNewGame: " + ex.getMessage());
