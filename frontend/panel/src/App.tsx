@@ -42,6 +42,8 @@ function App() {
   const [techStack, setTechStack] = useState<string[]>([]);
   const [autoLogin, setAutoLogin] = useState<boolean>(false);
   const autoLoginRef = useRef(autoLogin);
+  const [invitationTime, setInvitationTime] = useState<number>(0);
+
   
   useEffect(() => { // React ref is synchronous and always holds the latest value
     autoLoginRef.current = autoLogin; 

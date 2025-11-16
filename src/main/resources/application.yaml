@@ -21,4 +21,6 @@ websocket:
 useridle:
   timeout-mins: 2
   check-interval-sec: 60
+invitation:
+  timeout-sec: 15
 

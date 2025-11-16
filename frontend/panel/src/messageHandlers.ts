@@ -96,35 +96,27 @@ export function handleUserLogout( jsonResp: any, status: number ){
   }
 }
 
+// Request { "callerId": int, "calleeId": int, "selectedGame": "panel.game.connect4" } 
+// -> Response { "invitation": "send" | "cancel" | "accept" | "reject", callerId, calleeId, selectedGame }
 export function handleInvite( jsonResp: any, status: number ){
-  //console.log("******** ****** POST response handleInvite received: ", 
-      //jsonResp, "Status: ", status); 
   if( status == StatusCodes.OK ){
     switch( jsonResp.invitation ){
       case "send":
-        //console.log("User",jsonResp.calleeId, "was Invited");
-        // var response = new { invitatation = send, callerId, calleeId };
         setCallerUserIdRef( Number(jsonResp.callerId) );
         setCalleeUserIdRef( Number(jsonResp.calleeId) );
         setInvitationStateRef( "sent" );
         break;
       case "cancel":
-        //console.log("Invitation cancelled to user", jsonResp.calleeId );
-        // var response = new { invitatation = cancel, callerId, calleeId };
         setCallerUserIdRef( null );
         setCalleeUserIdRef( null );
         setInvitationStateRef( "init" );
         break;
       case "accept":
-        //console.log("PAIRED: Invitation accepted from  user", jsonResp.calleeId );
-        // var response = new { invitatation = accept, callerId, calleeId };
         setCallerUserIdRef( Number(jsonResp.callerId) );
         setCalleeUserIdRef( Number(jsonResp.calleeId) );
         setInvitationStateRef( "paired" );
         break;
       case "reject":
-        //console.log("Invitation rejected from  user", jsonResp.calleeId );
-        // var response = new { invitatation = accept, callerId, calleeId };
         setCallerUserIdRef( null );
         setCalleeUserIdRef( null );
         setInvitationStateRef( "init" );
@@ -168,9 +160,8 @@ export async function handleWsMessage( jsonMsg: any ) {
 }
 
 function handleWsInvitation( jsonResp: any ){
-  //var response = new { sending = true, callerId, calleeId };
-  //var response = new { accept = true, callerId, calleeId };
-  //    var msg = new { type = "invitation", status = "WsStatus.OK", data = response };
+  // Request { "callerId": int, "calleeId": int, "selectedGame": "panel.game.connect4" } 
+  // -> Response { "invitation": "send" | "cancel" | "accept" | "reject", callerId, calleeId, selectedGame }  
   console.log("Received WS invitation: ", jsonResp);
   switch( jsonResp.invitation){
     case "send":
@@ -186,11 +177,8 @@ function handleWsInvitation( jsonResp: any ){
       setCallerUserIdRef( null );
       setCalleeUserIdRef( null );
       setInvitationStateRef("init");
-      //console.log("User ", jsonResp.callerId, "cancelled invitation");
       break;
     case "accept":
-      //console.log("PAIRED: Invitation accepted from  user", jsonResp.calleeId );
-      // var response = new { invitatation = accept, callerId, calleeId };
       setCallerUserIdRef( Number(jsonResp.callerId) );
       setCalleeUserIdRef( Number(jsonResp.calleeId) );
       setInvitationStateRef( "paired" );

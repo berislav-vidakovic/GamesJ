@@ -153,6 +153,8 @@ public class InviteController {
     }
   }
 
+  // Request { callerId, calleeId, selectedGame }  
+  // Response { "invitation": "send" | "cancel" | "accept" | "reject", callerId, calleeId, selectedGame }
   @PostMapping("/invite")
   public ResponseEntity<?> postInvitationSend(
           @RequestBody JsonNode body,

@@ -31,7 +31,8 @@ public class GameManager {
   private final ScheduledExecutorService scheduler =
         Executors.newScheduledThreadPool(1);
 
-  private final long GAME_EXPIRE_SECONDS = 10; 
+  @Value("${invitation.timeout-sec}")
+  private int invitationTimeoutSeconds;
 
   @Autowired
   private ObjectMapper mapper;
@@ -250,7 +251,7 @@ public class GameManager {
           sendTimeoutMessage(session2);
           //System.out.println(" ### Session 2 is ready");  
       }
-      }, GAME_EXPIRE_SECONDS, TimeUnit.SECONDS);
+      }, invitationTimeoutSeconds, TimeUnit.SECONDS);
     
     gameTimeoutTasks.put(game.getGameId(), future);
   }
