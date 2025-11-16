@@ -86,7 +86,7 @@ public class GameConnect4 extends Game {
                 if (len == WIN) return true;
             }
         }
-        // --- Diagonal falling ↘ ---
+        // --- Diagonal falling \ ---
         for (int col = 0; col <= COLUMNS - WIN; col++) {
             for (int row = 0; row <= ROWS - WIN; row++) {
                 char c = matrix.get(row).charAt(col);
@@ -101,7 +101,7 @@ public class GameConnect4 extends Game {
                 }
             }
         }
-        // --- Diagonal rising ↗ ---
+        // --- Diagonal rising / ---
         for (int col = WIN - 1; col < COLUMNS; col++) {
             for (int row = 0; row <= ROWS - WIN; row++) {
                 char c = matrix.get(row).charAt(col);

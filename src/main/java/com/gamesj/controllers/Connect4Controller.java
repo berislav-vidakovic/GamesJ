@@ -123,7 +123,7 @@ public class Connect4Controller {
       if ( partnerSession != null && partnerSession.isOpen()) {
         String json = mapper.writeValueAsString(wsMsg);
         System.out.println("Sending WS: " + json);
-        partnerSession.sendMessage(new TextMessage(json));
+        webSocketHandler.sendWsMessage(partnerSession, new TextMessage(json));
       }
 
       return ResponseEntity.ok(Map.of("color", color1));
@@ -188,7 +188,7 @@ public class Connect4Controller {
       if ( partnerSession != null && partnerSession.isOpen()) {
         String json = mapper.writeValueAsString(wsMsg);
         System.out.println("Sending WS: " + json);
-        partnerSession.sendMessage(new TextMessage(json));
+        webSocketHandler.sendWsMessage( partnerSession, new TextMessage(json));
       }
       else 
          return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
@@ -204,7 +204,6 @@ public class Connect4Controller {
     }
   }
 
-  
   // POST /api/games/connect4/insertdisk - Request sent from Game browser
   // Req: { gameId, userId, row, col } Auth Bearer: accessToken
   // Resp: { userId, board, state }
@@ -263,9 +262,9 @@ public class Connect4Controller {
         String json = mapper.writeValueAsString(wsGameOverMsg);
         System.out.println("Sending WS: " + json);
         if ( partnerSession != null && partnerSession.isOpen()) 
-          partnerSession.sendMessage(new TextMessage(json));
+          webSocketHandler.sendWsMessage( partnerSession, new TextMessage(json));
         if ( senderSession != null && senderSession.isOpen()) 
-          senderSession.sendMessage(new TextMessage(json));
+          webSocketHandler.sendWsMessage( senderSession, new TextMessage(json));
         gameManager.setGameState( gameC4, Game.STATE_OVER );
       }
       else
@@ -284,7 +283,7 @@ public class Connect4Controller {
       String json = mapper.writeValueAsString(wsMsg);
       System.out.println("Sending WS: " + json);
       if ( partnerSession != null && partnerSession.isOpen()) 
-        partnerSession.sendMessage(new TextMessage(json));
+        webSocketHandler.sendWsMessage( partnerSession, new TextMessage(json));
 
       return ResponseEntity.ok(response);
     } 
@@ -349,7 +348,7 @@ public class Connect4Controller {
 
       if (partnerSession != null && partnerSession.isOpen()) {
         String json = mapper.writeValueAsString(wsMsg);
-        partnerSession.sendMessage(new TextMessage(json));
+        webSocketHandler.sendWsMessage( partnerSession, new TextMessage(json));
       }
 
       return ResponseEntity.ok(response);

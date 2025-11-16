@@ -90,7 +90,6 @@ public class GameManager {
   public Game createGame(String gameType, Player player1, Player player2) {
     UUID gameId = UUID.randomUUID();
     Game newGame = null;
-
     switch(gameType) {
       case "panel.game.connect4":
         newGame = new GameConnect4(gameId, player1, player2);
@@ -101,10 +100,8 @@ public class GameManager {
     if (newGame != null){
       games.put(gameId, newGame);
       System.out.println(" *** Created Game with gameId=" + gameId + " Total Games  : " + games.size() );
-      // TO DO timer start
       scheduleGameExpiration(newGame);
     }
-
     return newGame;
   }
   
@@ -222,7 +219,7 @@ public class GameManager {
     try{
       String json = mapper.writeValueAsString(msg);
       System.out.println("Sending WS: " + json);
-      webSocketHandler.sendSafe(session, new TextMessage(json));
+      webSocketHandler.sendWsMessage(session, new TextMessage(json));
     } 
     catch (Exception e){
       System.err.println("Error sending timeout message: " + e.getMessage());
@@ -238,12 +235,10 @@ public class GameManager {
         removeGame(game);
         WebSocketSession session1 = getSessionByUserId(game.getPlayer1UserId());
         if (session1 != null && session1.isOpen()) 
-          //System.out.println(" ### Session 1 is ready");  
           sendTimeoutMessage(session1);        
         WebSocketSession session2 = getSessionByUserId(game.getPlayer2UserId());
         if (session2 != null && session2.isOpen()) 
           sendTimeoutMessage(session2);
-          //System.out.println(" ### Session 2 is ready");  
       }
       }, invitationTimeoutSeconds, TimeUnit.SECONDS);
     

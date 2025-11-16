@@ -50,14 +50,15 @@ public class InviteController {
         parsedClientId = UUID.fromString(clientId);
       } 
       catch (Exception e) {
-        return ResponseEntity.badRequest().body(
-              Map.of("acknowledged", false, "error", "Missing clientId") );
+        return new ResponseEntity<>(
+          Map.of("acknowledged", false, "error", "Missing clientId"), 
+          HttpStatus.BAD_REQUEST);
       }
       System.out.println("Received POST /api/invitations/invite with valid clientId");
       if (!body.has("callerId") || !body.has("calleeId")) {
-          return ResponseEntity.badRequest().body(
-              Map.of("acknowledged", false, "error", "No both callerId, calleeId specified")
-          );
+        return new ResponseEntity<>(
+          Map.of("acknowledged", false, "error", "No both callerId, calleeId specified"),
+          HttpStatus.BAD_REQUEST );
       }
       System.out.println("Received POST /api/invitations/invite with valid callerId and calleeId");
       int callerId = body.get("callerId").asInt();
@@ -75,27 +76,22 @@ public class InviteController {
       WebSocketSession calleeSession = webSocketHandler.getSessionByClientId( calleeClientId);
       Player player2 = new Player( calleeId, calleeClientId, calleeSession );
 
-      // Test start
-      if ( invitation.equals("send") ){
-        gameManager.removeAll();
-      }
-      // Test end
       Game game = gameManager.getGame(callerId, calleeId);
       if ( invitation.equals("send") ){
         if( game != null  ) 
-          return ResponseEntity.badRequest().body(
-                Map.of("acknowledged", false, "error", "Players already play another game")); 
+          gameManager.removeGame(game);
         gameManager.createGame(selectedGame, player1, player2);
         System.out.println(" Created Game for Invitation from " + callerId + " to " + calleeId );
       }
       else if ( invitation.equals("accept") ){
         if( game == null || game.getState() != Game.STATE_INVITE ) 
-          return ResponseEntity.badRequest().body(
-                Map.of("acknowledged", false, "error", "Error in pairing players")); 
+          return new ResponseEntity<>(
+            Map.of("acknowledged", false, "error", "Error in pairing players"),
+            HttpStatus.BAD_REQUEST); 
         gameManager.pairPlayers(game);
         System.out.println(" Accepted Game Invitation from " + callerId + " to " + calleeId );
       }
-      else {
+      else { // cancel or reject
         gameManager.removeGame(game);
       }
 
@@ -111,36 +107,36 @@ public class InviteController {
           "status", "WsStatus.OK",
           "data", response
       );
-      // send and cancel are sent by caller / accept and reject are sent by callee
-      if (invitation.equals("send") && calleeSession != null && calleeSession.isOpen()) {
-        String json = mapper.writeValueAsString(msg);
-        System.out.println("Sending WS: " + json);
-        calleeSession.sendMessage(new TextMessage(json));
-      }
-      else if (invitation.equals("accept") && callerSession != null && callerSession.isOpen()) {
-        String json = mapper.writeValueAsString(msg);
-        System.out.println("Sending WS: " + json);
-        callerSession.sendMessage(new TextMessage(json));
-      }
-      else if (invitation.equals("cancel") && calleeSession != null && calleeSession.isOpen()) {
-        String json = mapper.writeValueAsString(msg);
-        System.out.println("Sending WS: " + json);
-        calleeSession.sendMessage(new TextMessage(json));
-      }
-      else if (invitation.equals("reject") && callerSession != null && callerSession.isOpen()) {
-        String json = mapper.writeValueAsString(msg);
-        System.out.println("Sending WS: " + json);
-        callerSession.sendMessage(new TextMessage(json));
-      }
-
+      // send and cancel are sent by caller / accept and reject are sent by callee      
+      if (invitation.equals("send") )
+        sendWsMessageToSession(calleeSession, msg); 
+      else if (invitation.equals("accept") )
+        sendWsMessageToSession(callerSession, msg);
+      else if (invitation.equals("cancel") )
+        sendWsMessageToSession(calleeSession, msg);
+      else if (invitation.equals("reject") )
+        sendWsMessageToSession(callerSession, msg);
 
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     } 
     catch (Exception ex) {
-      System.out.println("Error in Post Invite Received: " + ex.getMessage());
-      return ResponseEntity.status(500).body(
-              Map.of("acknowledged", false, "error", ex.getMessage())
-      );
+      System.out.println("Error in Post Invite Received: " + ex.getMessage());      
+      return new ResponseEntity<>(
+        Map.of( "acknowledged", false, "error", ex.getMessage() ), 
+        HttpStatus.INTERNAL_SERVER_ERROR);      
+    }
+  }
+
+  private void sendWsMessageToSession(WebSocketSession session, Map<String, Object> msg) {
+    try {
+      if (session != null && session.isOpen()) {
+        String json = mapper.writeValueAsString(msg);
+        System.out.println("Sending WS: " + json);
+        webSocketHandler.sendWsMessage( session, new TextMessage(json));
+      }
+    } 
+    catch (Exception ex) {
+      System.out.println("Error sending WS message: " + ex.getMessage());
     }
   }
 

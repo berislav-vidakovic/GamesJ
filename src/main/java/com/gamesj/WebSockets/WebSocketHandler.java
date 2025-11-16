@@ -93,7 +93,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
       }      
     }
 
-    public void sendSafe(WebSocketSession session, TextMessage msg) {
+    public void sendWsMessage(WebSocketSession session, TextMessage msg) {
     try {
       synchronized (session) {  // required for thread safety
         if (session != null && session.isOpen()) {
