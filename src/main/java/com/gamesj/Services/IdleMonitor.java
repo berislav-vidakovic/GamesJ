@@ -1,19 +1,12 @@
 package com.gamesj.Services;
 
-import java.time.LocalDateTime;
-import java.time.Duration;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import com.gamesj.Models.User;
-import com.gamesj.Repositories.UserRepository;
 import com.gamesj.WebSockets.WebSocketHandler;
 import jakarta.annotation.PreDestroy;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 // Base class for monitoring idle users or other entities 
 public abstract class IdleMonitor<TKey> {
@@ -26,6 +19,8 @@ public abstract class IdleMonitor<TKey> {
 
   /** Child must provide the activity map. */
   protected abstract ConcurrentHashMap<TKey, Client> getActivityMap();
+
+  private final AtomicBoolean timerRunning = new AtomicBoolean(false);
 
   // Timer functionality: ScheduledExecutorService
   protected final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -42,34 +37,28 @@ public abstract class IdleMonitor<TKey> {
     wsHandler.broadcast(wsJson);
   }
 
-  // called from controllers 1) /api/login and 2) /auth/refresh
-  public abstract void updateUserActivity(int userId, UUID clientId);    
-
-  // called from controller /api/logout
-  public abstract void removeUser(int userId);    
-
-  protected synchronized void startTimer(){
-    if (cleanupTask != null && !cleanupTask.isCancelled() && !cleanupTask.isDone()) {
-      return; // already running
+  protected synchronized void startTimer(String msg  ) {
+    System.out.println(" *** Attempt to start Timer for " + msg);
+    if (timerRunning.compareAndSet(false, true)) {
+        cleanupTask = scheduler.scheduleAtFixedRate(
+          this::cleanupIdleItems,
+          cleanupIntervalSeconds,
+          cleanupIntervalSeconds,
+          TimeUnit.SECONDS
+        );
+        System.out.println(" *** Timer started ("+msg+")*********************************** ");
     }
-    cleanupTask = scheduler.scheduleAtFixedRate(
-      this::cleanupIdleUsers,
-      cleanupIntervalSeconds,
-      cleanupIntervalSeconds,
-      TimeUnit.SECONDS
-    );
-    System.out.println(" *** Timer started " );
   }
 
-  protected synchronized void stopTimer() {
+  protected synchronized void stopTimer(String msg) {
     if (cleanupTask != null && !cleanupTask.isCancelled()) {
-        cleanupTask.cancel(false);
-        System.out.println(" *** Timer STOPPED");
+      cleanupTask.cancel(false);
+      timerRunning.set(false);
+      System.out.println(" *** Timer STOPPED ("+msg+")*********************************** ");
     }
   }
 
-  public abstract void autoLogout(int userId);
-  public abstract void cleanupIdleUsers();
+  public abstract void cleanupIdleItems();
   
   // shutdown scheduler (when app stops)
   @PreDestroy

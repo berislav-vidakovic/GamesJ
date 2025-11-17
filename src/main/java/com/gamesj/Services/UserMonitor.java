@@ -6,18 +6,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
 import com.gamesj.Models.User;
 import com.gamesj.Repositories.UserRepository;
-import com.gamesj.WebSockets.WebSocketHandler;
-
-import jakarta.annotation.PreDestroy;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -37,6 +30,7 @@ public class UserMonitor extends IdleMonitor<Integer> {
       @Value("${useridle.timeout-mins}") short idleTimeoutMinutes,
       @Value("${useridle.check-interval-sec}") short cleanupIntervalSeconds ){
         super(idleTimeoutMinutes, cleanupIntervalSeconds);
+      System.out.println(" =========== Created UserMonitor ======="); 
     }
 
     @Override
@@ -62,7 +56,6 @@ public class UserMonitor extends IdleMonitor<Integer> {
     }
 
     // called from controllers 1) /api/login and 2) /auth/refresh
-    @Override
     public void updateUserActivity(int userId, UUID clientId) {
       // add or update userId in map  
       userActivityMap.compute(userId, (key, existingClient) -> {
@@ -75,29 +68,29 @@ public class UserMonitor extends IdleMonitor<Integer> {
           return existingClient;
         }
       });
-      System.out.println(" *** *** UserId upd. for clientId=" + clientId + " User(s): " + userActivityMap.size() 
-        + " UserId: " + userId );
+      //System.out.println(" *** *** UserId upd. for clientId=" + clientId + " User(s): " + userActivityMap.size() 
+       // + " UserId: " + userId );
       //System.out.println(" *** updateUserActivity " + userId + " @ " + LocalDateTime.now() + " id=" + clientId);
-      if (cleanupTask == null || cleanupTask.isCancelled() || cleanupTask.isDone()) 
-        startTimer();
+      if (cleanupTask == null || cleanupTask.isCancelled() || cleanupTask.isDone()) {
+        //System.out.println(" *** Starting UserMonitor timer ......clientId=" + clientId + ".......User(s): " + userActivityMap.size() );
+        startTimer("UserMonitor");
+      }
     }
 
-    // called from controller /api/logout
-    @Override
+      // called from controller /api/logout
     public synchronized void removeUser(int userId) {
       if (userActivityMap.remove(userId) != null) {
         System.out.println(" *** User " + userId + " removed from UserMonitor");
         // If no users remain → stop timer
         if (userActivityMap.isEmpty()) {
           System.out.println(" *** LAST User (" + userId + ") removed from UserMonitor");
-          stopTimer();
+          stopTimer("UserMonitor");
         }
       } 
       else 
         System.out.println(" *** removeUser: user " + userId + " not found in map");
     }
 
-    @Override
     public void autoLogout(int userId){
       try{
         Optional<User> optionalUser = userRepository.findById(userId);
@@ -130,7 +123,7 @@ public class UserMonitor extends IdleMonitor<Integer> {
     }
 
     @Override
-    public void cleanupIdleUsers() {
+    public void cleanupIdleItems() {
       try {
         LocalDateTime now = LocalDateTime.now();
         System.out.println(" *** cleanupIdleUsers-START, Count = " + userActivityMap.size());
@@ -148,7 +141,7 @@ public class UserMonitor extends IdleMonitor<Integer> {
         });
         System.out.println(" *** cleanupIdleUsers-END, Count = " + userActivityMap.size());
         if( userActivityMap.isEmpty() ) // Stop timer if no active users remain
-          stopTimer();
+          stopTimer("UserMonitor");
       } 
       catch (Exception e) {
         System.err.println("Fatal error in cleanupIdleUsers: " + e.getMessage());
