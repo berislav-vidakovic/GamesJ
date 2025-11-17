@@ -17,7 +17,7 @@
 9. [Web socket and CORS policy to connect Frontend with backend](#9-web-socket-and-cors-policy-to-connect-frontend-with-backend)
 10. [Hashing password and JWT authentication](#10-hashing-password-and-jwt-authentication)
 11. [Refresh token and auto login/logout](#11-refresh-token-and-auto-loginlogout)
-12. [Websocket monitor and idle cleanup](#12-websocket-monitor-and-idle-cleanup)
+12. [Session monitor and idle cleanup](#12-session-monitor-and-idle-cleanup)
 
 
 ### 1. Create Project skeleton
@@ -395,7 +395,7 @@
 </table>
 
 
-### 12. Websocket monitor and idle cleanup
+### 12. Session Monitor and idle cleanup
 
 - Websocket connection
   - Established on mount
@@ -407,6 +407,153 @@
   - Remove users - Auto logout
   - Close sessions and remove from Map
 
-  
+#### Implementing Timer for cleanup Users
+
+- When the 1st User connected Timer started
+- Timer is running while there are connected users
+- When the last User disconnected Timer stops
+
+There is checklist for Timer implementation
+
+  - using a ScheduledExecutorService
+  - starting the timer only when needed
+  - stopping the timer when the last user is removed
+  - shutting down cleanly via @PreDestroy
+  - avoiding race-conditions with synchronized
+  - stopping only the repeating task (not the whole executor)
+
+
+1. Define parameters in application.yaml:
+
+    ```yaml
+    useridle:
+      timeout-mins: 2
+      check-interval-sec: 60
+    ```
+
+2. Inject parameters from application.yaml to class member variables
+
+    ```java
+    @Value("${useridle.timeout-mins}")
+    private short idleTimeoutMinutes;
+
+    @Value("${useridle.check-interval-sec}")
+    private short cleanupIntervalSeconds;
+    ```
+
+3. Add scheduler and task member variables
+
+    ```java
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> cleanupTask;  // to control start/stop
+    ```
+
+4. Create stopTimer method
+
+    ```java
+    private synchronized void stopTimer() {
+      if (cleanupTask != null && !cleanupTask.isCancelled()) 
+          cleanupTask.cancel(false);
+    }
+    ```
+
+
+5. Create cleanup method
+
+    - check user timestamp if it is older than idleTimeoutMinutes 
+    - stop Timer when last user removed 
+
+    ```java
+    public void cleanupIdleUsers() {
+      try {
+        LocalDateTime now = LocalDateTime.now();
+        Duration idleTimeout = Duration.ofMinutes(idleTimeoutMinutes);
+        userActivityMap.entrySet().removeIf(entry -> {
+          boolean idle = Duration.between(entry.getValue().getTimeStamp(), now).compareTo(idleTimeout) > 0;
+          if (idle) {
+            int userId = entry.getKey();
+            System.out.println(" *** Removing idle user: " + userId);
+            autoLogout(userId);
+          }
+          return idle;
+        });
+        if( userActivityMap.isEmpty() ) // Stop timer if no active users remain
+          stopTimer();
+      } 
+      catch (Exception e) {
+        System.err.println("Fatal error in cleanupIdleUsers: " + e.getMessage());
+        e.printStackTrace();
+      }
+    }
+    ```
+
+6. Create start Timer method
+
+    - assign scheduler.scheduleAtFixedRate return value to cleanupTask
+      - attach cleanup function 
+      - set interval for its execution to cleanupIntervalSeconds
+
+    ```java
+    private synchronized  void startTimer(){
+      if (cleanupTask != null && !cleanupTask.isCancelled() && !cleanupTask.isDone())
+        return; // already running
+      cleanupTask = scheduler.scheduleAtFixedRate(
+        this::cleanupIdleUsers,
+        cleanupIntervalSeconds,
+        cleanupIntervalSeconds,
+        TimeUnit.SECONDS
+      );
+      System.out.println(" *** Timer started " );
+    }
+    ```
+
+7. Call startTimer when the first user added
+
+    - Timer not started if cleanupTask not defined 
+
+    ```java
+    public void updateUserActivity(int userId, UUID clientId) {
+      // add or update userId in map  
+      userActivityMap.compute(userId, (key, existingClient) -> {
+        if (existingClient == null) {
+          return new Client(LocalDateTime.now(), clientId);
+        } 
+        else {
+          existingClient.setTimeStamp();
+          existingClient.setClientId(clientId);
+          return existingClient;
+        }
+      });
+      if (cleanupTask == null || cleanupTask.isCancelled() || cleanupTask.isDone()) 
+        startTimer();
+    }
+    ```
+
+8. Call stopTimer when the last user removed
+
+    ```java
+    public synchronized void removeUser(int userId) {
+      if (userActivityMap.remove(userId) != null) {
+        System.out.println(" *** User " + userId + " removed from UserMonitor");
+        if (userActivityMap.isEmpty()) { // If no users remain → stop timer
+          System.out.println(" *** LAST User (" + userId + ") removed from UserMonitor");
+          stopTimer();
+        }
+      } 
+      else 
+        System.out.println(" *** removeUser: user " + userId + " not found in map");
+    }
+    ```
+
+9. Create shutdown method to be  called when the Spring application is shutting down.
+
+    ```java
+    @PreDestroy
+    public void shutdown() {
+        scheduler.shutdown();
+        System.out.println(" *** Scheduler SHUTDOWN");
+    }
+    ```
+
 
 

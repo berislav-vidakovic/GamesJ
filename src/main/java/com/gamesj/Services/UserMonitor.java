@@ -15,43 +15,33 @@ import org.springframework.stereotype.Service;
 import com.gamesj.Models.User;
 import com.gamesj.Repositories.UserRepository;
 import com.gamesj.WebSockets.WebSocketHandler;
+
+import jakarta.annotation.PreDestroy;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 // Spring-managed singleton 
 @Service
-public class UserMonitor {
+public class UserMonitor extends IdleMonitor<Integer> {
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private ApplicationContext context; // inject context
-
-    @Autowired
     private ObjectMapper mapper;
-
-    // Injected via application.properties
-    @Value("${useridle.timeout-mins}")
-    private long idleTimeoutMinutes;
-
-    @Value("${useridle.check-interval-sec}")
-    private long cleanupIntervalSeconds;
-
 
     private final ConcurrentHashMap<Integer, Client> userActivityMap = new ConcurrentHashMap<>();
     public static final int EMPTY_USERID = -1;
 
-    // Timer functionality: ScheduledExecutorService
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private ScheduledFuture<?> cleanupTask;  // to control start/stop
-
-    public UserMonitor() {
-      System.out.println(" =========== Created UserMonitor ======="); 
+    public UserMonitor( 
+      @Value("${useridle.timeout-mins}") short idleTimeoutMinutes,
+      @Value("${useridle.check-interval-sec}") short cleanupIntervalSeconds ){
+        super(idleTimeoutMinutes, cleanupIntervalSeconds);
     }
 
-    private void broadcastWsMessage(String wsJson) {
-      WebSocketHandler wsHandler =  context.getBean(WebSocketHandler.class);
-      wsHandler.broadcast(wsJson);
+    @Override
+    protected ConcurrentHashMap<Integer, Client> getActivityMap() {
+      return userActivityMap;
     }
 
     public UUID getClientIdByUserId(int userId){
@@ -72,6 +62,7 @@ public class UserMonitor {
     }
 
     // called from controllers 1) /api/login and 2) /auth/refresh
+    @Override
     public void updateUserActivity(int userId, UUID clientId) {
       // add or update userId in map  
       userActivityMap.compute(userId, (key, existingClient) -> {
@@ -84,7 +75,6 @@ public class UserMonitor {
           return existingClient;
         }
       });
-
       System.out.println(" *** *** UserId upd. for clientId=" + clientId + " User(s): " + userActivityMap.size() 
         + " UserId: " + userId );
       //System.out.println(" *** updateUserActivity " + userId + " @ " + LocalDateTime.now() + " id=" + clientId);
@@ -93,6 +83,7 @@ public class UserMonitor {
     }
 
     // called from controller /api/logout
+    @Override
     public synchronized void removeUser(int userId) {
       if (userActivityMap.remove(userId) != null) {
         System.out.println(" *** User " + userId + " removed from UserMonitor");
@@ -106,28 +97,7 @@ public class UserMonitor {
         System.out.println(" *** removeUser: user " + userId + " not found in map");
     }
 
-    private synchronized  void startTimer(){
-      if (cleanupTask != null && !cleanupTask.isCancelled() && !cleanupTask.isDone()) {
-        return; // already running
-      }
-
-      cleanupTask = scheduler.scheduleAtFixedRate(
-        this::cleanupIdleUsers,
-        cleanupIntervalSeconds,
-        cleanupIntervalSeconds,
-        TimeUnit.SECONDS
-      );
-
-      System.out.println(" *** Timer started " );
-    }
-
-    private synchronized void stopTimer() {
-        if (cleanupTask != null && !cleanupTask.isCancelled()) {
-            cleanupTask.cancel(false);
-            System.out.println(" *** Timer STOPPED");
-        }
-    }
-
+    @Override
     public void autoLogout(int userId){
       try{
         Optional<User> optionalUser = userRepository.findById(userId);
@@ -159,6 +129,7 @@ public class UserMonitor {
       }
     }
 
+    @Override
     public void cleanupIdleUsers() {
       try {
         LocalDateTime now = LocalDateTime.now();
@@ -183,11 +154,5 @@ public class UserMonitor {
         System.err.println("Fatal error in cleanupIdleUsers: " + e.getMessage());
         e.printStackTrace();
       }
-    }
-
-    // shutdown scheduler (when app stops)
-    public void shutdown() {
-        scheduler.shutdown();
-        System.out.println(" *** Scheduler SHUTDOWN");
-    }
+    }    
 }
