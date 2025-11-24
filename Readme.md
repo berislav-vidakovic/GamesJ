@@ -28,6 +28,7 @@
 
       - Project	Maven
       - Language	Java
+      - Spring Boot - latest stable (no RC2, SNAPSHOT)
       - Group	com.gamesj
       - Artifact	gamesj
       - Name	gamesj
@@ -37,14 +38,38 @@
     - Add Dependencies (click Add Dependencies):
 
       - Spring Web (for REST API)
-      - Spring WebSocket (for WebSocket support)
+      - WebSocket (for WebSocket support)
       - Spring Boot DevTools
+    
+    - Download and Extract
 
-2. Download, Extract and run
+2. Define Port (default is 8080) in application.yaml
+
+      ```yaml
+      server:
+        port: 8081
+      ```
+
+3. Run
 
         mvn spring-boot:run
 
-3. Git init, commit, push
+4. Git init, commit, push
+
+    - Create Repo on GitHub
+    - Run
+      ```bash
+      git init
+      git add .
+      git commit -m "Initial commit"
+      ```
+    - Get Remote Repo SSH link and run
+      ```bash
+      git remote add origin git@github.com:berislav-vidakovic/ChatAppJn.git
+      ```
+
+
+
 
 ### 2. Add ping endpoint
 

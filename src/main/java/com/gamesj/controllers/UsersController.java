@@ -27,8 +27,12 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+// GET /api/users/all
+// POST /api/users/new
+// POST /api/users/login
+// POST /api/users/logout
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/users") 
 public class UsersController {
   @Autowired
   private UserRepository userRepository;
