@@ -11,7 +11,7 @@ function App() {
   const [solution, setSolution] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [level, setLevel] = useState<number>(0);
-  const [adminMode, setAdminMode] = useState<boolean>(false);
+  const [adminMode, setAdminMode] = useState<boolean>(true);
   const [selectedGameIdx, setSelectedGameIdx] = useState<number | null>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [startTimer, setStartTimer] = useState(false);  
@@ -36,6 +36,8 @@ function App() {
 
   const handleInit = ( jsonResp: any ) => {    
     console.log("Number of boards  : ", jsonResp.boards.length );
+    //console.log("Number of boards  : ", jsonResp );
+    //return;
     sessionStorage.setItem("myID", jsonResp.clientId );
     if( jsonResp.boards.length ){
       const games : Game[] = [];
@@ -80,14 +82,15 @@ function App() {
   return (
     <div 
       style={{
-        height: "100vh",
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        paddingTop: "16px",
         backgroundColor: "#f8f9fa",
       }}>
       
+      { adminMode && (
       <div className="auth-buttons">
         <button
           onClick={()=>{
@@ -108,6 +111,7 @@ function App() {
           Save
         </button>
       </div>
+      )}
       
       <h2>Sudoku</h2>
       <div className="auth-buttons">
@@ -121,9 +125,11 @@ function App() {
         >
           Start
         </button>    
+
         <button
           onClick={()=>{
-            if( startTimer || adminMode ) return;
+            //if( startTimer || adminMode ) return;
+            if( startTimer  ) return;
             let idx:number = (selectedGameIdx as number+1) % games.length;
             console.log(selectedGameIdx, idx, games.length);
             setSelectedGameIdx(idx);
@@ -136,6 +142,9 @@ function App() {
           onClick={()=> {
             if( !adminMode )
               setStartTimer(false); 
+              setBoardsLoaded(false);
+              sendGETRequest('api/sudoku/board', handleInit );
+
             //setRestartTimerFlag(!restartTimerFlag);
           } }
         >
