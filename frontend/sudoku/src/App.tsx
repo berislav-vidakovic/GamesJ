@@ -1,8 +1,9 @@
 // App.tsx
 import Board from "./Board";
-import { sendGETRequest } from '@common/restAPI';
+import { sendGETRequest, sendPOSTRequest } from '@common/restAPI';
 import { loadCommonConfig } from '@common/config';
 import { useEffect, useState } from "react";
+import { StatusCodes } from "http-status-codes";
 
 function App() {
   const [isConfigLoaded, setConfigLoaded] = useState<boolean>(false);
@@ -110,6 +111,29 @@ function App() {
         >
           Save
         </button>
+
+         {(<button
+          disabled={boardString.includes("0")}
+          onClick={()=>{             
+              
+                sendPOSTRequest('api/sudoku/tested', 
+                     JSON.stringify({ boardString }), 
+                (jsonResp: any, status: number) => {
+                    switch(status)
+                    {
+                      case StatusCodes.OK:
+                        console.log("Board set tested positive: ", jsonResp);
+                        break;
+                      default:
+                        console.log("Error encountered");
+                    }
+                  });
+
+            }}          
+        >
+          Tested OK
+        </button>
+      )}
       </div>
       )}
       

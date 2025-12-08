@@ -9,6 +9,7 @@ CREATE TABLE sudokuboards (
   solution VARCHAR(81) NOT NULL,
   name VARCHAR(20) NOT NULL,
   level TINYINT NOT NULL,
+  testedOK BOOLEAN DEFAULT FALSE,
   UNIQUE (board)
 );
 
