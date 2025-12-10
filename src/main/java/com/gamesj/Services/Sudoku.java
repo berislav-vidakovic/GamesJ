@@ -44,8 +44,6 @@ public class Sudoku {
         if( !areDigits1to9( sb.toString() ) )
           return false;              
       }
-
-
     
     return true;
   }

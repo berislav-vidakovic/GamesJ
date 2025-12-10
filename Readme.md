@@ -180,6 +180,14 @@
 
       https://gamesj.barryonweb.com/ping
 
+- Check Linux version, CPU, memory, disk
+  ```bash
+  lsb_release -a
+  htop
+  free -h
+  df -h
+  ```
+
 
 ### 6. Register backend as service
 
@@ -272,9 +280,84 @@
 
 - Add dependencies JPA and MySQL to pom.xml
 
-- Configure datasource in src/main/resources/application.yaml
+- Remote access
+
+  - Configure datasource in src/main/resources/application.yaml
+    ```yaml
+    url: jdbc:mysql://barryonweb.com:3306/db_games?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    ```
+
+  - Check if remote MySQL accepts external connections, update and restart
+    ```bash
+    sudo netstat -tulnp | grep 3306
+    /etc/mysql/mysql.conf.d/mysqld.cnf -> [mysqld] bind-address = 0.0.0.0
+    sudo systemctl restart mysql
+    ```
+
+  - Check existing users
+    ```sql
+    SELECT User, Host, authentication_string, plugin FROM mysql.user;
+    ```
+
+  - Create a remote-access version of this user and grant it privileges
+    ```sql
+    CREATE USER 'barry75'@'%' IDENTIFIED WITH caching_sha2_password BY 'abc123';
+    GRANT ALL PRIVILEGES ON db_games.* TO 'barry75'@'%';
+    FLUSH PRIVILEGES;
+    ```
 
 - Create Controller, Model, Repository
+
+- MySQL
+  - Get MySQL version
+    ```sql
+    SELECT VERSION();
+    ```
+
+  - Show tables and details
+    ```sql
+    SHOW TABLES;
+    DESCRIBE sudokuboards;
+    ```
+
+  - Add missing column
+    ```sql
+    ALTER TABLE  sudokuboards
+    ADD COLUMN testedOK tinyint(1) DEFAULT 0;
+    ```
+
+  - Copy content from local MySQL database to remote
+    ```sql
+    -- On source server
+    SELECT * 
+    INTO OUTFILE 'C:/ProgramData/MySQL/MySQL Server 9.4/Data/Uploads/sudokuboards.csv'
+    FIELDS TERMINATED BY ','
+    ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    FROM sudokuboards;
+
+    scp 'C:/ProgramData/MySQL/MySQL Server 9.4/Data/Uploads/sudokuboards.csv' barry75@barryonweb.com:/var/www/games/gamesj/data/mysql/
+
+    -- On target server
+    sudo mysql -u root -p
+    GRANT FILE ON *.* TO 'barry75'@'localhost';
+    FLUSH PRIVILEGES;
+
+    SHOW VARIABLES LIKE 'secure_file_priv';
+    sudo cp /var/www/games/gamesj/data/mysql/sudokuboards.csv /var/lib/mysql-files/
+    sudo chown mysql:mysql /var/lib/mysql-files/sudokuboards.csv
+
+    LOAD DATA INFILE '/var/lib/mysql-files/sudokuboards.csv'
+    INTO TABLE sudokuboards --existing table
+    FIELDS TERMINATED BY ','
+    ENCLOSED BY '"'
+    LINES TERMINATED BY '\n';    
+    ```
+
+- Test connection
+  ```
+  http://localhost:8080/api/pingdb
+  ```
 
 
 ### 9. Web socket and CORS policy to connect Frontend with backend
