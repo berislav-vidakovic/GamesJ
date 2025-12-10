@@ -11,6 +11,7 @@ interface SudokuBoardProps {
   solutionString: string;
   name: string;
   level: number;
+  testedOK: boolean;
   adminMode: boolean;
   startTimer: boolean;
   setStartTimer: Dispatch<SetStateAction<boolean>>;
@@ -19,7 +20,7 @@ interface SudokuBoardProps {
 type BoardArray = string[][];
 
 const SudokuBoard: React.FC<SudokuBoardProps> = ({ 
-  boardString, setBoardString, solutionString, name, level, adminMode, startTimer, setStartTimer }) => {
+  boardString, setBoardString, solutionString, name, level, testedOK, adminMode, startTimer, setStartTimer }) => {
   
 
   const initialBoard: BoardArray = Array.from({ length: 9 }, (_, row) =>
@@ -227,6 +228,14 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
       {/* Name and level */}
       <div className={"sudokuinfobox"}  >
         <div>Game: {name}</div>
+        { (
+        <div>{
+          !testedOK  
+          ? <span style={{ color: "red"}}>❌ not tested</span>
+          : <span style={{ color: "green"}}>✅ Tested OK</span>          
+        }
+        </div>)
+        }
         <div>Level: {level == 2 ? "Medium" : "Easy"}</div>
       </div>
       

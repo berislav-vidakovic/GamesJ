@@ -25,6 +25,9 @@ public class SudokuBoard {
     @Column(name = "level", nullable = false)
     private byte level;  // TINYINT → byte
 
+    @Column(name = "testedOK", nullable = false)
+    private boolean testedOK = false;  // default value
+
     // Constructors
     public SudokuBoard() {}
 
@@ -36,6 +39,14 @@ public class SudokuBoard {
     }
 
     // Getters and setters
+    public boolean isTestedOK() {
+        return testedOK;
+    }
+
+    public void setTestedOK(boolean testedOK) {
+        this.testedOK = testedOK;
+    }
+
     public Integer getBoardId() {
         return boardId;
     }

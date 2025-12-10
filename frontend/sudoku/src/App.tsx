@@ -12,6 +12,7 @@ function App() {
   const [solution, setSolution] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [level, setLevel] = useState<number>(0);
+  const [testedOK, setTested] = useState<boolean>(false);
   const [adminMode, setAdminMode] = useState<boolean>(true);
   const [selectedGameIdx, setSelectedGameIdx] = useState<number | null>(null);
   const [games, setGames] = useState<Game[]>([]);
@@ -32,12 +33,12 @@ function App() {
     board: string,
     solution: string, 
     name: string, 
-    level: number
+    level: number,
+    testedOK: boolean
   } 
 
   const handleInit = ( jsonResp: any ) => {    
-    console.log("Number of boards  : ", jsonResp.boards.length );
-    //console.log("Number of boards  : ", jsonResp );
+    console.log("Boards  : ", jsonResp );
     //return;
     sessionStorage.setItem("myID", jsonResp.clientId );
     if( jsonResp.boards.length ){
@@ -48,7 +49,8 @@ function App() {
           board: b.board,
           solution: b.solution,
           name: b.name,
-          level: b.level
+          level: b.level,
+          testedOK: b.testedOK
         });
       }
       setGames(games);
@@ -63,6 +65,8 @@ function App() {
     setSolution(games[idx].solution);
     setName(games[idx].name);
     setLevel(games[idx].level);
+    setTested( games[idx].testedOK);
+
   }
 
   useEffect(() => {
@@ -92,7 +96,12 @@ function App() {
       }}>
       
       { adminMode && (
-      <div className="auth-buttons">
+      <div 
+        className="auth-buttons"
+        style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      >      
+
+      <div style={{ display: "flex", gap: "4px", justifyContent: "center", alignItems: "center" }}>
         <button
           onClick={()=>{
             setStartTimer(false); 
@@ -104,36 +113,133 @@ function App() {
         </button>
         
         <button
-          onClick={()=>{ 
-            if( adminMode )
-              console.log(boardString);
-          }}
+         onClick={()=>{                          
+              console.log(boardString); 
+              sendPOSTRequest('api/sudoku/addgame', 
+                JSON.stringify({ boardString, name }), 
+              (jsonResp: any, status: number) => {
+                switch(status)
+                {
+                  case StatusCodes.OK:
+                    console.log("Added new game: ", jsonResp);
+                    sessionStorage.setItem("currentGameAdding", boardString );
+                    break;
+                  default:
+                      console.log("Error encountered: ", jsonResp);
+
+                }
+              });
+            }
+          }   
         >
-          Save
+          Board
         </button>
 
          {(<button
-          disabled={boardString.includes("0")}
-          onClick={()=>{             
-              
-                sendPOSTRequest('api/sudoku/tested', 
-                     JSON.stringify({ boardString }), 
-                (jsonResp: any, status: number) => {
-                    switch(status)
-                    {
-                      case StatusCodes.OK:
-                        console.log("Board set tested positive: ", jsonResp);
-                        break;
-                      default:
-                        console.log("Error encountered");
-                    }
-                  });
-
-            }}          
+          disabled={false} //{boardString.includes("0")}}
+          onClick={()=>{                          
+              console.log(boardString); 
+              const board = sessionStorage.getItem("currentGameAdding" );
+              sendPOSTRequest('api/sudoku/solution', 
+                    JSON.stringify({ board, solution: boardString, name }), 
+              (jsonResp: any, status: number) => {
+                  switch(status)
+                  {
+                    case StatusCodes.OK:
+                      const game: Game = {
+                        board: jsonResp.board,
+                        solution: jsonResp.solution,
+                        name: jsonResp.name,
+                        testedOK: false,
+                        level: 2
+                      };
+                      games.push(game);
+                      console.log("Board solution updated: ", jsonResp);
+                      break;
+                    default:
+                      console.log("Error encountered: ", jsonResp);
+                  }
+                });
+            }
+          }          
         >
-          Tested OK
-        </button>
-      )}
+          Solution
+        </button>)        
+        }
+        </div>
+
+
+          {
+          <div style={{ width: "100%", marginTop: "8px" }}>
+            <button
+              onClick={()=>{                          
+                  console.log(boardString, name, games[selectedGameIdx as number].name); 
+                  sendPOSTRequest('api/sudoku/setname', 
+                    JSON.stringify({ board: boardString, name }),  
+                      (jsonResp: any, status: number) => {
+                        switch(status)
+                        {
+                          case StatusCodes.OK:
+                            const game = games.find(g=>g.board == jsonResp.board);
+                            if( game ) {
+                              game.name = jsonResp.name;
+                              setGames([...games]);   // Trigger list refresh
+                              console.log("Board name updated: ", jsonResp);
+                            }
+                            else  
+                              console.log("Error - board not found", jsonResp);
+                            break;
+                          default:
+                            console.log("Error encountered: ", jsonResp);
+                        }
+                      }
+                  );
+                }
+              }            
+            >Set Name</button>
+
+            <input 
+              type="text" 
+              style={{ width: "30%", boxSizing: "border-box", marginLeft: "6px" }} 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Game name"
+            />
+
+            <button
+              onClick={()=>{                          
+                  console.log(boardString, name, games[selectedGameIdx as number].name); 
+                  sendPOSTRequest('api/sudoku/tested', 
+                    JSON.stringify({ board: boardString, name }),  
+                      (jsonResp: any, status: number) => {
+                        switch(status)
+                        {
+                          case StatusCodes.OK:
+                            const game = games.find(g=>g.board == jsonResp.board);
+                            if( game ) {
+                              game.name = jsonResp.name;
+                              game.testedOK = true;        
+                              setGames([...games]);   // Trigger list refresh
+                              setTested(true);        // Update current game UI                      
+                              console.log("Tested OK updated: ", jsonResp);
+                            }
+                            else  
+                              console.log("Error - board not found", jsonResp);
+                            break;
+                          default:
+                            console.log("Error encountered: ", jsonResp);
+                        }
+                      }
+                  );
+                }
+              }  
+            
+            >Tested OK</button>
+
+          </div>
+          }
+
+
       </div>
       )}
       
@@ -184,6 +290,7 @@ function App() {
         solutionString={solution} 
         name={name}
         level={level}
+        testedOK={testedOK}
         adminMode={adminMode}
         startTimer={startTimer}
         setStartTimer={setStartTimer}

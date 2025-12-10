@@ -58,6 +58,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         path.startsWith("/api/users/all") ||
         path.startsWith("/api/users/new") ||
         path.startsWith("/api/sudoku/board") ||
+        path.startsWith("/api/sudoku/tested") ||
+        path.startsWith("/api/sudoku/addgame") ||
+        path.startsWith("/api/sudoku/solution") ||
+        path.startsWith("/api/sudoku/setname") ||
         path.startsWith("/favicon.ico") || 
         path.startsWith("/websocket") ||
         path.startsWith("/images") ||

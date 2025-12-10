@@ -35,7 +35,7 @@ export async function sendPOSTRequest(
     msgBody: string, 
     handleResponse: (data: any, status: number) => void ): Promise<any> {
   const postUrl = `${URL_BACKEND_HTTP}/${endpoint}` + `?id=${sessionStorage.getItem("myID")}`;
-  //console.log("Sending POST: ", `${postUrl} Body:${msgBody}` );
+  console.log("Sending POST: ", `${postUrl} Body:${msgBody}` );
   fetch( postUrl, {
           method: "POST",
           headers: { 
@@ -57,6 +57,7 @@ export async function sendPOSTRequest(
         case StatusCodes.BAD_REQUEST: // 400      
         case StatusCodes.NOT_FOUND: // 404      
         case StatusCodes.UNAUTHORIZED: // 401 
+        case StatusCodes.NO_CONTENT: // 204  - no body!
           handleResponse( jsonResp, res.status );
           break;
         default:
