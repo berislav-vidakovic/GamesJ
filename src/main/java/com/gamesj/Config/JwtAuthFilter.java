@@ -19,28 +19,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                   FilterChain filterChain)
           throws ServletException, IOException {
 
-    // Add CORS headers
-    // Allowed origins
-    String origin = request.getHeader("Origin");
-    String[] allowedOrigins = {
-            "http://localhost:5174",
-            "http://localhost:5175",
-            "http://localhost:5176",
-            "https://gamesj.com"
-    };
-    // If Origin is in the allowed list, echo it back
-    for (String allowed : allowedOrigins) {
-        if (allowed.equals(origin)) {
-            response.setHeader("Access-Control-Allow-Origin", origin);
-            response.setHeader("Vary", "Origin"); // Required for proxies
-            break;
-        }
-    }
-
-    response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-    response.setHeader("Access-Control-Allow-Credentials", "true");
-
     // Allow preflight requests (CORS) to pass through
     if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
         response.setStatus(HttpServletResponse.SC_OK);
