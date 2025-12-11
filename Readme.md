@@ -671,7 +671,9 @@ There is checklist for Timer implementation
     ```
 
 
-### 13. RBAC and protected endpoint settings   
+### 13. Protected and public endpoint handling on backend
+
+
 
 
 

@@ -22,7 +22,8 @@ public class AppConfig {
             registry.addMapping("/**")
                     .allowedOrigins("http://localhost:5174",
                       "http://localhost:5175", 
-                      "https://gamesj.barryonweb.com")
+                      "https://gamesj.barryonweb.com",
+                      "https://gamesjclient.barryonweb.com")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowCredentials(true);
         }
