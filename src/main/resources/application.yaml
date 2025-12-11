@@ -15,6 +15,8 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+server:
+  port: 8082
 websocket:
   timeout-mins: 1
   check-interval-sec: 45

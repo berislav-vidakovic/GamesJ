@@ -43,11 +43,11 @@
     
     - Download and Extract
 
-2. Define Port (default is 8080) in application.yaml
+2. Define Port (default is 8080) in application.yaml (root key)
 
       ```yaml
       server:
-        port: 8081
+        port: 8082
       ```
 
 3. Run
@@ -74,6 +74,13 @@
 ### 2. Add ping endpoint
 
 - Create Controllers/PingController.java
+  - Enpoint: /api/ping
+  - Response: { response: pong }
+
+- Test connection
+  ```
+  http://localhost:8082/api/ping
+  ```
 
 ### 3. Create Nginx Config Template for Spring Boot Backend
 
@@ -85,7 +92,7 @@
       server_name gamesj.barryonweb.com;
 
       location / {
-          proxy_pass http://127.0.0.1:8080/;
+          proxy_pass http://127.0.0.1:8082/;
           proxy_set_header Host $host;
           proxy_set_header X-Real-IP $remote_addr;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -94,7 +101,7 @@
 
       # Health check endpoint
       location /ping {
-          proxy_pass http://127.0.0.1:8080/api/ping;
+          proxy_pass http://127.0.0.1:8082/api/ping;
           proxy_set_header Host $host;
           proxy_set_header X-Real-IP $remote_addr;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -356,7 +363,7 @@
 
 - Test connection
   ```
-  http://localhost:8080/api/pingdb
+  http://localhost:8082/api/pingdb
   ```
 
 
@@ -662,6 +669,9 @@ There is checklist for Timer implementation
         System.out.println(" *** Scheduler SHUTDOWN");
     }
     ```
+
+
+### 13. RBAC and protected endpoint settings   
 
 
 
