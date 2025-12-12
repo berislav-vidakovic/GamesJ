@@ -24,8 +24,6 @@ import com.gamesj.Services.UserMonitor;
 import com.gamesj.WebSockets.WebSocketHandler;
 
 // POST /api/auth/refresh
-
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

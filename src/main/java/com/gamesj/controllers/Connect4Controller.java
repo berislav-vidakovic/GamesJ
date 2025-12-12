@@ -19,6 +19,11 @@ import java.util.UUID;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+// POST /init
+// POST /swapcolors
+// POST /start
+// POST /insertdisk
+// POST /newgame
 @RestController
 @RequestMapping("/api/games/connect4")
 public class Connect4Controller {

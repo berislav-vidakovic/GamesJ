@@ -27,10 +27,10 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-// GET /api/users/all
-// POST /api/users/new
-// POST /api/users/login
-// POST /api/users/logout
+// GET /all
+// POST /new
+// POST /login
+// POST /logout
 @RestController
 @RequestMapping("/api/users") 
 public class UsersController {
@@ -53,7 +53,7 @@ public class UsersController {
   private ObjectMapper mapper;
 
   public UsersController(UserRepository userRepository) {
-      this.userRepository = userRepository;
+    this.userRepository = userRepository;
   }
 
   @GetMapping("/all")

@@ -23,10 +23,9 @@ import java.util.UUID;
 
 // GET /board
 // POST /tested
+// POST /solution
 // POST /setname
 // POST /addgame
-// POST /solution
-
 @RestController
 @RequestMapping("/api/sudoku")
 public class SudokuController {

@@ -8,6 +8,7 @@ import com.gamesj.Models.Localization;
 
 import java.util.*;
 
+// GET /get
 @RestController
 @RequestMapping("/api/localization")
 public class LocalizationController {

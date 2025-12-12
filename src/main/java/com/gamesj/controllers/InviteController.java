@@ -22,6 +22,10 @@ import java.util.UUID;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+// POST /invite
+// POST /accept
+// POST /cancel
+// POST /reject
 @RestController
 @RequestMapping("/api/invitations")
 public class InviteController {

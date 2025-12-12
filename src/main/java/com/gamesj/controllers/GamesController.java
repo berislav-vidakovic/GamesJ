@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+// POST /run
+// POST /init
 @RestController
 @RequestMapping("/api/games")
 public class GamesController {
