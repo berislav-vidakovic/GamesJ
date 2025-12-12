@@ -18,6 +18,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(webSocketHandler, "/websocket")
                 .setAllowedOrigins("http://localhost:5174",
-                                   "http://localhost:5176" ); // frontend origin
+                  "http://localhost:5176",
+                  "https://gamesjclient.barryonweb.com" ); // frontend origin
     }
 }
