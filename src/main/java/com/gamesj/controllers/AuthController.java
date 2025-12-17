@@ -63,6 +63,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
+      // Request: ?id=guid body: { refreshToken }
       try {        
         // Validate clientId
         UUID parsedClientId;

@@ -13,7 +13,7 @@
 5. [Build backend, Deploy, install Java Runtime and Test](#5-build-backend-deploy-install-java-runtime-and-test)
 6. [Register backend as service](#6-register-backend-as-service)
 7. [Create CI/CD pipeline](#7-create-cicd-pipeline)
-8. [Connect backend to DB](#8-connect-backend-to-db)
+8. [Connect backend to DB via JPA/Hibernate](#8-connect-backend-to-db-via-jpahibernate)
 9. [Web socket and CORS policy to connect Frontend with backend](#9-web-socket-and-cors-policy-to-connect-frontend-with-backend)
 10. [Hashing password and JWT authentication](#10-hashing-password-and-jwt-authentication)
 11. [Refresh token and auto login/logout](#11-refresh-token-and-auto-loginlogout)
@@ -283,7 +283,7 @@
   - GitHub Actions - Run workflow
 
 
-### 8. Connect backend to DB
+### 8. Connect backend to DB via JPA/Hibernate
 
 - Add dependencies JPA and MySQL to pom.xml
 
@@ -308,7 +308,7 @@
 
   - Create a remote-access version of this user and grant it privileges
     ```sql
-    CREATE USER 'barry75'@'%' IDENTIFIED WITH caching_sha2_password BY 'abc123';
+    CREATE USER 'barry75'@'%' IDENTIFIED WITH caching_sha2_password BY 'StrongPwd!';
     GRANT ALL PRIVILEGES ON db_games.* TO 'barry75'@'%';
     FLUSH PRIVILEGES;
     ```
@@ -316,9 +316,10 @@
 - Create Controller, Model, Repository
 
 - MySQL
-  - Get MySQL version
+  - Get MySQL version and current database selected
     ```sql
     SELECT VERSION();
+    SELECT DATABASE();
     ```
 
   - Show tables and details
@@ -360,11 +361,18 @@
     ENCLOSED BY '"'
     LINES TERMINATED BY '\n';    
     ```
-
 - Test connection
-  ```
-  http://localhost:8082/api/pingdb
-  ```
+
+  - MySQL Internal and external connection
+    ```bash
+    mysql -u barry75 -p
+    mysql -h barryonweb.com -P 3306 -u barry75 -p db_games;
+    ```
+
+  - Backend connection to DB
+    ```bash
+    http://localhost:8082/api/pingdb
+    ```
 
 
 ### 9. Web socket and CORS policy to connect Frontend with backend
@@ -671,9 +679,202 @@ There is checklist for Timer implementation
     ```
 
 
-### 13. Protected and public endpoint handling on backend
+### 13. Data Migration between MySQL and PostgreSQL database
 
 
 
+#### Table of Contents
+
+1. [Skills demonstrated](#skills-demonstrated)
+2. [Challenges & Solutions](#challenges--solutions)
+3. [Prerequisites](#prerequisites)
+4. [Export from MySQL to CSV file](#export-from-mysql-to-csv-file)
+5. [Import from CSV file to PostgreSQL](#import-from-csv-file-to-postgresql)
+6. [Schedule synchronization job](#schedule-synchronization-job)
+7. [Export from PostgreSQL and inport to MySQL](#export-from-postgresql-and-inport-to-mysql)
 
 
+
+#### Skills demonstrated
+
+- Cross-database migration (MySQL ↔ PostgreSQL)
+- Bash scripting and automation with logging
+- SQL troubleshooting: type conversion, transactions, constraints
+- Linux permissions, cron jobs, and server file management
+- Problem-solving for real-world database integration challenges
+
+#### Challenges & Solutions 
+
+- **Schema and Type Differences**: Cast PostgreSQL booleans to integers for MySQL compatibility and reset auto-increment IDs.
+
+- **Foreign Key Constraints**: Foreign key checks can be temporarily disabled to allow truncation of dependent tables. Used alternative solution with DELETE instead of TRUNCATE in PostgreSQL->MySQL case.
+
+- **File Permissions & Server Restrictions**: Used a dedicated directory and adjusted Linux permissions for safe CSV export/import.
+
+- **Automation & Reliability**: Built a Bash script with logging and scheduled it via cron for daily execution.
+
+- **Data Export/Import Differences**: Standardized CSV format and handled headers correctly for smooth cross-database migration.
+
+#### Prerequisites
+
+- Installed MySQL and PostgreSQL
+- Existing Database with populated tables on MySQL
+- Empty Database created in PostgreSQL
+
+
+#### Export from MySQL to csv file
+
+- Check MySQL’s allowed OUTFILE directory
+  ```bash
+  sudo mysql
+  SHOW VARIABLES LIKE 'secure_file_priv';
+  ```
+
+- Add user to mysql group, relogin and verify
+  ```bash
+  sudo usermod -aG mysql barry75
+  groups
+  ```
+
+- Login as root, check directory permissions, add rx to group
+  ```bash
+  ls -ld /var/lib/mysql-files
+  chmod g+rx /var/lib/mysql-files
+  ```
+
+- Export table to CSV file as super user, which is required because SELECT … INTO OUTFILE needs write access to MySQL’s secure folder (/var/lib/mysql-files).
+  ```sql
+  sudo mysql
+  use db_games
+  SELECT * 
+  INTO OUTFILE '/var/lib/mysql-files/sudokuboards.csv'
+  FIELDS TERMINATED BY ','
+  ENCLOSED BY '"'
+  LINES TERMINATED BY '\n'
+  FROM sudokuboards;
+  ```
+
+- Copy CSV file
+  ```bash
+  cp /var/lib/mysql-files/sudokuboards.csv .
+  ```
+
+
+#### Import from csv file to PostgreSQL
+
+- Copy schema script to server, connect to PostgreSQL and run script 
+  ```bash
+  scp -P 2222 schemapg.sql barry75@barryonweb.com:/var/www/data/migration/games/
+  psql -U barry75 -d db_games
+  \i /var/www/data/migration/games/schemapg.sql
+  ```
+
+- Copy all CSV files from mysql folder 
+  ```bash
+  cp /var/lib/mysql-files/*.csv /var/www/data/migration/games/ 
+  ```
+
+- Connect to PostgreSQL as regular user and Import from CSV
+  ```sql
+  psql -U barry75 -d db_games
+  TRUNCATE sudokuboards RESTART IDENTITY CASCADE;
+  \copy sudokuboards(board_id, board, solution, name, level, testedOK)
+  FROM '/var/www/data/migration/games/sudokuboards.csv'
+  DELIMITER ',' CSV QUOTE '"';
+  ```
+
+
+#### Schedule synchronization job
+
+- MySQL password cfg  ~/.my.cnf
+  ```bash
+  [client]
+  user=root
+  ```
+
+- PostgreSQL password cfg ~/.pgpass
+  ```bash  
+  localhost:5432:db_games:barry75:StrongPwd!
+  chmod 600 ~/.pgpass
+  ```
+
+- Enable user to run mysql via sudo
+  ```bash
+  sudo visudo
+  barry75 ALL=(root) NOPASSWD: /usr/bin/mysql
+  ```
+
+- Enable deleting old files
+  ```bash
+  sudo chmod 770 /var/lib/mysql-files
+  ```
+
+- Create and copy <a href="src/main/resources/mysql_to_pg.sh">bash script</a>
+  ```bash
+  scp -P 2222 mysql_to_pg_daily.sh barry75@barryonweb.com:/var/www/data/migration/games/
+  ```
+
+- Make script executable and Run manually
+  ```bash
+  chmod +x mysql_to_pg_daily.sh
+  ./mysql_to_pg_daily.sh
+  ```
+
+- Edit crontab:
+  ```bash
+  crontab -e
+  ```
+
+- Run every day at 03:55 PM (crontab format: minute,hour,day of month, month, day of week)
+  ```bash
+  55 15 * * * /var/www/data/migration/games/mysql_to_pg_daily.sh
+  ```
+
+- Logs will be written to:
+
+      /var/www/data/migration/games/mysql_to_pg.log
+
+- Current datetime on Linux, MySQL, PostgreSQL
+  ```bash
+  date
+  SELECT NOW(); # PostgreSQL and MySQL
+  ```
+
+#### Export from PostgreSQL and import to MySQL
+
+- Export from PostgreSQL (with boolean conversion)
+  ```sql
+  \copy (SELECT board_id, board, solution, name, level, 
+  (testedOK::int) AS testedOK FROM sudokuboards) 
+  TO '/var/www/data/migration/games/pgsudokuboards.csv' 
+  DELIMITER ',' CSV HEADER;
+  ```
+
+- Copy to MySQL secure location
+  ```sql
+  SHOW VARIABLES LIKE 'secure_file_priv';
+  ```
+  ```bash
+  cp pgsudokuboards.csv /var/lib/mysql-files/
+  ```
+
+- Backup in MySQL (SELECT INTO not supported)
+  ```sql
+  CREATE TABLE sudoku_backup LIKE sudokuboards;  -- copy structure
+  INSERT INTO sudoku_backup SELECT * FROM sudokuboards;  -- copy data
+  ```
+
+- Import to CSV file as super user
+  ```bash
+  sudo mysql
+  use db_games
+  LOAD DATA INFILE '/var/lib/mysql-files/pgsudokuboards.csv' 
+  INTO TABLE sudokuboards FIELDS TERMINATED BY ',' 
+  ENCLOSED BY '"' LINES TERMINATED BY '\n' 
+  IGNORE 1 LINES (board_id,board, solution, name, level, testedOK);
+  ```
+
+- Create <a href="src/main/resources/pg_to_mysql.sh">bash script</a> and copy
+  ```bash
+  scp -P 2222 pg_to_mysql.sh barry75@barryonweb.com:/var/www/data/migration/games/
+  ```

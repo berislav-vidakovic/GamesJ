@@ -13,7 +13,8 @@ public class Sudoku {
     String solution = sudokuBoard.getSolution();
     
     System.out.println(solution);
-    if( solution.contains("0") )
+    
+    if(  solution.contains("0") )
       return false;
 
     if( board.length() != 81 || solution.length() != 81 )

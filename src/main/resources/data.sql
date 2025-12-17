@@ -3,6 +3,9 @@ START TRANSACTION;
 
 SET NAMES utf8mb4;  
 
+DELETE FROM healthcheck;
+INSERT INTO healthcheck (msg) VALUES ('Hello world from DB!');
+
 DELETE FROM users;
 INSERT INTO users (user_id, password_hash, login, full_name) VALUES
   (1,'','shelly','Sheldon'),

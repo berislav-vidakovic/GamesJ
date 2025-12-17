@@ -1,5 +1,8 @@
 name: Deploy Java Backend
 
+env:
+  SSH_PORT: 2222
+
 on:
   push:
     branches:
@@ -38,32 +41,32 @@ jobs:
       - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan barryonweb.com >> ~/.ssh/known_hosts
+          ssh-keyscan -p $SSH_PORT barryonweb.com >> ~/.ssh/known_hosts
 
       # Copy published files to server
       - name: Deploy backend files 
         run: |
           ssh barry75@barryonweb.com "mkdir -p /var/www/games/gamesj"
-          scp target/gamesj-0.0.1-SNAPSHOT.jar barry75@barryonweb.com:/var/www/games/gamesj/
+          scp -P $SSH_PORT target/gamesj-0.0.1-SNAPSHOT.jar barry75@barryonweb.com:/var/www/games/gamesj/
       
       # Copy DB scripts to server
       - name: Copy DB scripts 
         run: |
-          ssh barry75@barryonweb.com "mkdir -p /var/www/games/gamesj/data/mysql"
-          scp -r src/main/resources/*.sql barry75@barryonweb.com:/var/www/games/gamesj/data/mysql/
+          ssh -p $SSH_PORT barry75@barryonweb.com "mkdir -p /var/www/games/gamesj/data/mysql"
+          scp -P $SSH_PORT -r src/main/resources/*.sql barry75@barryonweb.com:/var/www/games/gamesj/data/mysql/
 
       # Copy images to server
       - name: Deploy images 
         run: |
-          ssh barry75@barryonweb.com "mkdir -p /var/www/games/gamesj/images"
-          scp src/main/resources/static/images/*.png barry75@barryonweb.com:/var/www/games/gamesj/images/    
+          ssh -p $SSH_PORT barry75@barryonweb.com "mkdir -p /var/www/games/gamesj/images"
+          scp -P $SSH_PORT src/main/resources/static/images/*.png barry75@barryonweb.com:/var/www/games/gamesj/images/    
 
       # Deploy Nginx config and reload
       - name: Update Nginx config
         run: |
-          ssh barry75@barryonweb.com "mkdir -p /var/www/games/nginx"
-          scp gamesj barry75@barryonweb.com:/var/www/games/nginx/
-          ssh barry75@barryonweb.com "
+          ssh -p $SSH_PORT barry75@barryonweb.com "mkdir -p /var/www/games/nginx"
+          scp -P $SSH_PORT gamesj barry75@barryonweb.com:/var/www/games/nginx/
+          ssh -p $SSH_PORT barry75@barryonweb.com "
             sudo cp /var/www/games/nginx/gamesj /etc/nginx/sites-available/ &&
             sudo ln -sf /etc/nginx/sites-available/gamesj /etc/nginx/sites-enabled/ &&
             sudo nginx -t &&
@@ -72,11 +75,11 @@ jobs:
       # Restart backend via systemd
       - name: Restart backend service
         run: |
-          ssh barry75@barryonweb.com "sudo systemctl restart gamesj"
+          ssh -p $SSH_PORT barry75@barryonweb.com "sudo systemctl restart gamesj"
 
       # See logs after restart
       - name: Show backend logs
         run: |
-          ssh barry75@barryonweb.com "journalctl -u gamesj -n 50 --no-pager"
+          ssh -p $SSH_PORT barry75@barryonweb.com "journalctl -u gamesj -n 50 --no-pager"
 
  

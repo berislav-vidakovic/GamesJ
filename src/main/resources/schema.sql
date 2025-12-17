@@ -48,6 +48,5 @@ CREATE TABLE healthcheck (
   msg VARCHAR(255)
 );
 
-INSERT INTO healthcheck (msg) VALUES ('Hello world from DB!');
 
 COMMIT;
