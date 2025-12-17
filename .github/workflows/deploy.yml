@@ -46,7 +46,7 @@ jobs:
       # Copy published files to server
       - name: Deploy backend files 
         run: |
-          ssh barry75@barryonweb.com "mkdir -p /var/www/games/gamesj"
+          ssh -p $SSH_PORT barry75@barryonweb.com "mkdir -p /var/www/games/gamesj"
           scp -P $SSH_PORT target/gamesj-0.0.1-SNAPSHOT.jar barry75@barryonweb.com:/var/www/games/gamesj/
       
       # Copy DB scripts to server
