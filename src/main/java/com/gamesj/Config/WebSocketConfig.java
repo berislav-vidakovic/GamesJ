@@ -1,6 +1,6 @@
 package com.gamesj.Config;
 
-import com.gamesj.WebSockets.WebSocketHandler;
+import com.gamesj.API.WebSocket.WebSocketHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;
 

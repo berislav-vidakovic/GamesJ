@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gamesj.Models.SudokuBoard;
-import com.gamesj.Repositories.SudokuBoardRepo;
-import com.gamesj.Services.Sudoku;
+import com.gamesj.Core.Models.SudokuBoard;
+import com.gamesj.Core.Repositories.SudokuBoardRepo;
+import com.gamesj.Core.Services.Sudoku;
 
 import java.util.ArrayList;
 import java.util.List;

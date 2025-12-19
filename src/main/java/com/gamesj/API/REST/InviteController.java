@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gamesj.Services.Game;
-import com.gamesj.Services.GameManager;
-import com.gamesj.Services.Player;
-import com.gamesj.Services.UserMonitor;
-import com.gamesj.WebSockets.WebSocketHandler;
+import com.gamesj.Core.Services.Game;
+import com.gamesj.Core.Services.GameManager;
+import com.gamesj.Core.Services.Player;
+import com.gamesj.Core.Services.UserMonitor;
+import com.gamesj.API.WebSocket.WebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.gamesj.Services;
+package com.gamesj.Core.Services;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

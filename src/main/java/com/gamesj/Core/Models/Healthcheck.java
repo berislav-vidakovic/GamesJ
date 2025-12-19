@@ -1,4 +1,4 @@
-package com.gamesj.Models;
+package com.gamesj.Core.Models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

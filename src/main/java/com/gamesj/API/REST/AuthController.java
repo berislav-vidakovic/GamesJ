@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamesj.Config.JwtUtil;
-import com.gamesj.Models.RefreshToken;
-import com.gamesj.Models.User;
-import com.gamesj.Repositories.RefreshTokenRepository;
-import com.gamesj.Repositories.UserRepository;
-import com.gamesj.Services.UserMonitor;
-import com.gamesj.WebSockets.WebSocketHandler;
+import com.gamesj.Core.Models.RefreshToken;
+import com.gamesj.Core.Models.User;
+import com.gamesj.Core.Repositories.RefreshTokenRepository;
+import com.gamesj.Core.Repositories.UserRepository;
+import com.gamesj.Core.Services.UserMonitor;
+import com.gamesj.API.WebSocket.WebSocketHandler;
 
 // POST /api/auth/refresh
 @RestController

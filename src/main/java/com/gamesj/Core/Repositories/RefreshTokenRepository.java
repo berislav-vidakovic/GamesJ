@@ -1,6 +1,6 @@
-package com.gamesj.Repositories;
+package com.gamesj.Core.Repositories;
 
-import com.gamesj.Models.RefreshToken;
+import com.gamesj.Core.Models.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Modifying;

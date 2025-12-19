@@ -1,9 +1,9 @@
-package com.gamesj.Repositories;
+package com.gamesj.Core.Repositories;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.gamesj.Models.SudokuBoard;
+import com.gamesj.Core.Models.SudokuBoard;
 
 
 public interface SudokuBoardRepo extends JpaRepository<SudokuBoard, Integer> {

@@ -1,11 +1,11 @@
-package com.gamesj.Services;
+package com.gamesj.Core.Services;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import com.gamesj.WebSockets.WebSocketHandler;
+import com.gamesj.API.WebSocket.WebSocketHandler;
 import jakarta.annotation.PreDestroy;
 
 // Base class for monitoring idle users or other entities 

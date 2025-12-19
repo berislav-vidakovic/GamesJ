@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Optional;
 import java.util.Map;
-import com.gamesj.Repositories.HealthcheckRepository;
-import com.gamesj.Models.Healthcheck;
+import com.gamesj.Core.Repositories.HealthcheckRepository;
+import com.gamesj.Core.Models.Healthcheck;
 
 @RestController
 @RequestMapping("/api")

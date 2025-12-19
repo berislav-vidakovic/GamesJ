@@ -1,4 +1,4 @@
-package com.gamesj.Services;
+package com.gamesj.Core.Services;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.gamesj.Services;
+package com.gamesj.Core.Services;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.gamesj.WebSockets.WebSocketHandler;
+import com.gamesj.API.WebSocket.WebSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 // Spring-managed singleton 

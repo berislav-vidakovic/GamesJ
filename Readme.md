@@ -381,7 +381,7 @@
 
 - Create Config/WebSocketConfig.java
 
-- Create WebSockets/WebSocketHandler.java
+- Create WebSocket/WebSocketHandler.java
 
 - Add copy frontends to gamesj dir to frontend deploy yaml file 
 

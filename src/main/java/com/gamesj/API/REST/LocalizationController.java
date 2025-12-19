@@ -3,8 +3,8 @@ package com.gamesj.API.REST;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import com.gamesj.Repositories.LocalizationRepository;
-import com.gamesj.Models.Localization;
+import com.gamesj.Core.Repositories.LocalizationRepository;
+import com.gamesj.Core.Models.Localization;
 
 import java.util.*;
 

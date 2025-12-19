@@ -1,4 +1,4 @@
-package com.gamesj.WebSockets;
+package com.gamesj.Core.Services;
 
 import java.time.LocalDateTime;
 import java.time.Duration;
@@ -12,11 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
-
-import com.gamesj.Services.IdleMonitor;
-import com.gamesj.Services.UserMonitor;
-import com.gamesj.Services.Client;
-
 
 // Spring-managed singleton 
 @Service

@@ -1,4 +1,4 @@
-package com.gamesj.Common;
+package com.gamesj.API.REST;
 
 import java.util.ArrayList;
 import java.util.List;

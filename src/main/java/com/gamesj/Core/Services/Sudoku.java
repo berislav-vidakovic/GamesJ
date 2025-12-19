@@ -1,10 +1,10 @@
-package com.gamesj.Services;
+package com.gamesj.Core.Services;
 
 import java.util.HashSet;
 
 import org.springframework.stereotype.Service;
 
-import com.gamesj.Models.SudokuBoard;
+import com.gamesj.Core.Models.SudokuBoard;
 
 @Service
 public class Sudoku {

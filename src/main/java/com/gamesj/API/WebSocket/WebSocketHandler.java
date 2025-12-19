@@ -1,11 +1,12 @@
-package com.gamesj.WebSockets;
+package com.gamesj.API.WebSocket;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.gamesj.Services.Client;
+import com.gamesj.Core.Services.Client;
+import com.gamesj.Core.Services.SessionMonitor;
 import java.util.Map;
 import java.util.UUID;
 

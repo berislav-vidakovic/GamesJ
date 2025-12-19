@@ -1,4 +1,4 @@
-package com.gamesj.Services;
+package com.gamesj.Core.Services;
 
 import java.time.LocalDateTime;
 import java.time.Duration;
@@ -9,8 +9,8 @@ import java.util.concurrent.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.gamesj.Models.User;
-import com.gamesj.Repositories.UserRepository;
+import com.gamesj.Core.Models.User;
+import com.gamesj.Core.Repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
