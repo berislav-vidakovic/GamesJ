@@ -1,0 +1,5 @@
+type Query {
+  ping: String
+  pingDb: String
+}
+

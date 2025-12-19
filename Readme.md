@@ -18,6 +18,9 @@
 10. [Hashing password and JWT authentication](#10-hashing-password-and-jwt-authentication)
 11. [Refresh token and auto login/logout](#11-refresh-token-and-auto-loginlogout)
 12. [Session monitor and idle cleanup](#12-session-monitor-and-idle-cleanup)
+13. [Data Migration between MySQL and PostgreSQL database](#13-data-migration-between-mysql-and-postgresql-database)
+14. [Add support for GraphQL](#14-add-support-for-graphql)
+
 
 
 ### 1. Create Project skeleton
@@ -878,3 +881,100 @@ There is checklist for Timer implementation
   ```bash
   scp -P 2222 pg_to_mysql.sh barry75@barryonweb.com:/var/www/data/migration/games/
   ```
+
+### 14. Add support for GraphQL
+
+- Add dependecies to pom.xml
+
+- Create GraphQL schema schema.graphqls in resources/graphql directory:
+  ```graphql
+  type Query {
+    ping: String
+  }
+  ```
+
+- Create Controller in API/GraphQL directory
+  ```java
+  package com.gamesj.API.GraphQL;
+  import org.springframework.graphql.data.method.annotation.QueryMapping;
+  import org.springframework.stereotype.Controller;
+  @Controller
+  public class PingControllerGraphQL {
+    // Method name ping() corresponds to the Query field in schema.graphqls
+    @QueryMapping
+    public String ping() {
+      return "pong";
+    }
+  }
+  ```
+
+- Update SecurityConfigs
+  ```java
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+      .csrf(csrf -> csrf.disable())
+      .authorizeHttpRequests(auth -> auth.anyRequest().permitAll() )  // allow all requests
+      .httpBasic(httpBasic -> httpBasic.disable())   // disable HTTP Basic
+      .formLogin(formLogin -> formLogin.disable()); // disable login form
+    return http.build();
+  } 
+  ```
+
+- Add endpoint /graphql to White list in OncePerRequestFilter subclass
+
+- Test from Postman as POST with JSON body:
+  ```json
+  {
+    "query": "{ ping }"
+  }
+  ```
+  - Response expected:
+    ```json
+    {
+      "data": {
+        "ping": "pong"
+      }
+    }
+    ```
+
+- Add pingDb query
+  - Extend GraphQL schema definition with pingDb: String
+  - Add Controller to API/GraphQL
+  - Test from Postman as POST with JSON body:
+    ```json
+    {
+      "query": "{ pingDb }"
+    }
+    ```
+    - Response expected 
+      - Row exists:
+        ```json
+        {
+          "data": {
+            "pingDb": "Hello world from DB!"
+          }
+        }
+        ```
+      - No row exists:
+        ```json
+        {
+          "data": {
+            "pingDb": null
+          }
+        }
+        ```
+      - Database Error:
+        ```json
+        {
+          "errors": [
+            {
+              "message": "Database connection failed",
+              "locations": [...],
+              "path": ["pingDb"]
+            }
+          ]
+        }
+        ```
+
+
