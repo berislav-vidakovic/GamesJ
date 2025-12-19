@@ -1,4 +1,4 @@
-package com.gamesj.Controllers;
+package com.gamesj.API.REST;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;

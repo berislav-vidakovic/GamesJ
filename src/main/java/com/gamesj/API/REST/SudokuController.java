@@ -1,5 +1,5 @@
 // SudokuController.java
-package com.gamesj.Controllers;
+package com.gamesj.API.REST;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

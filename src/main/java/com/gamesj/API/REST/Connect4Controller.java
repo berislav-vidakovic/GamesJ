@@ -1,4 +1,4 @@
-package com.gamesj.Controllers;
+package com.gamesj.API.REST;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

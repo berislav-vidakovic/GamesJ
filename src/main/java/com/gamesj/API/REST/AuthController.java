@@ -1,4 +1,4 @@
-package com.gamesj.Controllers;
+package com.gamesj.API.REST;
 
 import java.time.LocalDateTime;
 import java.util.Map;
