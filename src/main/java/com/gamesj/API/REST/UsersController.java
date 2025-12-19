@@ -11,21 +11,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamesj.Config.JwtUtil;
+import com.gamesj.Core.DTO.UsersAll;
 import com.gamesj.Core.Models.RefreshToken;
 import com.gamesj.Core.Models.User;
 import com.gamesj.Core.Repositories.UserRepository;
 import com.gamesj.Core.Services.UserMonitor;
+import com.gamesj.Core.Services.UserService;
 import com.gamesj.API.WebSocket.WebSocketHandler;
 import com.gamesj.Core.Repositories.RefreshTokenRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 // GET /all
 // POST /new
@@ -34,6 +34,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/api/users") 
 public class UsersController {
+  @Autowired
+  private UserService userService;
+
   @Autowired
   private UserRepository userRepository;
 
@@ -57,29 +60,8 @@ public class UsersController {
   }
 
   @GetMapping("/all")
-  public ResponseEntity<Map<String, Object>> getUsers() {
-    List<User> users = userRepository.findAll();
-    if (users.isEmpty()) 
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204
-
-    UUID id = UUID.randomUUID();
-
-    // build base URL from request
-    String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(); 
-
-    List<String> techstack = List.of(
-        baseUrl + "/images/java.png",
-        baseUrl + "/images/spring.png",
-        baseUrl + "/images/mysql.png"
-    );
-
-    Map<String, Object> response = Map.of(
-        "id", id.toString(),
-        "users", users,
-        "techstack", techstack
-    );
-
-    return new ResponseEntity<>(response, HttpStatus.OK); // 200
+  public ResponseEntity<UsersAll> getUsers() {
+    return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK); // 200
   }
 
   @PostMapping("/new")
