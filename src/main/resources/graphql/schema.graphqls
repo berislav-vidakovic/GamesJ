@@ -17,3 +17,24 @@ type User {
   isOnline: Boolean!
 }
 
+input RegisterUserInput {
+  login: String!
+  fullName: String!
+  password: String!
+}
+
+type RegisterUserPayload {
+  acknowledged: Boolean!
+  user: User
+  error: String
+}
+
+type Mutation {
+  registerUser(input: RegisterUserInput!): RegisterUserPayload!
+}
+
+type Subscription {
+  userRegistered: User!
+}
+
+

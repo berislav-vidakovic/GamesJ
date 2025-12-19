@@ -106,7 +106,6 @@ public class UsersController {
       User newUser = new User();
       newUser.setLogin(login);
       newUser.setFullName(fullName);
-      //newUser.setPwd(password);
       newUser.setPwd(hashedPwd);
       userRepository.save(newUser);
       System.out.printf("New user inserted: %s%n", login);

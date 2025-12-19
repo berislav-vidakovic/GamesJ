@@ -985,3 +985,54 @@ There is checklist for Timer implementation
 - Update GraphQL schema
 - Add Controller
 - Add User DTO
+- Add common UserService to Core
+
+#### Register user query mutation
+
+- Add to schema:
+  - input RegisterUserInput 
+  - type RegisterUserPayload 
+  - type Mutation 
+- Add DTO RegisterUserInput and RegisterUserPayload
+- Add UsersMutationController
+- Test from Postman:
+  ```json
+  {
+  "query": 
+    "mutation { registerUser(input: { login: \"penny12\" fullName: \"Penny12\" password: \"pwd123\" }) { acknowledged error user { userId login fullName } } }"
+  }
+  ```
+
+  - Expected response:
+    ```json
+    {
+      "data": {
+        "registerUser": {
+          "acknowledged": true,
+          "error": null,
+          "user": {
+            "userId": "14",
+            "login": "penny",
+            "fullName": "Penny"
+          }
+        }
+      }
+    }
+    ```
+
+  - User exists:
+    ```json
+    {
+      "data": {
+        "registerUser": {
+          "acknowledged": false,
+          "error": "User already exists",
+          "user": null
+        }
+      }
+    }
+    ```
+
+
+
+
