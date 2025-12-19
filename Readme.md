@@ -884,6 +884,8 @@ There is checklist for Timer implementation
 
 ### 14. Add support for GraphQL
 
+#### Basic support
+
 - Add dependecies to pom.xml
 
 - Create GraphQL schema schema.graphqls in resources/graphql directory:
@@ -978,3 +980,8 @@ There is checklist for Timer implementation
         ```
 
 
+#### Get all users query
+
+- Update GraphQL schema
+- Add Controller
+- Add User DTO

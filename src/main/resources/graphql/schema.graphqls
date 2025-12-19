@@ -1,5 +1,19 @@
 type Query {
   ping: String
   pingDb: String
+  getAllUsers: UsersAll
+}
+
+type UsersAll {
+  id: ID!
+  users: [User!]!
+  techstack: [String!]!
+}
+
+type User {
+  userId: ID!
+  login: String!
+  fullName: String
+  isOnline: Boolean!
 }
 
