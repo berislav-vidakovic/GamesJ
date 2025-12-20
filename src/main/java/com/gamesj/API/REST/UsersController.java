@@ -17,6 +17,8 @@ import com.gamesj.Core.Models.User;
 import com.gamesj.Core.Repositories.UserRepository;
 import com.gamesj.Core.Services.UserMonitor;
 import com.gamesj.Core.Services.UserService;
+import com.gamesj.Core.Services.WebSocketService;
+
 import com.gamesj.API.WebSocket.WebSocketHandler;
 import com.gamesj.Core.Repositories.RefreshTokenRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,6 +50,9 @@ public class UsersController {
 
   @Autowired
   private WebSocketHandler webSocketHandler;
+
+  @Autowired
+  private WebSocketService webSocketService;
 
   @Autowired
   private UserMonitor userMonitor;
@@ -116,17 +121,8 @@ public class UsersController {
               "user", newUser
       );
 
-      // Build WS message as Map
-      Map<String, Object> wsMessage = Map.of(
-          "type", "userRegister",
-          "status", "WsStatus.OK",
-          "data", response
-      );
-      // Convert Map to JSON string
-      String wsJson = mapper.writeValueAsString(wsMessage);
+      webSocketService.broadcastMessage("userRegister", "WsStatus.OK", response);
 
-      // Broadcast via WebSocket
-      webSocketHandler.broadcast(wsJson);
 
       return new ResponseEntity<>(response, HttpStatus.CREATED); // 201
     } 

@@ -9,10 +9,12 @@ import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamesj.API.WebSocket.WebSocketHandler;
+
 import com.gamesj.Core.DTO.RegisterUserInput;
 import com.gamesj.Core.DTO.RegisterUserPayload;
 import com.gamesj.Core.Models.User;
 import com.gamesj.Core.Repositories.UserRepository;
+import com.gamesj.Core.Services.WebSocketService;
 
 @Controller
 public class UsersMutationController {
@@ -20,10 +22,7 @@ public class UsersMutationController {
     private final UserRepository userRepository;
 
     @Autowired
-    private WebSocketHandler webSocketHandler;
-
-    @Autowired
-    private ObjectMapper mapper;
+    private WebSocketService webSocketService;
 
     public UsersMutationController(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -62,21 +61,12 @@ public class UsersMutationController {
               "user", user
         );
 
-        // Build WS message as Map
-        Map<String, Object> wsMessage = Map.of(
-            "type", "userRegister",
-            "status", "WsStatus.OK",
-            "data", response
+        // Use WebSocketService to broadcast
+        webSocketService.broadcastMessage(
+          "userRegister",
+          "WsStatus.OK",
+          response
         );
-        try {
-            String wsJson = mapper.writeValueAsString(wsMessage);
-            // Broadcast via WebSocket
-            webSocketHandler.broadcast(wsJson);
-        } catch (Exception e) {
-            // Log the error but do not fail the mutation
-            e.printStackTrace();
-        }
-
         //  Return payload
         return new RegisterUserPayload(true, user, null);
     }
