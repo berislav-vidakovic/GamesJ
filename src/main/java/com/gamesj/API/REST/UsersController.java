@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamesj.Config.JwtUtil;
+import com.gamesj.Core.Adapters.RegisterUserResult;
 import com.gamesj.Core.DTO.UsersAll;
 import com.gamesj.Core.Models.RefreshToken;
 import com.gamesj.Core.Models.User;
 import com.gamesj.Core.Repositories.UserRepository;
+import com.gamesj.Core.Services.Registration;
 import com.gamesj.Core.Services.UserMonitor;
 import com.gamesj.Core.Services.UserService;
 import com.gamesj.Core.Services.WebSocketService;
@@ -51,8 +53,9 @@ public class UsersController {
   @Autowired
   private WebSocketHandler webSocketHandler;
 
-  @Autowired
-  private WebSocketService webSocketService;
+  private final WebSocketService webSocketService;
+
+  private final Registration userRegistrationService;
 
   @Autowired
   private UserMonitor userMonitor;
@@ -60,8 +63,10 @@ public class UsersController {
   @Autowired
   private ObjectMapper mapper;
 
-  public UsersController(UserRepository userRepository) {
+  public UsersController(UserRepository userRepository, Registration userRegistrationService, WebSocketService webSocketService) {
     this.userRepository = userRepository;
+    this.userRegistrationService = userRegistrationService;
+    this.webSocketService = webSocketService;
   }
 
   @GetMapping("/all")
@@ -73,58 +78,39 @@ public class UsersController {
   public ResponseEntity<?> registerUser(@RequestBody Map<String, Object> body) {
     try {
       // Expecting: {"register": {"login": "penny", "fullname": "Penny", "password": "pwd123"} }
-      if (!body.containsKey("register")) {
-        Map<String, Object> response = Map.of(
-                  "acknowledged", false,
-                  "error", "Missing 'register' field"
-        );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
-      }
+      if (!body.containsKey("register")) 
+        return new ResponseEntity<>(Map.of( 
+          "acknowledged", false,
+          "error", "Missing 'register' field"), 
+          HttpStatus.BAD_REQUEST); // 400
 
-      @SuppressWarnings("unchecked")
       Map<String, Object> credentials = (Map<String, Object>) body.get("register");
-      String login = (String) credentials.get("login");
-      String fullName = (String) credentials.get("fullname");
-      String password = (String) credentials.get("password");
-      if (login == null || login.isBlank() || fullName == null || fullName.isBlank()
-          || password == null || password.isBlank()) {
-        Map<String, Object> response = Map.of(
-                  "acknowledged", false,
-                  "error", "Missing login or fullname or password"
-          );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
-      }
-      System.out.printf("Register request: login=%s, fullname=%s, password=%s%n", login, fullName, password);
+      RegisterUserResult result = userRegistrationService.register(
+        (String) credentials.get("login"),
+        (String) credentials.get("fullname"),
+        (String) credentials.get("password") );
 
-      boolean exists = userRepository.existsByLoginOrFullName(login, fullName);
-      if (exists) {
-        Map<String, Object> response = Map.of(
+      if (!result.isSuccess()) {
+        return ResponseEntity
+            .status(ErrorCodes.toHttpStatus(result.getErrorCode()))
+            .body(Map.of(
                 "acknowledged", false,
-                "error", "User  already exists"
-        );
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT); // 409
+                "error", result.getErrorMessage()
+            ));
       }
-      // Hash the password using BCrypt
-      String hashedPwd = passwordEncoder.encode(password);
 
-      // Create and persist user
-      User newUser = new User();
-      newUser.setLogin(login);
-      newUser.setFullName(fullName);
-      newUser.setPwd(hashedPwd);
-      newUser.setIsOnline(false);
-      userRepository.save(newUser);
-      System.out.printf("New user inserted: %s%n", login);
-
-      Map<String, Object> response = Map.of(
-              "acknowledged", true,
-              "user", newUser
+      webSocketService.broadcastMessage(
+        "userRegister",
+        "WsStatus.OK",
+        Map.of("acknowledged", true, "user", result.getUser())
       );
 
-      webSocketService.broadcastMessage("userRegister", "WsStatus.OK", response);
-
-
-      return new ResponseEntity<>(response, HttpStatus.CREATED); // 201
+      return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(Map.of(
+                "acknowledged", true,
+                "user", result.getUser()
+            ));
     } 
     catch (Exception e) {
         e.printStackTrace();

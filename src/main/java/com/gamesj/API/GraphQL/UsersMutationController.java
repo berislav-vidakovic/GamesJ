@@ -2,72 +2,54 @@ package com.gamesj.API.GraphQL;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gamesj.API.WebSocket.WebSocketHandler;
-
+import com.gamesj.Core.Adapters.RegisterUserResult;
 import com.gamesj.Core.DTO.RegisterUserInput;
 import com.gamesj.Core.DTO.RegisterUserPayload;
-import com.gamesj.Core.Models.User;
-import com.gamesj.Core.Repositories.UserRepository;
+import com.gamesj.Core.Services.Registration;
 import com.gamesj.Core.Services.WebSocketService;
 
 @Controller
 public class UsersMutationController {
+    
+    private final Registration userRegistrationService;
+    private final WebSocketService webSocketService;
 
-    private final UserRepository userRepository;
-
-    @Autowired
-    private WebSocketService webSocketService;
-
-    public UsersMutationController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UsersMutationController(Registration userRegistrationService, WebSocketService webSocketService) {
+        this.userRegistrationService = userRegistrationService; 
+        this.webSocketService = webSocketService; 
     }
 
     @MutationMapping
     public RegisterUserPayload registerUser(@Argument RegisterUserInput input) {
+      RegisterUserResult result = userRegistrationService.register(
+        input.getLogin(),
+        input.getFullName(),
+        input.getPassword()
+      );
 
-        // Validate input
-        if (input.getLogin() == null || input.getLogin().isBlank()
-         || input.getFullName() == null || input.getFullName().isBlank()
-         || input.getPassword() == null || input.getPassword().isBlank()) {
-
-            return new RegisterUserPayload(false, null,
-                    "Missing login or fullname or password");
-        }
-
-        // Check existence
-        boolean exists = userRepository
-                .existsByLoginOrFullName(input.getLogin(), input.getFullName());
-
-        if (exists) {
-            return new RegisterUserPayload(false, null, "User already exists");
-        }
-
-        // Create user (no hashing yet if you prefer to add later)
-        User user = new User();
-        user.setLogin(input.getLogin());
-        user.setFullName(input.getFullName());
-        user.setPwd(input.getPassword());
-
-        userRepository.save(user);
-
-        Map<String, Object> response = Map.of(
-              "acknowledged", true,
-              "user", user
+      if (!result.isSuccess()) {
+        return new RegisterUserPayload(
+          false,
+          null,
+          result.getErrorMessage()
         );
+      }
 
-        // Use WebSocketService to broadcast
-        webSocketService.broadcastMessage(
-          "userRegister",
-          "WsStatus.OK",
-          response
-        );
-        //  Return payload
-        return new RegisterUserPayload(true, user, null);
+      // Use WebSocketService to broadcast
+      webSocketService.broadcastMessage(
+        "userRegister",
+        "WsStatus.OK",
+        Map.of("acknowledged", true, "user", result.getUser())
+      );
+      //  Return payload
+      return new RegisterUserPayload(
+          true,
+          result.getUser(),
+          null
+      );
     }
 }

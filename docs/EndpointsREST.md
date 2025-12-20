@@ -54,7 +54,7 @@ POST request
 
 
 ### Response
-- OK
+- OK - HttpStatus.CREATED
   ```json
   {
     acknowledged: true, 
@@ -64,7 +64,7 @@ POST request
   }  
   ```
 
-- Missing credentials, user exists or server error:
+- Missing credentials (HttpStatus.BAD_REQUEST), user exists (HttpStatus.CONFICT) or server error (HttpStatus.INTERNAL_SERVER_ERROR):
   ```json
   {
     acknowledged: false, error
