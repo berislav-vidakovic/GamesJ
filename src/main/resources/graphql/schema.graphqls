@@ -33,8 +33,3 @@ type Mutation {
   registerUser(input: RegisterUserInput!): RegisterUserPayload!
 }
 
-type Subscription {
-  userRegistered: User!
-}
-
-
