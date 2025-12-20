@@ -71,6 +71,10 @@
       git remote add origin git@github.com:berislav-vidakovic/ChatAppJn.git
       ```
 
+5. Get current Spring Boot version
+  ```bash
+  mvn dependency:list | grep spring-boot
+  ```
 
 
 
@@ -1002,6 +1006,18 @@ There is checklist for Timer implementation
     "mutation { registerUser(input: { login: \"penny12\" fullName: \"Penny12\" password: \"pwd123\" }) { acknowledged error user { userId login fullName } } }"
   }
   ```
+  ```json
+  {
+    "query": "mutation RegisterUser($input: RegisterUserInput!) { registerUser(input: $input) { acknowledged error user { userId login fullName } } }",
+    "variables": {
+      "input": {
+        "login": "penny",
+        "fullName": "Penny",
+        "password": "pwd123"
+      }
+    }
+  }
+  ```
 
   - Expected response:
     ```json
@@ -1032,7 +1048,6 @@ There is checklist for Timer implementation
       }
     }
     ```
-
 
 
 
