@@ -97,6 +97,54 @@ POST
   ```
 </details>
 
+### POST /api/auth/refresh
+
+<details>
+<summary>
+Login with refresh token
+</summary>
+
+### Request
+
+POST 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+- Body
+  ```js
+  { refreshToken }
+  ```
+
+
+### Response
+- OK - HttpStatus.OK (200)
+  ```js
+  {
+    accessToken,
+    refreshToken,
+    userId,
+    isOnline: true
+  }  
+  ```
+
+- Error
+  - Missing clientGUID, Refresh token missing, invalid or expired, User not found - HttpStatus.BAD_REQUEST (400)
+  - Server error - HttpStatus.INTERNAL_SERVER_ERROR (500)
+    ```js
+    { error }
+    ```
+
+- WebSocket broadcast push
+  ```js
+  {
+    type: userSessionUpdate,
+    status: WsStatus.OK,
+    data: <restResponseOK>
+  }
+  ```
+</details>
+
+
+
 
 ## Sudoku
 

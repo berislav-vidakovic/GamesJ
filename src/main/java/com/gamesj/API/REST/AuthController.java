@@ -72,8 +72,7 @@ public class AuthController {
         } 
         catch (IllegalArgumentException e) {
           Map<String, Object> response = Map.of(
-                  "acknowledged", false,
-                  "error", "Missing or invalid ID"
+              "error", "Missing or invalid ID"
             );
           return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
         }
