@@ -1,14 +1,25 @@
 package com.gamesj.Core.Services;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.gamesj.Core.DTO.SudokuBoards;
 import com.gamesj.Core.Models.SudokuBoard;
+import com.gamesj.Core.Repositories.SudokuBoardRepo;
+
 
 @Service
 public class Sudoku {
-  public boolean evaluate(SudokuBoard sudokuBoard){
+  private final SudokuBoardRepo boardsRepository;
+
+  public Sudoku(SudokuBoardRepo boardsRepository) {
+    this.boardsRepository = boardsRepository;
+  }
+
+  private boolean evaluate(SudokuBoard sudokuBoard){
     String board = sudokuBoard.getBoard();
     String solution = sudokuBoard.getSolution();
     
@@ -63,5 +74,28 @@ public class Sudoku {
       seen.add( row.charAt(i) );
     }
     return seen.size() == 9;
+  }
+
+  public SudokuBoards getBoardsDTO() {
+    List<SudokuBoard> boardsDb = boardsRepository.findAll();
+    List<SudokuBoard> boards = new ArrayList<>();
+    int testedOK = 0;
+    List<String> allNames = new ArrayList<>();
+
+    for( SudokuBoard board : boardsDb ){
+      if( evaluate(board) )
+        boards.add(board);
+      if( board.isTestedOK() )
+        ++testedOK;
+      allNames.add( board.getName());
+    }
+
+    System.out.println("Valid " + boards.size() + " out of " + boardsDb.size() + "board(s)" );
+    float valid = (float) boards.size() / boardsDb.size() * 100;
+    String validFormatted = String.format("%d%% (%d/%d)", (int)valid, boards.size(), boardsDb.size()); 
+    float tested = (float) testedOK / boardsDb.size() * 100;
+    String testedFormatted = String.format("%d%% (%d/%d)", (int)tested, testedOK, boardsDb.size()); 
+
+    return new SudokuBoards( boards, allNames, validFormatted, testedFormatted );
   }
 }

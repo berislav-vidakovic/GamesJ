@@ -15,8 +15,8 @@ import com.gamesj.Core.Models.SudokuBoard;
 import com.gamesj.Core.Repositories.SudokuBoardRepo;
 import com.gamesj.Core.Services.Sudoku;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.gamesj.Core.DTO.SudokuBoards;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,30 +38,14 @@ public class SudokuController {
     
     @GetMapping("/board")
     public ResponseEntity<Map<String, Object>> getBoards() {
-      List<SudokuBoard> boardsDb = boardsRepository.findAll();
-      List<SudokuBoard> boards = new ArrayList<>();
-      int testedOK = 0;
-      List<String> allNames = new ArrayList<>();
-
-      for( SudokuBoard board : boardsDb ){
-        if( sudokuService.evaluate(board) )
-          boards.add(board);
-        if( board.isTestedOK() )
-          ++testedOK;
-        allNames.add( board.getName());
-      }
-
-      System.out.println("Valid " + boards.size() + " out of " + boardsDb.size() + "board(s)" );
-      float valid = (float) boards.size() / boardsDb.size() * 100;
-      String validFormatted = String.format("%d%% (%d/%d)", (int)valid, boards.size(), boardsDb.size()); 
-      float tested = (float) testedOK / boardsDb.size() * 100;
-      String testedFormatted = String.format("%d%% (%d/%d)", (int)tested, testedOK, boardsDb.size()); 
+      
+      SudokuBoards dto = sudokuService.getBoardsDTO();
 
       Map<String, Object> response = Map.of( 
-        "boards", boards, 
-        "valid", validFormatted,
-        "tested", testedFormatted,
-        "allNames", allNames
+        "boards", dto.getBoards(), 
+        "valid", dto.getValid(),
+        "tested", dto.getTested(),
+        "allNames", dto.getAllNames()
       );
 
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
