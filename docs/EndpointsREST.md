@@ -152,10 +152,11 @@ POST
   ```js
   { newGame: name }
   ```
+  - if name field not provided or empty backend generates new GUID as name
 
 - Error
   - Missing board in Request  - HttpStatus.BAD_REQUEST (400)
-  - Existing board - HttpStatus.CONFLICT (409)
+  - Existing board or existing name (if name provided in Request) - HttpStatus.CONFLICT (409)
     ```js
     { error }
     ```
@@ -189,6 +190,8 @@ POST
 - Error
   - Missing board or name in Request - HttpStatus.BAD_REQUEST (400)
   - Board not found in DB - HttpStatus.NOT_FOUND (404)
+  - Existing game with the same name - HttpStatus.CONFLICT (409)
+
     ```js
     { error }
     ```

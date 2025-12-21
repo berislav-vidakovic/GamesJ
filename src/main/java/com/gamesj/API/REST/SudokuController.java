@@ -152,8 +152,13 @@ public class SudokuController {
       else
         System.out.println(" **** **** *** Board found");   
 
-      SudokuBoard board = boardOpt.get();
       String name = body.get("name");
+      if( !boardsRepository.findAllByName(name).isEmpty() )
+        return new ResponseEntity<>(
+          Map.of("error", "Invalid name - game with the same name already exists in DB"), 
+          HttpStatus.CONFLICT);       
+
+      SudokuBoard board = boardOpt.get();
       board.setName(name);
       boardsRepository.save(board);
 
@@ -183,10 +188,14 @@ public class SudokuController {
       else
         System.out.println(" **** **** *** Board does not exist");   
 
-      
-      String name = body.containsKey("name")
-        ? body.get("name")
-        : UUID.randomUUID().toString().substring(0,15);
+      String name = UUID.randomUUID().toString().substring(0,15);
+      if( body.containsKey("name") ){
+        name = body.get("name");
+        if( !boardsRepository.findAllByName(name).isEmpty() )
+          return new ResponseEntity<>(
+            Map.of("error", "Invalid name - game with the same name already exists in DB"), 
+            HttpStatus.CONFLICT);  
+      }      
 
       SudokuBoard board = new SudokuBoard(boardString, "", name, (byte)2);
       boardsRepository.save(board);
