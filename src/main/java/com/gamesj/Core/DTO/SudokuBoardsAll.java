@@ -4,13 +4,13 @@ import java.util.List;
 
 import com.gamesj.Core.Models.SudokuBoard;
 
-public class SudokuBoards {
+public class SudokuBoardsAll {
   private final List<SudokuBoard> boards;
   private final List<String> allNames;
   private final String valid;
   private final String tested;
 
-  public SudokuBoards( List<SudokuBoard> boards, List<String> allNames,
+  public SudokuBoardsAll( List<SudokuBoard> boards, List<String> allNames,
     String valid, String tested ) {
     this.boards = boards;
     this.allNames = allNames;

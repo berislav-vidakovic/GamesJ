@@ -145,14 +145,15 @@ POST
   ```js
   { board, name }
   ```
+  - Field name is optional
 
 
 ### Response
 - OK - HttpStatus.CREATED (201)
   ```js
-  { newGame: name }
+  { name }
   ```
-  - if name field not provided or empty backend generates new GUID as name
+  - if name field not provided or empty - backend generates new GUID as name
 
 - Error
   - Missing board in Request  - HttpStatus.BAD_REQUEST (400)
@@ -213,7 +214,7 @@ POST
 - Header: Authorization: Bearer accessToken 
 - Body
   ```js
-  { board, solution, name }
+  { board, solution }
   ```
 
 
@@ -224,7 +225,7 @@ POST
   ```
 
 - Error
-  - Missing board, name and/or solution in Request - HttpStatus.BAD_REQUEST (400)
+  - Missing board and/or solution in Request - HttpStatus.BAD_REQUEST (400)
   - Board not found in DB - HttpStatus.NOT_FOUND (404)
     ```js
     { error }
@@ -247,7 +248,7 @@ POST
 - Header: Authorization: Bearer accessToken 
 - Body
   ```js
-  { board, name }
+  { board }
   ```
 
 
@@ -258,7 +259,7 @@ POST
   ```
 
 - Error
-  - Missing board and/or name in Request - HttpStatus.BAD_REQUEST (400)
+  - Missing board in Request - HttpStatus.BAD_REQUEST (400)
   - Board not found in DB - HttpStatus.NOT_FOUND (404)
     ```js
     { error }

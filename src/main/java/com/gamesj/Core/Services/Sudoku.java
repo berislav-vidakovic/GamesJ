@@ -3,10 +3,16 @@ package com.gamesj.Core.Services;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.gamesj.Core.DTO.SudokuBoards;
+import com.gamesj.Core.DTO.SudokuBoardsAll;
+import com.gamesj.Core.DTO.SudokuGame;
 import com.gamesj.Core.Models.SudokuBoard;
 import com.gamesj.Core.Repositories.SudokuBoardRepo;
 
@@ -76,7 +82,7 @@ public class Sudoku {
     return seen.size() == 9;
   }
 
-  public SudokuBoards getBoardsDTO() {
+  public SudokuBoardsAll getBoardsDTO() {
     List<SudokuBoard> boardsDb = boardsRepository.findAll();
     List<SudokuBoard> boards = new ArrayList<>();
     int testedOK = 0;
@@ -96,6 +102,59 @@ public class Sudoku {
     float tested = (float) testedOK / boardsDb.size() * 100;
     String testedFormatted = String.format("%d%% (%d/%d)", (int)tested, testedOK, boardsDb.size()); 
 
-    return new SudokuBoards( boards, allNames, validFormatted, testedFormatted );
+    return new SudokuBoardsAll( boards, allNames, validFormatted, testedFormatted );
+  }
+
+  public SudokuGame getDTOtested(String boardString) {
+    Optional<SudokuBoard> boardOpt = boardsRepository.findByBoard(boardString);
+    if( boardOpt.isEmpty() )
+      return null;
+   
+    SudokuBoard boardEntity = boardOpt.get();
+    boardEntity.setTestedOK(true);
+    boardsRepository.save(boardEntity);
+
+    return new SudokuGame( boardEntity.getName(), boardString, null);
+  }
+
+  public SudokuGame getDTOsolution(String boardString, String solution) {
+    Optional<SudokuBoard> boardOpt = boardsRepository.findByBoard(boardString);
+    if( boardOpt.isEmpty() )
+      return null;
+  
+    SudokuBoard boardEntity = boardOpt.get();
+    boardEntity.setSolution(solution);
+    boardsRepository.save(boardEntity);
+
+    return new SudokuGame( boardEntity.getName(), boardString, solution);
+  }
+
+  public SudokuGame getDTOname(String boardString, String name) {
+    Optional<SudokuBoard> boardOpt = boardsRepository.findByBoard(boardString);
+    if( boardOpt.isEmpty() )
+      return null;
+  
+    SudokuBoard boardEntity = boardOpt.get();
+    boardEntity.setName(name);
+    boardsRepository.save(boardEntity);
+
+    return new SudokuGame( boardEntity.getName(), boardString, null);
+  }
+  
+  public SudokuGame getDTOaddGame(String boardString, String name) {
+    Optional<SudokuBoard> boardOpt = boardsRepository.findByBoard(boardString);
+    if( !boardOpt.isEmpty() ) // existing board
+      return null;
+    
+    if( name == null || name.isBlank() )
+      name = UUID.randomUUID().toString().substring(0,15);
+    else
+      if( !boardsRepository.findAllByName(name).isEmpty() ) // existing name
+        return null;    
+    // default level Medium = 2
+    SudokuBoard boardEntity = new SudokuBoard(boardString, "", name, (byte)2);
+    boardsRepository.save(boardEntity);
+
+    return new SudokuGame( boardEntity.getName(), null, null);
   }
 }

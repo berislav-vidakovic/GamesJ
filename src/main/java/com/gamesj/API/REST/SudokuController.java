@@ -11,15 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gamesj.Core.Models.SudokuBoard;
-import com.gamesj.Core.Repositories.SudokuBoardRepo;
 import com.gamesj.Core.Services.Sudoku;
 
-import com.gamesj.Core.DTO.SudokuBoards;
+import com.gamesj.Core.DTO.SudokuBoardsAll;
+import com.gamesj.Core.DTO.SudokuGame;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 // GET /board
 // POST /tested
@@ -31,161 +29,70 @@ import java.util.UUID;
 public class SudokuController {
 
     @Autowired
-    SudokuBoardRepo  boardsRepository;
-
-    @Autowired
     Sudoku  sudokuService;
     
     @GetMapping("/board")
     public ResponseEntity<Map<String, Object>> getBoards() {
-      
-      SudokuBoards dto = sudokuService.getBoardsDTO();
-
+      SudokuBoardsAll dto = sudokuService.getBoardsDTO();
       Map<String, Object> response = Map.of( 
         "boards", dto.getBoards(), 
         "valid", dto.getValid(),
         "tested", dto.getTested(),
         "allNames", dto.getAllNames()
       );
-
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     }
 
     @PostMapping("/tested")
     public ResponseEntity<?> setTestedOK(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
-      // Request { board, name }
-      if (!body.containsKey("board") || !body.containsKey("name") ) 
-        return new ResponseEntity<>(
-          Map.of("error", "Invalid request - missing board and/or name"), 
-          HttpStatus.BAD_REQUEST);         
-      else
-        System.out.println(" **** **** *** Key(s) contained");
-
-      String boardString = body.get("board");
-      Optional<SudokuBoard> boardOpt = boardsRepository.findByBoard(boardString);
-      if( boardOpt.isEmpty() )
-        return new ResponseEntity<>(
-          Map.of("error", "Invalid board - not found in DB"), 
-          HttpStatus.NOT_FOUND);       
-      else
-        System.out.println(" **** **** *** Board found");   
-
-      String name = body.get("name");
-
-      SudokuBoard board = boardOpt.get();
-      board.setName(name);
-      board.setTestedOK(true);
-      boardsRepository.save(board);
-
+      // Request { board }
+      if( !RequestChecker.checkMandatoryFields(List.of("board"), body) )
+        return RequestChecker.buildResponseMissingFields();
+      SudokuGame dtoGame = sudokuService.getDTOtested( body.get("board") );
+      if( dtoGame == null )
+        return RequestChecker.buildResponseNotFound();
       Map<String, Object> response = Map.of( 
-        "board", board.getBoard(), "name", name  );
+        "board", dtoGame.getBoard(), "name", dtoGame.getName()  );
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     }
 
-
     @PostMapping("/solution")
     public ResponseEntity<?> setSolution(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
-      // Request { board, solution, name }
-      if (!body.containsKey("board") || !body.containsKey("solution") 
-          || !body.containsKey("name") ) 
-        return new ResponseEntity<>(
-          Map.of("error", "Invalid request - missing board, name and/or solution"), 
-          HttpStatus.BAD_REQUEST);         
-      else
-        System.out.println(" **** **** *** Key(s) contained");
-
-      String boardString = body.get("board");
-      Optional<SudokuBoard> boardOpt = boardsRepository.findByBoard(boardString);
-      if( boardOpt.isEmpty() )
-        return new ResponseEntity<>(
-          Map.of("error", "Invalid board - not found in DB"), 
-          HttpStatus.NOT_FOUND);       
-      else
-        System.out.println(" **** **** *** Board found");   
-
-      SudokuBoard board = boardOpt.get();
-      String solution = body.get("solution");
-      String name = body.get("name");
-      board.setSolution(solution);
-      board.setName(name);
-      boardsRepository.save(board);
-
+      // Request { board, solution }
+      if( !RequestChecker.checkMandatoryFields(List.of("board", "solution"), body) )
+        return RequestChecker.buildResponseMissingFields();
+      SudokuGame dtoGame = sudokuService.getDTOsolution( body.get("board"), body.get("solution") );
+      if( dtoGame == null )
+        return RequestChecker.buildResponseNotFound();
       Map<String, Object> response = Map.of( 
-          "board", board.getBoard(),
-          "solution", solution, 
-          "name", name );
+          "board", dtoGame.getBoard(),
+          "solution", dtoGame.getSolution(), 
+          "name", dtoGame.getName() );
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     }
 
     @PostMapping("/setname")
     public ResponseEntity<?> setName(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
       // Request { board, name }
-      if (!body.containsKey("board") || !body.containsKey("name") ) 
-        return new ResponseEntity<>(
-          Map.of("error", "Invalid request - missing board and/or name"), 
-          HttpStatus.BAD_REQUEST);         
-      else
-        System.out.println(" **** **** *** Key(s) contained");
-
-      String boardString = body.get("board");
-      Optional<SudokuBoard> boardOpt = boardsRepository.findByBoard(boardString);
-      if( boardOpt.isEmpty() )
-        return new ResponseEntity<>(
-          Map.of("error", "Invalid board - not found in DB"), 
-          HttpStatus.NOT_FOUND);       
-      else
-        System.out.println(" **** **** *** Board found");   
-
-      String name = body.get("name");
-      if( !boardsRepository.findAllByName(name).isEmpty() )
-        return new ResponseEntity<>(
-          Map.of("error", "Invalid name - game with the same name already exists in DB"), 
-          HttpStatus.CONFLICT);       
-
-      SudokuBoard board = boardOpt.get();
-      board.setName(name);
-      boardsRepository.save(board);
-
-      Map<String, Object> response = Map.of( "board", board.getBoard(), "name", name );
+      if( !RequestChecker.checkMandatoryFields(List.of("board", "name"), body) )
+        return RequestChecker.buildResponseMissingFields();
+      SudokuGame dtoGame = sudokuService.getDTOname( body.get("board"), body.get("name") );
+      if( dtoGame == null )
+        return RequestChecker.buildResponseNotFound();
+      Map<String, Object> response = Map.of( 
+        "board", dtoGame.getBoard(), "name", dtoGame.getName() );
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     }
 
     @PostMapping("/addgame")
     public ResponseEntity<?> addNewGame(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
-      // Request { board, name }
-      if (!body.containsKey("board") ) {
-        System.out.println(" **** **** *** Invalid request - missing board");
-
-        return new ResponseEntity<>(
-          Map.of("error", "Invalid request - missing board"), 
-          HttpStatus.BAD_REQUEST);         
-        }
-      else
-        System.out.println(" **** **** *** Key contained");
-
-      String boardString = body.get("board");
-      Optional<SudokuBoard> boardOpt = boardsRepository.findByBoard(boardString);
-      if( !boardOpt.isEmpty() )
-        return new ResponseEntity<>(
-          Map.of("error", "Invalid request - board exists"), 
-          HttpStatus.CONFLICT);       
-      else
-        System.out.println(" **** **** *** Board does not exist");   
-
-      String name = UUID.randomUUID().toString().substring(0,15);
-      if( body.containsKey("name") ){
-        name = body.get("name");
-        if( !boardsRepository.findAllByName(name).isEmpty() )
-          return new ResponseEntity<>(
-            Map.of("error", "Invalid name - game with the same name already exists in DB"), 
-            HttpStatus.CONFLICT);  
-      }      
-
-      SudokuBoard board = new SudokuBoard(boardString, "", name, (byte)2);
-      boardsRepository.save(board);
-
-      Map<String, Object> response = Map.of( "newGame", name );
+      // Request { board, name } - name field is optional
+      if( !RequestChecker.checkMandatoryFields(List.of("board"), body) )
+        return RequestChecker.buildResponseMissingFields();
+      SudokuGame dtoGame = sudokuService.getDTOaddGame( body.get("board"), body.get("name") );
+      if( dtoGame == null )
+        return RequestChecker.buildResponseConflict();
+      Map<String, Object> response = Map.of( "name", dtoGame.getName() );
       return new ResponseEntity<>(response, HttpStatus.CREATED); // 201
     }
-
 }
