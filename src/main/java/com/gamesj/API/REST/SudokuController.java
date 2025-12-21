@@ -135,7 +135,7 @@ public class SudokuController {
 
     @PostMapping("/setname")
     public ResponseEntity<?> setName(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
-      // Request { board, solution }
+      // Request { board, name }
       if (!body.containsKey("board") || !body.containsKey("name") ) 
         return new ResponseEntity<>(
           Map.of("error", "Invalid request - missing board and/or name"), 
@@ -163,20 +163,23 @@ public class SudokuController {
 
     @PostMapping("/addgame")
     public ResponseEntity<?> addNewGame(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
-      // Request { boardString, name }
-      if (!body.containsKey("boardString") ) 
+      // Request { board, name }
+      if (!body.containsKey("board") ) {
+        System.out.println(" **** **** *** Invalid request - missing board");
+
         return new ResponseEntity<>(
           Map.of("error", "Invalid request - missing board"), 
           HttpStatus.BAD_REQUEST);         
+        }
       else
         System.out.println(" **** **** *** Key contained");
 
-      String boardString = body.get("boardString");
+      String boardString = body.get("board");
       Optional<SudokuBoard> boardOpt = boardsRepository.findByBoard(boardString);
       if( !boardOpt.isEmpty() )
         return new ResponseEntity<>(
           Map.of("error", "Invalid request - board exists"), 
-          HttpStatus.BAD_REQUEST);       
+          HttpStatus.CONFLICT);       
       else
         System.out.println(" **** **** *** Board does not exist");   
 
@@ -188,8 +191,8 @@ public class SudokuController {
       SudokuBoard board = new SudokuBoard(boardString, "", name, (byte)2);
       boardsRepository.save(board);
 
-      Map<String, Object> response = Map.of( "New board added:", name );
-      return new ResponseEntity<>(response, HttpStatus.OK); // 200
+      Map<String, Object> response = Map.of( "newGame", name );
+      return new ResponseEntity<>(response, HttpStatus.CREATED); // 201
     }
 
 }

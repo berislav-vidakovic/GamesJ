@@ -1,4 +1,19 @@
-## REST API Endpoints
+# REST API Endpoints
+
+
+There are following Frontend projects and Request Endpoints:
+- [Panel](#panel)
+  - [GET /api/users/all](#get-apiusersall)
+  - [POST /api/users/new](#post-apiusersnew)
+- [Sudoku](#sudoku)
+  - [GET /api/sudoku/board](#get-apisudokuboard)
+  - [POST /api/sudoku/addgame](#post-apisudokuaddgame)
+  - [POST /api/sudoku/setname](#post-apisudokusetname)
+  - [POST /api/sudoku/solution](#post-apisudokusolution)
+  - [POST /api/sudoku/tested](#post-apisudokutested)
+- [Connect4](#connect4)
+
+## Panel
 
 ### GET /api/users/all
 
@@ -9,11 +24,13 @@ Get all users, new client GUID and tech stack
 
 ### Request
 
-GET (no parameters)
+GET 
+- Parameter: id=(empty)      
+- Header: Authorization: Bearer accessToken 
 
 ### Response
 
-```json
+```js
 {
   id, 
   techstack: [],
@@ -38,24 +55,22 @@ Register new user
 
 ### Request
 
-POST request
+POST 
 - Parameter: id=clientGUID      
 - Header: Authorization: Bearer accessToken 
 - Body
-  ```json
+  ```js
   { 
     register {
-      login,
-      fullname
-      password
+      login, fullname, password
     } 
   }
   ```
 
 
 ### Response
-- OK - HttpStatus.CREATED
-  ```json
+- OK - HttpStatus.CREATED (201)
+  ```js
   {
     acknowledged: true, 
     user {
@@ -64,20 +79,198 @@ POST request
   }  
   ```
 
-- Missing credentials (HttpStatus.BAD_REQUEST), user exists (HttpStatus.CONFICT) or server error (HttpStatus.INTERNAL_SERVER_ERROR):
-  ```json
-  {
-    acknowledged: false, error
-  }
-  ```
+- Error
+  - Missing credentials - HttpStatus.BAD_REQUEST (400)
+  - User exists - HttpStatus.CONFLICT (409)
+  - Server error - HttpStatus.INTERNAL_SERVER_ERROR (500)
+    ```js
+    { acknowledged: false, error }
+    ```
 
 - WebSocket broadcast push
-  ```json
+  ```js
   {
     type: userRegister,
     status: WsStatus.OK,
-    data: restResponseOK
+    data: <restResponseOK>
   }
   ```
 </details>
+
+
+## Sudoku
+
+
+### GET /api/sudoku/board
+
+<details>
+<summary>
+Get all valid sudoku boards
+</summary>
+
+### Request
+
+GET 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+
+### Response
+
+```js
+{ boards, valid, tested, allNames } 
+```
+
+- boards: array of all valid boards 
+- valid: valid board count and percentage 
+- tested: tested board count and percentage 
+- allNames: array of all board names in DB
+
+
+</details>
+
+
+### POST /api/sudoku/addgame
+
+<details>
+<summary>
+Add new game
+</summary>
+
+### Request
+
+POST 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+- Body
+  ```js
+  { board, name }
+  ```
+
+
+### Response
+- OK - HttpStatus.CREATED (201)
+  ```js
+  { newGame: name }
+  ```
+
+- Error
+  - Missing board in Request  - HttpStatus.BAD_REQUEST (400)
+  - Existing board - HttpStatus.CONFLICT (409)
+    ```js
+    { error }
+    ```
+
+</details>
+
+### POST /api/sudoku/setname
+
+<details>
+<summary>
+Set name for existing game
+</summary>
+
+### Request
+
+POST 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+- Body
+  ```js
+  { board, name }
+  ```
+
+
+### Response
+- OK - HttpStatus.OK (200)
+  ```js
+  { board, name }
+  ```
+
+- Error
+  - Missing board or name in Request - HttpStatus.BAD_REQUEST (400)
+  - Board not found in DB - HttpStatus.NOT_FOUND (404)
+    ```js
+    { error }
+    ```
+
+</details>
+
+
+### POST /api/sudoku/solution
+
+<details>
+<summary>
+Update solution and name for existing game
+</summary>
+
+### Request
+
+POST 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+- Body
+  ```js
+  { board, solution, name }
+  ```
+
+
+### Response
+- OK - HttpStatus.OK (200)
+  ```js
+  { board, solution, name }
+  ```
+
+- Error
+  - Missing board, name and/or solution in Request - HttpStatus.BAD_REQUEST (400)
+  - Board not found in DB - HttpStatus.NOT_FOUND (404)
+    ```js
+    { error }
+    ```
+
+</details>
+
+
+### POST /api/sudoku/tested
+
+<details>
+<summary>
+Update testedOK status and name after testing game 
+</summary>
+
+### Request
+
+POST 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+- Body
+  ```js
+  { board, name }
+  ```
+
+
+### Response
+- OK - HttpStatus.OK (200)
+  ```js
+  { board, name }
+  ```
+
+- Error
+  - Missing board and/or name in Request - HttpStatus.BAD_REQUEST (400)
+  - Board not found in DB - HttpStatus.NOT_FOUND (404)
+    ```js
+    { error }
+    ```
+
+</details>
+
+
+## Connect4
+
+
+
+
+
+
+
+
 
