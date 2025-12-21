@@ -27,6 +27,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,11 +80,8 @@ public class UsersController {
   public ResponseEntity<?> registerUser(@RequestBody Map<String, Object> body) {
     try {
       // Expecting: {"register": {"login": "penny", "fullname": "Penny", "password": "pwd123"} }
-      if (!body.containsKey("register")) 
-        return new ResponseEntity<>(Map.of( 
-          "acknowledged", false,
-          "error", "Missing 'register' field"), 
-          HttpStatus.BAD_REQUEST); // 400
+      if( !RequestChecker.checkMandatoryFields( List.of("register"), new ArrayList<>(body.keySet())) )
+        return RequestChecker.buildResponseMissingFields();
 
       Map<String, Object> credentials = (Map<String, Object>) body.get("register");
       RegisterUserResult result = userRegistrationService.register(
@@ -90,14 +89,10 @@ public class UsersController {
         (String) credentials.get("fullname"),
         (String) credentials.get("password") );
 
-      if (!result.isSuccess()) {
+      if (!result.isSuccess()) 
         return ResponseEntity
             .status(ErrorCodes.toHttpStatus(result.getErrorCode()))
-            .body(Map.of(
-                "acknowledged", false,
-                "error", result.getErrorMessage()
-            ));
-      }
+            .body(Map.of( "error", result.getErrorMessage() ));
 
       webSocketService.broadcastMessage(
         "userRegister",

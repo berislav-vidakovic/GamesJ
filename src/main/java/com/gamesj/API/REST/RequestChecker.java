@@ -13,9 +13,9 @@ public class RequestChecker {
       HttpStatus.NOT_FOUND);   
   }
 
-  public static boolean checkMandatoryFields(List<String> mandatoryFields, Map<String, String> body) {
+  public static boolean checkMandatoryFields(List<String> mandatoryFields, List<String> bodyKeys) {
     for( String field : mandatoryFields )
-      if (!body.containsKey(field)  ) 
+      if (!bodyKeys.contains(field)  ) 
         return false;
     return true;
   }

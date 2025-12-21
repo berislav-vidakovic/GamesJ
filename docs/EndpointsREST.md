@@ -84,7 +84,7 @@ POST
   - User exists - HttpStatus.CONFLICT (409)
   - Server error - HttpStatus.INTERNAL_SERVER_ERROR (500)
     ```js
-    { acknowledged: false, error }
+    { error }
     ```
 
 - WebSocket broadcast push

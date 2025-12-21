@@ -16,6 +16,7 @@ import com.gamesj.Core.Services.Sudoku;
 import com.gamesj.Core.DTO.SudokuBoardsAll;
 import com.gamesj.Core.DTO.SudokuGame;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public class SudokuController {
     @PostMapping("/tested")
     public ResponseEntity<?> setTestedOK(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
       // Request { board }
-      if( !RequestChecker.checkMandatoryFields(List.of("board"), body) )
+      if( !RequestChecker.checkMandatoryFields(List.of("board"), new ArrayList<>(body.keySet())) )
         return RequestChecker.buildResponseMissingFields();
       SudokuGame dtoGame = sudokuService.getDTOtested( body.get("board") );
       if( dtoGame == null )
@@ -59,7 +60,7 @@ public class SudokuController {
     @PostMapping("/solution")
     public ResponseEntity<?> setSolution(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
       // Request { board, solution }
-      if( !RequestChecker.checkMandatoryFields(List.of("board", "solution"), body) )
+      if( !RequestChecker.checkMandatoryFields(List.of("board", "solution"), new ArrayList<>(body.keySet())) )
         return RequestChecker.buildResponseMissingFields();
       SudokuGame dtoGame = sudokuService.getDTOsolution( body.get("board"), body.get("solution") );
       if( dtoGame == null )
@@ -74,7 +75,7 @@ public class SudokuController {
     @PostMapping("/setname")
     public ResponseEntity<?> setName(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
       // Request { board, name }
-      if( !RequestChecker.checkMandatoryFields(List.of("board", "name"), body) )
+      if( !RequestChecker.checkMandatoryFields(List.of("board", "name"), new ArrayList<>(body.keySet())) )
         return RequestChecker.buildResponseMissingFields();
       SudokuGame dtoGame = sudokuService.getDTOname( body.get("board"), body.get("name") );
       if( dtoGame == null )
@@ -87,7 +88,7 @@ public class SudokuController {
     @PostMapping("/addgame")
     public ResponseEntity<?> addNewGame(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
       // Request { board, name } - name field is optional
-      if( !RequestChecker.checkMandatoryFields(List.of("board"), body) )
+      if( !RequestChecker.checkMandatoryFields(List.of("board"), new ArrayList<>(body.keySet())) )
         return RequestChecker.buildResponseMissingFields();
       SudokuGame dtoGame = sudokuService.getDTOaddGame( body.get("board"), body.get("name") );
       if( dtoGame == null )
