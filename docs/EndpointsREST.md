@@ -247,6 +247,32 @@ POST
   ```
 </details>
 
+### GET /api/localization/get
+
+<details>
+<summary>
+Get localization keys and values for languages currently present in DB
+</summary>
+
+### Request
+
+GET 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+
+### Response
+
+```js
+{
+  locales: [{
+    paramKey, paramValue, languange
+  }]
+}
+```
+
+</details>
+
+
 
 
 

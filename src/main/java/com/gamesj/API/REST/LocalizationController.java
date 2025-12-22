@@ -20,12 +20,17 @@ public class LocalizationController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<Map<String, Object>> getLocalization() {
+    public ResponseEntity<Map<String, Object>> getLocalization(@RequestParam("id") String clientId) {
       try {
+        UUID parsedClientId = RequestChecker.parseIdParameter(clientId);
+        if( parsedClientId == null )
+          return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
+
         List<Localization> locales = localizationRepository.findAll();        
         if ( locales.isEmpty() ) 
           return new ResponseEntity<>(HttpStatus.NO_CONTENT); //  204 
         Map<String, Object> response = Map.of("locales", locales);
+
         return new ResponseEntity<>(response, HttpStatus.OK); // 200          
       } 
       catch (Exception ex) {
