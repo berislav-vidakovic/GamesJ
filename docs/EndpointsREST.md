@@ -149,7 +149,7 @@ POST
   ```
 </details>
 
-### POST /api/users/login
+### POST /api/auth/login
 
 <details>
 <summary>
@@ -186,6 +186,52 @@ POST
   - Missing clientGUID, userId or password - HttpStatus.BAD_REQUEST (400)
   - User not found - HttpStatus.NOT_FOUND (404)
   - Invalid password - HttpStatus.UNAUTHORIZED (401)
+  - Server error - HttpStatus.INTERNAL_SERVER_ERROR (500)
+    ```js
+    { error }
+    ```
+
+- WebSocket broadcast push
+  ```js
+  {
+    type: userSessionUpdate,
+    status: WsStatus.OK,
+    data: <restResponseOK>
+  }
+  ```
+</details>
+
+
+### POST /api/auth/logout
+
+<details>
+<summary>
+Logout user
+</summary>
+
+### Request
+
+POST 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+- Body
+  ```js
+  { userId }
+  ```
+
+
+### Response
+- OK - HttpStatus.OK (200)
+  ```js
+  {
+    userId,
+    isOnline: false
+  }  
+  ```
+
+- Error
+  - Missing clientGUID - HttpStatus.BAD_REQUEST (400)
+  - Missing userId or User not found - HttpStatus.UNAUTHORIZED (401)
   - Server error - HttpStatus.INTERNAL_SERVER_ERROR (500)
     ```js
     { error }

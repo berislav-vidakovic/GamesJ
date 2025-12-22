@@ -44,8 +44,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         path.startsWith("/websocket") ||
         path.startsWith("/images") ||
         path.startsWith("/api/auth/refresh") ||
-        path.startsWith("/api/users/login") ||
-        path.startsWith("/api/users/logout") ||
+        path.startsWith("/api/auth/login") ||
+        path.startsWith("/api/auth/logout") ||
         path.startsWith("/api/games/init") ||
         path.startsWith("/api/localization/get") || 
         path.startsWith("/graphql")

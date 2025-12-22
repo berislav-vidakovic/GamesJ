@@ -1,9 +1,12 @@
 package com.gamesj.Core.Services;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.gamesj.Core.Repositories.UserRepository;
@@ -44,6 +47,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
           - save to Repository
       - set user online and save to UserRepository
       - return new AuthUserDTO(accessToken, refreshToken, user)
+    logout(userId)
+      - Find User entity in UserRepository by provided userId
+      - set user offline and save to UserRepository
+      - delete all RefreshToken entities for userId from RefreshTokenRepository
+      - return new AuthUserDTO(null,null,userID) for success
 */
 
 // Spring-managed singleton 
@@ -104,6 +112,33 @@ public class Authentication  {
       // delete existing refreshToken
       refreshTokenRepository.delete(refTokenEntity);
       return buildAuthUser(userOpt.get());
+    }
+
+    public AuthUserDTO logout(String userIdStr){
+      if( userIdStr == null || userIdStr.isEmpty() )
+        return new AuthUserDTO("Missing userId");
+      Integer userId;
+      try {
+        userId = Integer.valueOf(userIdStr);
+      } catch (NumberFormatException e) {
+        return new AuthUserDTO("Invalid userId");
+      }
+
+      // Find user
+      Optional<User> optionalUser = userRepository.findById(userId);
+      if (optionalUser.isEmpty()) 
+        return new AuthUserDTO("User not found");
+      
+      User user = optionalUser.get();
+      user.setIsOnline(false);
+      userRepository.save(user);
+
+      // Clear refresh token from DB
+      System.out.println("Deleting refresh tokens for userId: " + userId);
+      refreshTokenRepository.deleteByUserId(userId);
+      System.out.println("Deleting done ");
+
+      return new AuthUserDTO(null,null,user);
     }
 
     // Private helper methods
