@@ -2,6 +2,7 @@ type Query {
   ping: String
   pingDb: String
   getAllUsers: UsersAll
+  localizations(clientId: ID!): LocalizationResponse
 }
 
 type UsersAll {
@@ -31,5 +32,16 @@ type RegisterUserPayload {
 
 type Mutation {
   registerUser(input: RegisterUserInput!): RegisterUserPayload!
+}
+
+type LocalizationResponse {
+  locales: [Localization!]!
+}
+
+type Localization {
+  id: ID!
+  paramKey: String
+  paramValue: String
+  language: String
 }
 

@@ -1050,4 +1050,10 @@ There is checklist for Timer implementation
     ```
 
 
+#### Get localization  query
 
+- Update schema.graphql
+  - Add localizations (clientId: ID!) entry into type Query 
+  - Add type Localization (match with Model) and LocalizationResponse (DTO record)
+- Add LocalizationResponse DTO record
+- Add GraphQL Resolver  LocalesQueryController
