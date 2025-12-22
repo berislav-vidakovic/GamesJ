@@ -439,14 +439,14 @@
     boolean passwordsMatch = passwordEncoder.matches(password, user.getPwd());
     ```
 
-- Created class JwtUtil
+- Created class JwtBuilder
 
   - SECRET_KEY, EXPIRATION_TIME_MS and generateToken
 
 - Generate JWT and send it in API Response 
 
     ```java
-    String token = JwtUtil.generateToken(user.getUserId(), user.getLogin());
+    String token = JwtBuilder.generateToken(user.getUserId(), user.getLogin());
     ```
 
 - Frontend handles JWT with sessionStorage  

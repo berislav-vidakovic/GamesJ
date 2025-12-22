@@ -19,6 +19,12 @@ public class RefreshToken {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
+    public RefreshToken() {}
+
+    public RefreshToken(Integer userId) {
+        this.userId = userId;
+    }
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

@@ -6,7 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
 
-public class JwtUtil {
+public class JwtBuilder {
 
     private static final Key SECRET_KEY = Keys.hmacShaKeyFor("KeyForJWTauthenticationInGamesProject".getBytes());
     private static final long EXPIRATION_TIME_MS = 60*60*1000; // 1 hour

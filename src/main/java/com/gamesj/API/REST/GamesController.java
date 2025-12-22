@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gamesj.Config.JwtUtil;
+import com.gamesj.Config.JwtBuilder;
 import com.gamesj.Core.Models.RefreshToken;
 import com.gamesj.Core.Models.User;
 import com.gamesj.Core.Repositories.UserRepository;
@@ -91,7 +91,7 @@ public class GamesController {
       User user = userRepository.findById(tokenEntity.getUserId())
               .orElseThrow(() -> new RuntimeException("User not found"));
       // Issue new Access Token
-      String newAccessToken = JwtUtil.generateToken(user.getUserId(), user.getLogin());
+      String newAccessToken = JwtBuilder.generateToken(user.getUserId(), user.getLogin());
       // Issue new Refresh Token and save it in DB
       String newRefreshToken = UUID.randomUUID().toString();
       LocalDateTime newExpiry = LocalDateTime.now().plusDays(7);

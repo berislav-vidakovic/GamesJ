@@ -3,22 +3,20 @@ package com.gamesj.API.REST;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.stereotype.Service;
 
-@Service
 public class Endpoints {
 
     public Endpoints() {
-      this.endpointsPublic.addAll( List.of(
+      Endpoints.Public.addAll( List.of(
         "/api/auth/refresh"
       ));
-      this.endpointsProtected.addAll(List.of(""));
+      Endpoints.Protected.addAll(List.of(""));
     } 
 
-    private List<String> endpointsPublic = new ArrayList<>();
-    private List<String> endpointsProtected = new ArrayList<>();
+    private static List<String> Public = new ArrayList<>();
+    private static List<String> Protected = new ArrayList<>();
 
-    public List<String> getPublicEndpoints(){
-      return endpointsPublic;
+    public static List<String> getPublicEndpoints(){
+      return Public;
     }
 }

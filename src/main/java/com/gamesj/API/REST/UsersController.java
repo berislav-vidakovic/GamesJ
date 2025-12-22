@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gamesj.Config.JwtUtil;
+import com.gamesj.Config.JwtBuilder;
 import com.gamesj.Core.Adapters.RegisterUserResult;
 import com.gamesj.Core.DTO.UsersAll;
 import com.gamesj.Core.Models.RefreshToken;
@@ -160,7 +160,7 @@ public class UsersController {
               "acknowledged", false,
               "error", "UserID Not found"
         );
-        return new ResponseEntity<>(response, HttpStatus.NO_CONTENT); // 204
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND); // 404
       }
       User user = optionalUser.get();
 
@@ -184,7 +184,7 @@ public class UsersController {
       }
       
       // Issue access token
-      String accessToken = JwtUtil.generateToken(user.getUserId(), user.getLogin());
+      String accessToken = JwtBuilder.generateToken(user.getUserId(), user.getLogin());
 
       // Issue and store refresh token 
       String refreshToken = java.util.UUID.randomUUID().toString();

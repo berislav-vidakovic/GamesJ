@@ -1,8 +1,6 @@
 package com.gamesj.API.REST;
 
-import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,51 +12,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gamesj.Config.JwtUtil;
-import com.gamesj.Core.Models.RefreshToken;
+import com.gamesj.Core.DTO.AuthUserDTO;
 import com.gamesj.Core.Models.User;
-import com.gamesj.Core.Repositories.RefreshTokenRepository;
-import com.gamesj.Core.Repositories.UserRepository;
+import com.gamesj.Core.Services.Authentication;
 import com.gamesj.Core.Services.UserMonitor;
-import com.gamesj.API.WebSocket.WebSocketHandler;
+import com.gamesj.Core.Services.WebSocketService;
 
 // POST /api/auth/refresh
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final UserRepository userRepository;
-
-    @Autowired
-    private WebSocketHandler webSocketHandler;
-
     @Autowired
     private UserMonitor userMonitor;
 
-    @Autowired
-    private ObjectMapper mapper;
+    private final Authentication authService;
+    private final WebSocketService webSocketService;
 
-    public AuthController(RefreshTokenRepository refreshTokenRepository,
-                          UserRepository userRepository) {
-        this.refreshTokenRepository = refreshTokenRepository;
-        this.userRepository = userRepository;
-    }
-
-    private RefreshToken getTokenEntity(String refreshToken) {
-      if( refreshToken == null || refreshToken.isEmpty() )
-        return null;
-
-      Optional<RefreshToken> tokenEntityOpt = refreshTokenRepository.findByToken(refreshToken);
-      if( tokenEntityOpt.isEmpty() )
-        return null;
-      
-      RefreshToken tokenEntity = tokenEntityOpt.get();
-      if (tokenEntity.getExpiresAt().isBefore(LocalDateTime.now()) )
-        return null;
-
-      return tokenEntity;
+    public AuthController(Authentication authenticationService, WebSocketService webSocketService) {
+        this.authService = authenticationService;
+        this.webSocketService = webSocketService; 
     }
 
     @PostMapping("/refresh")
@@ -79,53 +51,27 @@ public class AuthController {
         System.out.println("Received POST /auth/refresh with valid ID: " + parsedClientId.toString());
         String refreshToken = body.get("refreshToken");
 
-        // get token entity from refreshTokenRepository and check expiry
-        RefreshToken tokenEntity = getTokenEntity(refreshToken); // {id, userId, token, expiresAt }
-        if( tokenEntity == null ) 
+        AuthUserDTO authUser = authService.authenticate(refreshToken);
+        if( !authUser.isOK() )
           return ResponseEntity
                   .status(HttpStatus.UNAUTHORIZED)
-                  .body(Map.of("error", "Refresh token missing, invalid or expired"));
+                  .body(Map.of("error", authUser.getErrorMsg()));
 
-        // Load user and issue new tokens
-        User user = userRepository.findById(tokenEntity.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        String newAccessToken = JwtUtil.generateToken(user.getUserId(), user.getLogin());
-        String newRefreshToken = UUID.randomUUID().toString();
-        LocalDateTime newExpiry = LocalDateTime.now().plusDays(7);
-
-        // Update token in DB
-        tokenEntity.setToken(newRefreshToken);
-        tokenEntity.setExpiresAt(newExpiry);
-        refreshTokenRepository.save(tokenEntity);
-
-        // Set user online
-        user.setIsOnline(true);
-        userRepository.save(user);
-        System.out.println(" -----------updateUserActivity " + user.getUserId() + " clientId=" + parsedClientId);
-
+        User user = authUser.getUser();
         userMonitor.updateUserActivity(user.getUserId(), parsedClientId);
+        System.out.println(" -----------updateUserActivity DONE " + user.getUserId() + " clientId=" + parsedClientId);
 
         // Return new tokens
         Map<String, Object> response = Map.of(
-                "accessToken", newAccessToken,
-                "refreshToken", newRefreshToken,
-                "userId", tokenEntity.getUserId(),
-                "isOnline", true
+                "accessToken", authUser.getAccessToken(),
+                "refreshToken", authUser.getRefreshToken(),
+                "userId", user.getUserId(),
+                "isOnline", user.getIsOnline()
         );
 
-        Map<String, Object> wsMessage = Map.of(
-            "type", "userSessionUpdate",
-            "status", "WsStatus.OK",
-            "data", response
-        );
-        // Convert Map to JSON string
-        String wsJson = mapper.writeValueAsString(wsMessage);
-        // Broadcast via WebSocket
-        webSocketHandler.broadcast(wsJson);
+        webSocketService.broadcastMessage("userSessionUpdate", "WsStatus.OK", response);
 
         return ResponseEntity.ok(response);
-
       } 
       catch (Exception e) {
             e.printStackTrace();

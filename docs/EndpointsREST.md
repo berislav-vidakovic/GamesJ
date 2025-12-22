@@ -101,7 +101,12 @@ POST
 
 <details>
 <summary>
-Login with refresh token
+Login with refresh token. <br />
+Called in Frontend <br />
+  - on mount (browser refresh) - auto Login, if failed no Login Dialog (Login button click required) <br />
+  - on Login button click - first try with refresh token, if failed Login Dialog raised to provide credentials <br />
+On success: <br />
+  - new accessToken and refreshToken issued
 </summary>
 
 ### Request
@@ -127,7 +132,60 @@ POST
   ```
 
 - Error
-  - Missing clientGUID, Refresh token missing, invalid or expired, User not found - HttpStatus.BAD_REQUEST (400)
+  - Missing clientGUID or Refresh token - HttpStatus.BAD_REQUEST (400)
+  - Refresh token missing, invalid or expired, User not found - HttpStatus.UNAUTHORIZED (401)
+  - Server error - HttpStatus.INTERNAL_SERVER_ERROR (500)
+    ```js
+    { error }
+    ```
+
+- WebSocket broadcast push
+  ```js
+  {
+    type: userSessionUpdate,
+    status: WsStatus.OK,
+    data: <restResponseOK>
+  }
+  ```
+</details>
+
+### POST /api/users/login
+
+<details>
+<summary>
+Login with credentials. <br />
+Called in Frontend <br />
+  - on Login Dialog confirm click - after failed refreshLogin Login Dialog raised to provide credentials<br />
+On success: <br />
+  - new accessToken and refreshToken issued
+</summary>
+
+### Request
+
+POST 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+- Body
+  ```js
+  { userId, password }
+  ```
+
+
+### Response
+- OK - HttpStatus.OK (200)
+  ```js
+  {
+    accessToken,
+    refreshToken,
+    userId,
+    isOnline: true
+  }  
+  ```
+
+- Error
+  - Missing clientGUID, userId or password - HttpStatus.BAD_REQUEST (400)
+  - User not found - HttpStatus.NOT_FOUND (404)
+  - Invalid password - HttpStatus.UNAUTHORIZED (401)
   - Server error - HttpStatus.INTERNAL_SERVER_ERROR (500)
     ```js
     { error }
@@ -317,6 +375,43 @@ POST
 
 
 ## Connect4
+
+
+### POST /api/games/init
+
+<details>
+<summary>
+Update testedOK status and name after testing game 
+</summary>
+
+### Request
+
+POST 
+- Parameter: id=clientGUID      
+- Header: Authorization: Bearer accessToken 
+- Body
+  ```js
+  { gameId, userId }
+  ```
+
+
+### Response
+- OK - HttpStatus.OK (200)
+  ```js
+  { gameId, id, userName, user2Id, user2Name }
+  ```
+
+- Error
+  - Missing board in Request - HttpStatus.BAD_REQUEST (400)
+  - Board not found in DB - HttpStatus.NOT_FOUND (404)
+    ```js
+    { error }
+    ```
+
+</details>
+
+
+
 
 
 
