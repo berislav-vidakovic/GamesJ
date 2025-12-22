@@ -37,20 +37,11 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
       // Request: ?id=guid body: { refreshToken }
       try {        
-        // Validate clientId
-        UUID parsedClientId;
-        try {
-          parsedClientId = UUID.fromString(clientId);
-        } 
-        catch (IllegalArgumentException e) {
-          Map<String, Object> response = Map.of(
-              "error", "Missing or invalid ID"
-            );
-          return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
-        }
-        System.out.println("Received POST /auth/refresh with valid ID: " + parsedClientId.toString());
-        String refreshToken = body.get("refreshToken");
+        UUID parsedClientId = RequestChecker.parseIdParameter(clientId);
+        if( parsedClientId == null ) 
+          return RequestChecker.buildResponseInvalidGuid();
 
+        String refreshToken = body.get("refreshToken");
         AuthUserDTO authUser = authService.authenticate(refreshToken);
         if( !authUser.isOK() )
           return ResponseEntity
@@ -68,9 +59,7 @@ public class AuthController {
                 "userId", user.getUserId(),
                 "isOnline", user.getIsOnline()
         );
-
         webSocketService.broadcastMessage("userSessionUpdate", "WsStatus.OK", response);
-
         return ResponseEntity.ok(response);
       } 
       catch (Exception e) {
