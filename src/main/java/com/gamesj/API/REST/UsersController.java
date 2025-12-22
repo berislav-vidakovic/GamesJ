@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamesj.Config.JwtBuilder;
 import com.gamesj.Core.Adapters.RegisterUserResult;
+import com.gamesj.Core.DTO.AuthUserDTO;
 import com.gamesj.Core.DTO.UsersAll;
 import com.gamesj.Core.Models.RefreshToken;
 import com.gamesj.Core.Models.User;
 import com.gamesj.Core.Repositories.UserRepository;
+import com.gamesj.Core.Services.Authentication;
 import com.gamesj.Core.Services.Registration;
 import com.gamesj.Core.Services.UserMonitor;
 import com.gamesj.Core.Services.UserService;
@@ -59,16 +61,24 @@ public class UsersController {
 
   private final Registration userRegistrationService;
 
+  private final Authentication authService;
+
   @Autowired
   private UserMonitor userMonitor;
 
   @Autowired
   private ObjectMapper mapper;
 
-  public UsersController(UserRepository userRepository, Registration userRegistrationService, WebSocketService webSocketService) {
+  public UsersController(UserRepository userRepository, 
+    Registration userRegistrationService, 
+    WebSocketService webSocketService, 
+    Authentication authService 
+
+  ) {
     this.userRepository = userRepository;
     this.userRegistrationService = userRegistrationService;
     this.webSocketService = webSocketService;
+    this.authService = authService;
   }
 
   @GetMapping("/all")
@@ -116,109 +126,29 @@ public class UsersController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestParam("id") String clientId, @RequestBody Map<String, Object> body) {
+  public ResponseEntity<?> login(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
     try {
-      // Validate clientId
-      UUID parsedClientId;
-      try {
-        parsedClientId = UUID.fromString(clientId);
-      } 
-      catch (IllegalArgumentException e) {
-        Map<String, Object> response = Map.of(
-                "acknowledged", false,
-                "error", "Missing or invalid ID"
-          );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
-      }
-      System.out.println("Received POST /api/users/logout with valid ID: " + parsedClientId.toString());
+      UUID parsedClientId = RequestChecker.parseIdParameter(clientId);
+      if( parsedClientId == null ) 
+        return RequestChecker.buildResponseInvalidGuid();
 
-      // Validate userId
-      if (!body.containsKey("userId")) {
-        Map<String, Object> response = Map.of(
-            "acknowledged", false,
-            "error", "Missing 'userId' field"
-          );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
-      }
-      int userId = (Integer) body.get("userId");
+      String password = body.get("password");
+      String userId = body.get("userId");
+      AuthUserDTO authUser = authService.authenticate(userId, password);
+      if( !authUser.isOK() )
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", authUser.getErrorMsg()));
 
-      // Extract password field
-      if (!body.containsKey("password")) {
-        Map<String, Object> response = Map.of(
-            "acknowledged", false,
-            "error", "Missing 'password' field"
-          );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400
-      }
-      String password = body.get("password").toString();
-      System.out.println("Password received for login: " + password);
-
-      // Find user
-      Optional<User> optionalUser = userRepository.findById(userId);
-      if (optionalUser.isEmpty()) {
-        Map<String, Object> response = Map.of(
-              "acknowledged", false,
-              "error", "UserID Not found"
-        );
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND); // 404
-      }
-      User user = optionalUser.get();
-
-      // Password validation 
-      // if no hashed pwd in DB => new user, first time password hashing
-      if( user.getPwd().isEmpty() ){
-        // Hash the password using BCrypt
-        String hashedPwd = passwordEncoder.encode(password);
-        user.setPwd(hashedPwd);
-        userRepository.save(user);
-      }       
-      else {
-        boolean passwordsMatch = passwordEncoder.matches(password, user.getPwd());
-        if( !passwordsMatch ) {
-          Map<String, Object> response = Map.of(
-                "acknowledged", false,
-                "error", "Invalid password"
-          );
-          return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED); // 401
-        }
-      }
-      
-      // Issue access token
-      String accessToken = JwtBuilder.generateToken(user.getUserId(), user.getLogin());
-
-      // Issue and store refresh token 
-      String refreshToken = java.util.UUID.randomUUID().toString();
-      LocalDateTime expiryDate = LocalDateTime.now().plusDays(7); // valid for 7 days
-      refreshTokenRepository.deleteByUserId(user.getUserId());
-      RefreshToken tokenEntity = new RefreshToken();
-      tokenEntity.setUserId(user.getUserId());
-      tokenEntity.setToken(refreshToken);
-      tokenEntity.setExpiresAt(expiryDate);
-      refreshTokenRepository.save(tokenEntity);
-
-      // Set user online
-      user.setIsOnline(true);
-      userRepository.save(user);
+      User user = authUser.getUser();
       userMonitor.updateUserActivity(user.getUserId(), parsedClientId);
-
       Map<String, Object> response = Map.of(
-              "userId", userId,
-              "isOnline", true,
-              "accessToken", accessToken,           
-              "refreshToken", refreshToken
+              "userId", user.getUserId(),
+              "isOnline", user.getIsOnline(),
+              "accessToken", authUser.getAccessToken(),           
+              "refreshToken", authUser.getRefreshToken()
       );
-
-      //var response = new { userId, isOnline = true };
-      Map<String, Object> wsMessage = Map.of(
-          "type", "userSessionUpdate",
-          "status", "WsStatus.OK",
-          "data", response
-      );
-      // Convert Map to JSON string
-      String wsJson = mapper.writeValueAsString(wsMessage);
-      // Broadcast via WebSocket
-      webSocketHandler.broadcast(wsJson);
-
+      webSocketService.broadcastMessage("userSessionUpdate", "WsStatus.OK", response);
       return new ResponseEntity<>(response, HttpStatus.OK); // 200
     } 
     catch (Exception e) {

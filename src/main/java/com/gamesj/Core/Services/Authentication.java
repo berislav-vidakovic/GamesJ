@@ -58,7 +58,17 @@ public class Authentication  {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
-    public AuthUserDTO authenticate(Integer userId, String password){
+    public AuthUserDTO authenticate(String userIdStr, String password){
+      if( userIdStr == null || password == null || password.isEmpty() )
+        return new AuthUserDTO("Missing userId or password");
+
+      Integer userId;
+      try {
+        userId = Integer.valueOf(userIdStr);
+      } catch (NumberFormatException e) {
+        return new AuthUserDTO("Invalid userId");
+      }
+      
       // Find user
       Optional<User> optionalUser = userRepository.findById(userId);
       if (optionalUser.isEmpty()) 
