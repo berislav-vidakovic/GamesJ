@@ -71,7 +71,7 @@ public class AuthController {
         }
     }
   
-    @PostMapping("/login")
+  @PostMapping("/login")
   public ResponseEntity<?> login(@RequestParam("id") String clientId, @RequestBody Map<String, String> body) {
     try {
       UUID parsedClientId = RequestChecker.parseIdParameter(clientId);

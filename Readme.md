@@ -997,6 +997,7 @@ There is checklist for Timer implementation
   - input RegisterUserInput 
   - type RegisterUserPayload 
   - type Mutation 
+    - add entry registerUser(input: RegisterUserInput!): RegisterUserPayload! 
 - Add DTO RegisterUserInput and RegisterUserPayload
 - Add UsersMutationController
 - Test from Postman:
@@ -1057,3 +1058,10 @@ There is checklist for Timer implementation
   - Add type Localization (match with Model) and LocalizationResponse (DTO record)
 - Add LocalizationResponse DTO record
 - Add GraphQL Resolver  LocalesQueryController
+
+#### Refresh login mutation 
+
+- Update schema.graphql
+  - Add refreshToken(clientId: ID!, refreshToken: String!): RefreshTokenResponse! entry into type Mutation 
+  - Add type RefreshTokenResponse
+- Add @MutationMapping method to Controller - GraphQL Resolver

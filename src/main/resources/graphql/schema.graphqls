@@ -5,6 +5,11 @@ type Query {
   localizations(clientId: ID!): LocalizationResponse
 }
 
+type Mutation {
+  registerUser(input: RegisterUserInput!): RegisterUserPayload!
+  refreshToken(clientId: String!, refreshToken: String): RefreshTokenResponse!
+}
+
 type UsersAll {
   id: ID!
   users: [User!]!
@@ -30,10 +35,6 @@ type RegisterUserPayload {
   error: String
 }
 
-type Mutation {
-  registerUser(input: RegisterUserInput!): RegisterUserPayload!
-}
-
 type LocalizationResponse {
   locales: [Localization!]!
 }
@@ -43,5 +44,13 @@ type Localization {
   paramKey: String
   paramValue: String
   language: String
+}
+
+type RefreshTokenResponse {
+  accessToken: String
+  refreshToken: String
+  userId: Int!
+  isOnline: Boolean!
+  error: String
 }
 
