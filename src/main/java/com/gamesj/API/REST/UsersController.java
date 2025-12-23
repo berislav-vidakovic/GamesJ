@@ -41,6 +41,7 @@ public class UsersController {
   @GetMapping("/all")
   public ResponseEntity<UsersAll> getUsers() {
     UsersAll dtoUsersAll = userService.getAllUsers();
+    userService.addTechStackItem(dtoUsersAll, "/images/REST.jpg");
     return new ResponseEntity<>(dtoUsersAll, HttpStatus.OK); // 200
   }
 

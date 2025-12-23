@@ -1,5 +1,6 @@
 package com.gamesj.Core.Services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,5 +41,10 @@ public class UserService {
     );
 
     return dtoUsersAll;    
+  }
+
+  public void addTechStackItem(UsersAll users, String sTechStackItem){
+    String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(); 
+    users.addTechStackItem(baseUrl + sTechStackItem);
   }
 }

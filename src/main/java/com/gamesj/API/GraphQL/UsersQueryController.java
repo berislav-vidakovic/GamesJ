@@ -17,7 +17,9 @@ public class UsersQueryController {
 
     @QueryMapping
     public UsersAll getAllUsers() { // Method name = Query
-      return userService.getAllUsers();
+      UsersAll dto = userService.getAllUsers();
+      userService.addTechStackItem(dto, "/images/GraphQL.png");
+      return dto;
     }
 }
 
