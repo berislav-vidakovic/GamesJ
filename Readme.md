@@ -994,45 +994,37 @@ There is checklist for Timer implementation
 #### Register user query mutation
 
 - Add to schema:
-  - input RegisterUserInput 
   - type RegisterUserPayload 
   - type Mutation 
-    - add entry registerUser(input: RegisterUserInput!): RegisterUserPayload! 
-- Add DTO RegisterUserInput and RegisterUserPayload
+    - add entry registerUser( login: String!, fullName: String!, password: String!): RegisterUserPayload!
+- Add DTO RegisterUserPayload
 - Add UsersMutationController
 - Test from Postman:
   ```json
   {
-  "query": 
-    "mutation { registerUser(input: { login: \"penny12\" fullName: \"Penny12\" password: \"pwd123\" }) { acknowledged error user { userId login fullName } } }"
-  }
-  ```
-  ```json
-  {
-    "query": "mutation RegisterUser($input: RegisterUserInput!) { registerUser(input: $input) { acknowledged error user { userId login fullName } } }",
+    "query": "mutation RegisterUser($login: String!, $fullName: String!, $password: String!) { registerUser(login: $login, fullName: $fullName, password: $password) { acknowledged error user { userId login fullName } } }",
     "variables": {
-      "input": {
-        "login": "penny",
-        "fullName": "Penny",
-        "password": "pwd123"
-      }
+      "login": "jdoe",
+      "fullName": "John Doe",
+      "password": "secret123"
     }
   }
   ```
+
 
   - Expected response:
     ```json
     {
       "data": {
-        "registerUser": {
-          "acknowledged": true,
-          "error": null,
-          "user": {
-            "userId": "14",
-            "login": "penny",
-            "fullName": "Penny"
+          "registerUser": {
+              "acknowledged": true,
+              "error": null,
+              "user": {
+                  "userId": 48,
+                  "login": "jdoe",
+                  "fullName": "John Doe"
+              }
           }
-        }
       }
     }
     ```

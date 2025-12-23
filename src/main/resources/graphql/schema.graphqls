@@ -6,7 +6,7 @@ type Query {
 }
 
 type Mutation {
-  registerUser(input: RegisterUserInput!): RegisterUserPayload!
+  registerUser( login: String!, fullName: String!, password: String!): RegisterUserPayload!
   refreshToken(clientId: String!, refreshToken: String): RefreshTokenResponse!
 }
 
@@ -21,12 +21,6 @@ type User {
   login: String!
   fullName: String
   isOnline: Boolean!
-}
-
-input RegisterUserInput {
-  login: String!
-  fullName: String!
-  password: String!
 }
 
 type RegisterUserPayload {
