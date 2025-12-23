@@ -55,8 +55,8 @@ public class GamesController {
   }
 
   // POST /api/games/run  - Request sent from Panel browser
-  // Req: { run: "Connect Four", userId1, userId2, senderId } 
-  // Resp: { game: "Connect Four", gameid, senderId }
+  // Req: { run: "panel.game.connect4", userId1, userId2, senderId, refreshToken }
+  // Resp: { game: "panel.game.connect4", gameid, senderId, refreshToken, accessToken }
   @PostMapping("/run")
   public ResponseEntity<?> postRunGame(@RequestBody Map<String, Object> body) {
     try {
@@ -71,10 +71,10 @@ public class GamesController {
       Integer senderId = (Integer) body.get("senderId");
 
       if (userId1 == null || userId2 == null || senderId == null)
-          return ResponseEntity.badRequest().body(Map.of(
-                  "acknowledged", false,
-                  "error", "Both userId1, userId2, senderId required in POST request"
-          ));
+        return ResponseEntity.badRequest().body(Map.of(
+                "acknowledged", false,
+                "error", "Both userId1, userId2, senderId required in POST request"
+        ));
 
       String gameId = gameManager.getGameId(userId1, userId2).toString();
 

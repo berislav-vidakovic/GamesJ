@@ -12,7 +12,7 @@ type UsersAll {
 }
 
 type User {
-  userId: ID!
+  userId: Int!
   login: String!
   fullName: String
   isOnline: Boolean!

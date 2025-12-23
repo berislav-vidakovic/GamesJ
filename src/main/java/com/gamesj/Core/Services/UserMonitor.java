@@ -2,6 +2,7 @@ package com.gamesj.Core.Services;
 
 import java.time.LocalDateTime;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +32,7 @@ public class UserMonitor extends IdleMonitor<Integer> {
       @Value("${useridle.check-interval-sec}") short cleanupIntervalSeconds ){
         super(idleTimeoutMinutes, cleanupIntervalSeconds);
       System.out.println(" =========== Created UserMonitor ======="); 
+
     }
 
     @Override

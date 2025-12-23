@@ -96,7 +96,7 @@ public class Authentication  {
         if( !passwordsMatch )
           return new AuthUserDTO( "Invalid password" );
       }
-
+      System.out.println("authenticate OK"); 
       return buildAuthUser(user);
     }
 
@@ -110,7 +110,7 @@ public class Authentication  {
         return new AuthUserDTO("User not found for the provided refresh token");
       
       // delete existing refreshToken
-      refreshTokenRepository.delete(refTokenEntity);
+      //refreshTokenRepository.delete(refTokenEntity);
       return buildAuthUser(userOpt.get());
     }
 
@@ -145,6 +145,8 @@ public class Authentication  {
     private AuthUserDTO buildAuthUser(User user) {
       String accessToken = JwtBuilder.generateToken(
               user.getUserId(), user.getLogin() );
+
+      refreshTokenRepository.deleteByUserId(user.getUserId());      
       RefreshToken tokenEntity = new RefreshToken(user.getUserId());
       String refreshToken = renewAndStoreRefreshToken(tokenEntity);
       // Set user online
