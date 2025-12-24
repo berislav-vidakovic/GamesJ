@@ -1,8 +1,5 @@
 # Games - Full stack project in React, Java and MySql
 
-<a href="https://gamesj.barryonweb.com">Run Project</a>  
-<a href="https://github.com/berislav-vidakovic/GamesJ">View Code</a>
-
 
 ## Complete vertical
 
