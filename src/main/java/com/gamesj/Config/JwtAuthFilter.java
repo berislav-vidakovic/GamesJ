@@ -19,6 +19,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                   FilterChain filterChain)
           throws ServletException, IOException {
 
+    if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        filterChain.doFilter(request, response); // let Spring handle it
+        return;
+    }
    // Allow endpoints without token
     String path = request.getRequestURI();
     if( path.equals("/favicon.ico") ||
@@ -38,8 +42,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         path.startsWith("/api/auth/login") ||
         path.startsWith("/api/auth/logout") ||
         path.startsWith("/api/games/init") ||
-        path.startsWith("/api/localization/get") || 
-        path.startsWith("/graphql")
+        path.startsWith("/api/localization/get") 
+        // || path.startsWith("/graphql")
       ) {
           filterChain.doFilter(request, response);
           return;
