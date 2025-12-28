@@ -889,6 +889,28 @@ There is checklist for Timer implementation
 
 - Add dependecies to pom.xml
 
+- Add GraphQL endpoint to Nginx config
+  ```nginx
+  # GraphQL endpoint
+  location /graphql {
+    proxy_pass http://127.0.0.1:8082/graphql;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection keep-alive;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Port $server_port;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_cache_bypass $http_upgrade;
+
+    # Optional: add CORS headers if needed
+    add_header 'Access-Control-Allow-Origin' "$http_origin";
+    add_header 'Access-Control-Allow-Credentials' 'true';
+  }
+  ```
+
+- Add GraphQL endpoint to application.yaml (by default)
+
 - Create GraphQL schema schema.graphqls in resources/graphql directory:
   ```graphql
   type Query {
@@ -1056,7 +1078,7 @@ There is checklist for Timer implementation
 - Add @MutationMapping method to Controller - GraphQL Resolver
 
 
-### 15. Introduce Docket to separate Test environment
+### 15. Introduce Docker to separate Test environment
 
 #### Parameterize database connection
 
