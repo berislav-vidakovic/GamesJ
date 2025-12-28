@@ -1054,3 +1054,21 @@ There is checklist for Timer implementation
   - Add refreshToken(clientId: ID!, refreshToken: String!): RefreshTokenResponse! entry into type Mutation 
   - Add type RefreshTokenResponse
 - Add @MutationMapping method to Controller - GraphQL Resolver
+
+
+### 15. Introduce Docket to separate Test environment
+
+#### Parameterize database connection
+
+- Replace this
+  ```yaml
+  datasource:
+    url: jdbc:mysql://barryonweb.com:3306/db_games?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: barry75
+    password: abc123
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  ```
+- Create .env file
+

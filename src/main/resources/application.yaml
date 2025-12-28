@@ -2,9 +2,9 @@ spring:
   application:
     name: gamesj
   datasource:
-    url: jdbc:mysql://barryonweb.com:3306/db_games?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: barry75
-    password: abc123
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
   sql:
     init:
       mode: never

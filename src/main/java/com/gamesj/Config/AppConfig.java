@@ -26,6 +26,7 @@ public class AppConfig {
                       "https://gamesj.barryonweb.com",
                       "https://gamesjclient.barryonweb.com")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                    .allowedHeaders("*") // GraphQL required
                     .allowCredentials(true);
         }
       };

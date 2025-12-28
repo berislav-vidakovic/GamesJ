@@ -3,6 +3,9 @@ Description=GamesJ Spring Boot Backend
 After=network.target
 
 [Service]
+Environment="DB_URL=jdbc:mysql://barryonweb.com:3306/db_games"
+Environment="DB_USER=barry75"
+Environment="DB_PASSWORD=abc123"
 WorkingDirectory=/var/www/games/gamesj
 ExecStart=/usr/bin/java -jar /var/www/games/gamesj/gamesj-0.0.1-SNAPSHOT.jar
 SuccessExitStatus=143
