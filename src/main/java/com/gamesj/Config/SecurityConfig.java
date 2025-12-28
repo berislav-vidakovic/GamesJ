@@ -6,23 +6,32 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
 
+    private final CorsConfigurationSource corsConfigurationSource;
+
+    // Inject the CorsConfigurationSource bean
+    public SecurityConfig(CorsConfigurationSource corsConfigurationSource) {
+        this.corsConfigurationSource = corsConfigurationSource;
+    }
+
     @Bean 
     public PasswordEncoder passwordEncoder() {
-      return new BCryptPasswordEncoder(); // default strength 10
+        return new BCryptPasswordEncoder(); // default strength 10
     }   
-    
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-      http
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll() )  // allow all requests
-        .httpBasic(httpBasic -> httpBasic.disable())   // disable HTTP Basic
-        .formLogin(formLogin -> formLogin.disable()); // disable login form
-      return http.build();
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource)) // use injected bean
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .formLogin(formLogin -> formLogin.disable());
+
+        return http.build();
     } 
-    
 }
