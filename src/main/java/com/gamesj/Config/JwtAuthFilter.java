@@ -43,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         path.startsWith("/api/auth/logout") ||
         path.startsWith("/api/games/init") ||
         path.startsWith("/api/localization/get") 
-        // || path.startsWith("/graphql")
+         || path.startsWith("/graphql")
       ) {
           filterChain.doFilter(request, response);
           return;
