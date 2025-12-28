@@ -72,9 +72,10 @@ jobs:
             sudo nginx -t &&
             sudo systemctl reload nginx"
 
-      # Restart backend via systemd
-      - name: Restart backend service
+      # Copy service script and Restart backend via systemd
+      - name: Copy backend service file and Restart backend service
         run: |
+          scp -P $SSH_PORT gamesj.service barry75@barryonweb.com:/etc/systemd/system/
           ssh -p $SSH_PORT barry75@barryonweb.com "sudo systemctl restart gamesj"
 
       # See logs after restart

@@ -21,9 +21,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     // Allow preflight requests (CORS) to pass through
     if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-        response.setStatus(HttpServletResponse.SC_OK);
-        filterChain.doFilter(request, response); // continue chain
-        return;
+      response.setHeader("Access-Control-Allow-Origin", "https://gamesjclient.barryonweb.com");
+      response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
+      response.setHeader("Access-Control-Allow-Credentials", "true");
+      response.setStatus(HttpServletResponse.SC_OK);
+      return; // don't continue chain
     }
 
     String header = request.getHeader("Authorization");
