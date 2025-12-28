@@ -1,7 +1,7 @@
 name: Deploy Java Backend
 
 env:
-  SSH_PORT: 2222
+  SSH_PORT: 2026
 
 on:
   push:
