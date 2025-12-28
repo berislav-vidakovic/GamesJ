@@ -1072,3 +1072,9 @@ There is checklist for Timer implementation
   ```
 - Create .env file
 
+
+### Logs
+
+```bash
+sudo journalctl -u gamesj -n 50 --no-pager
+```

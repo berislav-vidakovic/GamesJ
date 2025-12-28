@@ -11,17 +11,6 @@ server {
 
     # API proxy
     location /api/ {
-        # Handle OPTIONS requests for CORS
-        if ($request_method = OPTIONS) {
-            add_header 'Access-Control-Allow-Origin' "$http_origin";
-            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
-            add_header 'Access-Control-Allow-Headers' "$http_access_control_request_headers";
-            add_header 'Access-Control-Allow-Credentials' 'true';
-            add_header 'Content-Length' 0;
-            add_header 'Content-Type' 'text/plain';
-            return 204;
-        }
-
         proxy_pass http://127.0.0.1:8082/api/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -31,10 +20,6 @@ server {
         proxy_set_header X-Forwarded-Port $server_port; 
         proxy_set_header X-Forwarded-Host $host;       
         proxy_cache_bypass $http_upgrade;
-
-        # Add CORS headers for actual responses
-        add_header 'Access-Control-Allow-Origin' "$http_origin";
-        add_header 'Access-Control-Allow-Credentials' 'true';
     }
 
     # Health check endpoint
