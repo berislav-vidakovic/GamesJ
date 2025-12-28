@@ -2,9 +2,9 @@ spring:
   application:
     name: gamesj
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL:jdbc:mysql://barryonweb.com:3306/db_games}
+    username: ${DB_USER:barry75}
+    password: ${DB_PASSWORD:abc123}
   sql:
     init:
       mode: never
@@ -15,6 +15,8 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+  graphql:
+    path: /graphql
 server:
   port: 8082
 websocket:

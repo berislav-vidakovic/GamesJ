@@ -902,14 +902,15 @@ There is checklist for Timer implementation
     proxy_set_header X-Forwarded-Port $server_port;
     proxy_set_header X-Forwarded-Host $host;
     proxy_cache_bypass $http_upgrade;
-
-    # Optional: add CORS headers if needed
-    add_header 'Access-Control-Allow-Origin' "$http_origin";
-    add_header 'Access-Control-Allow-Credentials' 'true';
   }
   ```
 
 - Add GraphQL endpoint to application.yaml (by default)
+  ```yaml
+  spring:
+    graphql:
+      path: /graphql
+  ```
 
 - Create GraphQL schema schema.graphqls in resources/graphql directory:
   ```graphql
@@ -1100,3 +1101,4 @@ There is checklist for Timer implementation
 ```bash
 sudo journalctl -u gamesj -n 50 --no-pager
 ```
+
