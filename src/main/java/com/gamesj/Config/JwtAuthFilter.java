@@ -19,19 +19,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                   FilterChain filterChain)
           throws ServletException, IOException {
 
-    // Allow preflight requests (CORS) to pass through
-    if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-      response.setHeader("Access-Control-Allow-Origin", "https://gamesjclient.barryonweb.com");
-      response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-      response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
-      response.setHeader("Access-Control-Allow-Credentials", "true");
-      response.setStatus(HttpServletResponse.SC_OK);
-      return; // don't continue chain
-    }
-
-    String header = request.getHeader("Authorization");
-
-    // Allow endpoints without token
+   // Allow endpoints without token
     String path = request.getRequestURI();
     if( path.equals("/favicon.ico") ||
         path.startsWith("/api/ping") ||
@@ -56,6 +44,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
           filterChain.doFilter(request, response);
           return;
     }
+
+    String header = request.getHeader("Authorization");
     if (header != null && header.startsWith("Bearer ")) {
       String token = header.substring(7);
       try {
