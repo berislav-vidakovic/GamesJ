@@ -948,7 +948,7 @@ There is checklist for Timer implementation
 
 - Add endpoint /graphql to White list in OncePerRequestFilter subclass
 
-- Test from Postman as POST with JSON body:
+- Test from Postman as POST to https://gamesj.barryonweb.com/graphql  with JSON body:
   ```json
   {
     "query": "{ ping }"
@@ -966,7 +966,7 @@ There is checklist for Timer implementation
 - Add pingDb query
   - Extend GraphQL schema definition with pingDb: String
   - Add Controller to API/GraphQL
-  - Test from Postman as POST with JSON body:
+  - Test from Postman as POST to https://gamesj.barryonweb.com/graphql with JSON body:
     ```json
     {
       "query": "{ pingDb }"
