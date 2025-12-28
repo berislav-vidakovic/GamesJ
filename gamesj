@@ -59,10 +59,6 @@ server {
       proxy_set_header X-Forwarded-Port $server_port;
       proxy_set_header X-Forwarded-Host $host;
       proxy_cache_bypass $http_upgrade;
-
-      # Add CORS headers 
-      add_header 'Access-Control-Allow-Origin' "$http_origin";
-      add_header 'Access-Control-Allow-Credentials' 'true';
     }
 
     listen 443 ssl; # managed by Certbot
