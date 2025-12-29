@@ -1200,4 +1200,34 @@ These commands will build a frozen backend, versioned and stored in Docker Hub:
   curl https://gamesj-test.barryonweb.com:8084/api/ping
   ```
 
+#### 6. Run to use new database
+
+- Create new database, grant access, create and populate tables
+  ```sql
+  sudo mysql
+  CREATE DATABASE db_gamestest CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  GRANT ALL PRIVILEGES ON db_gamestest.* TO 'barry75'@'%';
+  FLUSH PRIVILEGES;
+  mysql -u barry75 -p db_gamestest;
+  SOURCE /var/www/games/gamesj/data/mysql/schema.sql;
+  SOURCE /var/www/games/gamesj/data/mysql/data.sql;
+  ```
+
+- Stop and remove running container, run with env. vars
+  ```bash
+  docker ps -a
+  docker stop <containerId>
+  docker rm <containerId>
+  
+  docker run -d --name gamesj-backend-test -p 8084:8082 \
+    --restart unless-stopped \
+    -e DB_URL=jdbc:mysql://barryonweb.com:3306/db_gamestest \
+    -e DB_USER=barry75 \
+    -e DB_PASSWORD=abc123 berislavvidakovic/gamesj-backend-test:1.0
+  ```
+- Test pingdb endpoint
+  ```
+  https://gamesj-test.barryonweb.com/api/pingdb
+  ```
+
 

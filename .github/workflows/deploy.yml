@@ -83,4 +83,11 @@ jobs:
         run: |
           ssh -p $SSH_PORT barry75@barryonweb.com "journalctl -u gamesj -n 50 --no-pager"
 
+      # Dockerized test environment
+      - name: Copy docker run script
+        run: |
+          scp -P $SSH_PORT runtestDocker.sh barry75@barryonweb.com:/var/www/games/testenv/
+
+
+
  
