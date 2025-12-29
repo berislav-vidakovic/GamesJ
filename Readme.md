@@ -1096,9 +1096,108 @@ There is checklist for Timer implementation
 - Create .env file
 
 
-### Logs
+#### Logs
 
 ```bash
 sudo journalctl -u gamesj -n 50 --no-pager
 ```
+
+#### 1. Add Dockerfile
+  ```docker
+  FROM eclipse-temurin:21-jre
+
+  WORKDIR /app
+
+  COPY target/gamesj-0.0.1-SNAPSHOT.jar app.jar
+
+  EXPOSE 8080
+
+  ENTRYPOINT ["java", "-jar", "app.jar"]
+  ```
+
+#### 2. Build Docker image locally 
+
+These commands will build a frozen backend, versioned and stored in Docker Hub:
+- build Java app 
+  ```bash
+  mvn clean package -DskipTests
+  ```
+- docker build:
+  ```bash
+  docker build -t berislavvidakovic/gamesj-backend-test:1.0 .
+  ```
+  - Reads Dockerfile in the current directory (.)
+  - Executes every instruction in the Dockerfile
+  - Produces a Docker image locally. Naming required to push to Docker Hub:
+    - Docker Hub username: berislavvidakovic
+    - Repository name: gamesj-backend-test
+    - Tag (version): 1.0
+  - Check if docker images is used by the container, stop and remove container, delete image, check space
+    ```bash
+    docker images
+    docker ps -a
+    docker stop <containerID>
+    docker rm <containerID>
+    docker rmi tasmanager:latest
+    docker system df
+    ```
+- docker push
+  ```bash
+  docker push berislavvidakovic/gamesj-backend-test:1.0
+  ```
+  - This uploads the image to Docker Hub
+  - Checks for login
+  - Uploads image to https://hub.docker.com/r/berislavvidakovic/gamesj-backend-test
+  - Backend image becomes
+    - Public (or private) on Docker Hub
+    - Pullable from any server, including VPS
+
+
+#### 3. Run backend manually on VPS
+
+- This command will pull Docker image and run container
+  ```bash
+  docker run -d --name gamesj-backend-test -p 8084:8082 
+    --restart unless-stopped berislavvidakovic/gamesj-backend-test:1.0
+  ```
+
+- Check logs, in particular check for internal Port listening
+  ```bash
+  docker logs gamesj-backend-test
+  docker logs gamesj-backend-test | grep Tomcat
+  ```
+
+- Recreate container
+  ```bash
+  docker stop <containerID>
+  docker rm <containerID>
+  ```
+
+- Test with no separate subdomain, VPS and Browser
+  ```bash
+  curl http://localhost:8084/api/ping
+  ```
+
+#### 4. Nginx HTTP config for gamesj-test.barryonweb.com
+- Create minimal Nginx config, based on games subdomain
+  - Remove 443 section
+  - Remove redirect section
+  - Update domain name to gamesj-test.barryonweb.com
+  - Update port number to 8084
+- Enable site
+- Check syntax
+- Restart Nginx service
+- Test with new subdomain, VPS and Browser
+  ```bash
+  curl http://gamesj-test.barryonweb.com:8084/api/ping
+  ```
+
+#### 5. Add TLS for new subdomain
+
+- Issue SSL certificate 
+- Test with new subdomain and SSL, VPS and Browser
+  ```bash
+  curl https://gamesj-test.barryonweb.com:8084/api/ping
+  ```
+
 
