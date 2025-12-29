@@ -86,7 +86,7 @@ jobs:
       # Dockerized test environment
       - name: Copy nginx config and Docker run script
         run: |
-          scp -P $SSH_PORT gamesj-testgit barry75@barryonweb.com:/var/www/games/nginx/
+          scp -P $SSH_PORT gamesj-test barry75@barryonweb.com:/var/www/games/nginx/
           scp -P $SSH_PORT runTestDocker.sh barry75@barryonweb.com:/var/www/games/testenv/
 
 
